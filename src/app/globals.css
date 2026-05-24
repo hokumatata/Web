@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Source+Serif+4:wght@400;500;600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -9,43 +9,44 @@
     color-scheme: dark;
   }
   html {
-    background: #070809;
-    color: #dde2ec;
+    background: #000000;
+    color: #cccccc;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
   body {
-    @apply bg-ink-950 text-ink-100 font-sans;
+    @apply bg-ink-950 text-ink-100 font-sans text-sm;
     font-feature-settings: "ss01" on, "cv11" on;
+    letter-spacing: -0.01em;
   }
   ::selection {
-    background: #fa6900;
-    color: #070809;
+    background: #ff8800;
+    color: #000000;
   }
   *:focus-visible {
-    outline: 2px solid #fa6900;
-    outline-offset: 2px;
-    border-radius: 2px;
+    outline: 1px solid #ff8800;
+    outline-offset: 1px;
   }
 
-  .prose-mp h1 { @apply font-serif text-3xl md:text-4xl font-bold text-white mt-8 mb-3; }
-  .prose-mp h2 { @apply font-serif text-2xl md:text-3xl font-semibold text-white mt-8 mb-3; }
-  .prose-mp h3 { @apply font-serif text-xl md:text-2xl font-semibold text-white mt-6 mb-2; }
-  .prose-mp h4 { @apply font-serif text-lg font-semibold text-white mt-5 mb-2; }
-  .prose-mp p  { @apply text-ink-200 leading-7 my-4; }
-  .prose-mp ul { @apply list-disc list-outside pl-6 my-4 space-y-1 text-ink-200; }
-  .prose-mp ol { @apply list-decimal list-outside pl-6 my-4 space-y-1 text-ink-200; }
+  /* Article prose — serif for readability */
+  .prose-mp h1 { @apply font-serif text-2xl md:text-3xl font-bold text-white mt-8 mb-3; }
+  .prose-mp h2 { @apply font-serif text-xl md:text-2xl font-semibold text-white mt-8 mb-3; }
+  .prose-mp h3 { @apply font-serif text-lg md:text-xl font-semibold text-white mt-6 mb-2; }
+  .prose-mp h4 { @apply font-serif text-base font-semibold text-white mt-5 mb-2; }
+  .prose-mp p  { @apply text-ink-200 leading-7 my-4 font-serif text-base; }
+  .prose-mp ul { @apply list-disc list-outside pl-6 my-4 space-y-1 text-ink-200 font-serif; }
+  .prose-mp ol { @apply list-decimal list-outside pl-6 my-4 space-y-1 text-ink-200 font-serif; }
   .prose-mp li { @apply leading-7; }
   .prose-mp a  { @apply text-accent underline-offset-4 hover:underline; }
-  .prose-mp blockquote { @apply border-l-2 border-accent pl-4 italic text-ink-200 my-4; }
-  .prose-mp code { @apply bg-ink-800 text-ink-100 px-1.5 py-0.5 rounded text-sm font-mono; }
-  .prose-mp pre { @apply bg-ink-850 border border-ink-700 p-4 rounded-md overflow-x-auto my-4; }
+  .prose-mp blockquote { @apply border-l-2 border-accent pl-4 italic text-ink-200 my-4 font-serif; }
+  .prose-mp code { @apply bg-ink-800 text-accent px-1.5 py-0.5 text-xs font-mono; }
+  .prose-mp pre { @apply bg-ink-900 border border-ink-700 p-4 overflow-x-auto my-4; }
   .prose-mp pre code { @apply bg-transparent p-0; }
   .prose-mp strong { @apply text-white font-semibold; }
   .prose-mp table { @apply w-full my-4 border-collapse; }
   .prose-mp th { @apply text-left text-2xs uppercase tracking-wider text-ink-300 border-b border-ink-700 pb-2 px-3; }
   .prose-mp td { @apply border-b border-ink-800 py-2 px-3 text-sm; }
-  .prose-mp img { @apply rounded-sm my-6 w-full; }
+  .prose-mp img { @apply my-6 w-full; }
   .prose-mp hr { @apply border-ink-700 my-8; }
 }
 
@@ -54,52 +55,52 @@
     @apply mx-auto w-full max-w-[1440px] px-4 md:px-6 lg:px-8;
   }
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-sm px-3 py-2 text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed border;
   }
   .btn-primary {
-    @apply btn bg-accent text-ink-950 hover:bg-accent/90 hover:shadow-glow;
+    @apply btn bg-accent text-black border-accent hover:bg-accent-soft;
   }
   .btn-secondary {
-    @apply btn border border-ink-600 text-ink-100 hover:bg-ink-800 hover:border-ink-500;
+    @apply btn border-ink-600 text-ink-100 hover:bg-ink-800 hover:border-ink-500;
   }
   .btn-ghost {
-    @apply btn text-ink-200 hover:bg-ink-800 hover:text-white;
+    @apply btn border-transparent text-ink-300 hover:bg-ink-800 hover:text-white;
   }
   .btn-danger {
-    @apply btn border border-down/40 text-down hover:bg-down/10;
+    @apply btn border-down/40 text-down hover:bg-down/10;
   }
   .input {
-    @apply w-full rounded-sm border border-ink-600 bg-ink-900 px-3 py-2 text-sm text-ink-100 placeholder:text-ink-400 focus:border-accent focus:outline-none transition-colors;
+    @apply w-full border border-ink-600 bg-ink-900 px-3 py-2 text-sm text-ink-100 placeholder:text-ink-500 focus:border-accent focus:outline-none transition-colors font-mono;
   }
   .label {
-    @apply block text-xs font-medium uppercase tracking-wider text-ink-300 mb-1;
+    @apply block text-2xs font-medium uppercase tracking-widest text-ink-400 mb-1;
   }
   .card {
-    @apply border border-ink-700 bg-ink-900/80 transition-all duration-200;
+    @apply border border-ink-700 bg-ink-900 transition-all duration-150;
   }
   .card-hover {
-    @apply card hover:border-ink-600 hover:bg-ink-900;
+    @apply card hover:border-accent/40 hover:bg-ink-850;
   }
   .badge {
-    @apply inline-flex items-center rounded-sm border border-ink-600 bg-ink-850 px-2 py-0.5 text-2xs font-medium uppercase tracking-wider text-ink-200;
+    @apply inline-flex items-center border border-ink-600 bg-ink-800 px-2 py-0.5 text-3xs font-semibold uppercase tracking-widest text-ink-300;
   }
   .badge-accent {
-    @apply inline-flex items-center rounded-sm bg-accent/10 text-accent border border-accent/30 px-2 py-0.5 text-2xs font-medium uppercase tracking-wider;
+    @apply inline-flex items-center bg-accent/10 text-accent border border-accent/30 px-2 py-0.5 text-3xs font-semibold uppercase tracking-widest;
   }
   .badge-up {
-    @apply inline-flex items-center rounded-sm bg-up/10 text-up border border-up/30 px-2 py-0.5 text-2xs font-medium uppercase tracking-wider;
+    @apply inline-flex items-center bg-up/10 text-up border border-up/30 px-2 py-0.5 text-3xs font-semibold uppercase tracking-widest;
   }
   .badge-down {
-    @apply inline-flex items-center rounded-sm bg-down/10 text-down border border-down/30 px-2 py-0.5 text-2xs font-medium uppercase tracking-wider;
+    @apply inline-flex items-center bg-down/10 text-down border border-down/30 px-2 py-0.5 text-3xs font-semibold uppercase tracking-widest;
   }
   .section-title {
-    @apply flex items-center justify-between border-b-2 border-accent/30 pb-2 mb-5;
+    @apply flex items-center justify-between border-b border-accent/40 pb-2 mb-5;
   }
   .section-title h2 {
-    @apply font-serif text-lg font-semibold text-white tracking-tight;
+    @apply text-sm font-semibold text-accent uppercase tracking-widest;
   }
   .kicker {
-    @apply text-2xs uppercase tracking-[0.18em] text-accent font-semibold;
+    @apply text-3xs uppercase tracking-[0.2em] text-accent font-bold;
   }
   .rule {
     @apply border-t border-ink-700;
@@ -111,13 +112,13 @@
     @apply grid gap-px bg-ink-700;
   }
   .terminal-cell {
-    @apply bg-ink-900 p-4;
+    @apply bg-ink-900 p-3;
   }
   .data-label {
-    @apply text-2xs uppercase tracking-wider text-ink-400 mb-1;
+    @apply text-3xs uppercase tracking-widest text-ink-400 mb-0.5;
   }
   .data-value {
-    @apply text-lg font-mono font-semibold text-white tabular;
+    @apply text-base font-mono font-semibold text-white tabular;
   }
   .flash-up {
     @apply text-up;
@@ -135,13 +136,13 @@
   @apply text-bloomberg-blue underline underline-offset-2 decoration-bloomberg-blue/40 hover:decoration-bloomberg-blue transition-colors;
 }
 .prose-mp figure.article-figure {
-  @apply my-6 rounded-sm overflow-hidden border border-ink-700;
+  @apply my-6 overflow-hidden border border-ink-700;
 }
 .prose-mp figure.article-figure img {
   @apply w-full max-h-[500px] object-cover;
 }
 .prose-mp figure.article-figure figcaption {
-  @apply px-3 py-2 text-2xs text-ink-400 italic bg-ink-850 border-t border-ink-700;
+  @apply px-3 py-2 text-3xs text-ink-400 uppercase tracking-wider bg-ink-900 border-t border-ink-700;
 }
 .prose-mp figure.article-figure figcaption:empty {
   @apply hidden;

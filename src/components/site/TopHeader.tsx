@@ -6,14 +6,14 @@ import { LiveClock } from "./LiveClock";
 import { UserMenu } from "./UserMenu";
 
 const NAV = [
-  { href: "/news", label: "News" },
-  { href: "/category/crypto", label: "Crypto" },
-  { href: "/category/forex", label: "Forex" },
-  { href: "/category/stocks", label: "Stocks" },
-  { href: "/category/macro", label: "Macro" },
-  { href: "/category/analysis", label: "Analysis" },
-  { href: "/category/opinion", label: "Opinion" },
-  { href: "/markets", label: "Markets" },
+  { href: "/news", label: "NEWS" },
+  { href: "/category/crypto", label: "CRYPTO" },
+  { href: "/category/forex", label: "FOREX" },
+  { href: "/category/stocks", label: "STOCKS" },
+  { href: "/category/macro", label: "MACRO" },
+  { href: "/category/analysis", label: "ANALYSIS" },
+  { href: "/category/opinion", label: "OPINION" },
+  { href: "/markets", label: "MARKETS" },
 ];
 
 export async function TopHeader({
@@ -28,59 +28,60 @@ export async function TopHeader({
     .catch(() => 0);
 
   return (
-    <header className="sticky top-0 z-40 bg-ink-950/95 backdrop-blur-md supports-[backdrop-filter]:bg-ink-950/80">
+    <header className="sticky top-0 z-40 bg-ink-950">
       {/* Bloomberg-style top utility bar */}
-      <div className="border-b border-ink-800/60">
-        <div className="container-tw flex h-8 items-center justify-between text-2xs uppercase tracking-wider text-ink-400">
-          <div className="flex items-center gap-4">
+      <div className="border-b border-ink-700">
+        <div className="container-tw flex h-7 items-center justify-between text-3xs uppercase tracking-widest text-ink-400">
+          <div className="flex items-center gap-3">
             <LiveClock />
             <span className="hidden sm:inline text-ink-600">|</span>
-            <span className="hidden sm:inline">New York</span>
+            <span className="hidden sm:inline">NYC</span>
+            <span className="hidden sm:inline text-ink-600">|</span>
+            <span className="hidden sm:inline">LDN</span>
+            <span className="hidden sm:inline text-ink-600">|</span>
+            <span className="hidden sm:inline">TKY</span>
             {breakingCount > 0 && (
               <>
                 <span className="text-ink-600">|</span>
                 <Link
                   href="/news?breaking=1"
-                  className="flex items-center gap-1.5 text-accent hover:underline animate-pulse-dot"
+                  className="flex items-center gap-1 text-down font-bold animate-pulse-dot"
                 >
-                  <Zap size={10} className="fill-accent" />
-                  Breaking News
+                  <Zap size={8} className="fill-down" />
+                  BREAKING
                 </Link>
               </>
             )}
           </div>
-          <div className="hidden md:flex items-center gap-4">
-            <Link href="/newsletter" className="hover:text-white transition-colors">Newsletter</Link>
-            <Link href="/about" className="hover:text-white transition-colors">About</Link>
-            <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
+          <div className="hidden md:flex items-center gap-3">
+            <Link href="/newsletter" className="hover:text-accent transition-colors">SUBSCRIBE</Link>
+            <span className="text-ink-600">|</span>
+            <Link href="/about" className="hover:text-accent transition-colors">ABOUT</Link>
+            <span className="text-ink-600">|</span>
+            <Link href="/contact" className="hover:text-accent transition-colors">CONTACT</Link>
           </div>
         </div>
       </div>
 
-      {/* Main header */}
-      <div className="border-b border-ink-700">
-        <div className="container-tw flex h-14 items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="flex items-center gap-0.5">
-              <span className="block h-8 w-1.5 bg-accent rounded-sm" />
-              <span className="block h-8 w-1.5 bg-accent/50 rounded-sm" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-serif text-xl font-bold tracking-tight text-white leading-none group-hover:text-accent transition-colors">
-                {siteName}
-              </span>
-              <span className="text-[9px] uppercase tracking-[0.25em] text-ink-400 leading-none mt-0.5">
-                Markets &amp; Data
-              </span>
-            </div>
+      {/* Main header — terminal style */}
+      <div className="border-b border-ink-700 bg-ink-950">
+        <div className="container-tw flex h-12 items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 group">
+            <span className="block h-6 w-1 bg-accent" />
+            <span className="text-lg font-bold tracking-tight text-accent leading-none uppercase">
+              {siteName}
+            </span>
+            <span className="hidden sm:inline text-3xs uppercase tracking-[0.3em] text-ink-500 leading-none ml-1 border-l border-ink-600 pl-2">
+              TERMINAL
+            </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center">
+          <nav className="hidden lg:flex items-center gap-0">
             {NAV.map((n) => (
               <Link
                 key={n.href}
                 href={n.href}
-                className="relative px-3 py-1.5 text-[13px] font-medium text-ink-200 hover:text-white transition-colors after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-accent after:transition-all hover:after:w-full"
+                className="px-3 py-1.5 text-2xs font-semibold text-ink-300 hover:text-accent hover:bg-ink-800 transition-colors tracking-wider"
               >
                 {n.label}
               </Link>
@@ -90,11 +91,11 @@ export async function TopHeader({
           <div className="flex items-center gap-2">
             <form action="/search" className="hidden md:flex items-center">
               <div className="relative">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-400" size={14} />
+                <Search className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-ink-500" size={12} />
                 <input
                   name="q"
-                  placeholder="Search..."
-                  className="input pl-8 w-48 lg:w-64 text-sm h-8 bg-ink-850 border-ink-700"
+                  placeholder="SEARCH..."
+                  className="input pl-7 w-40 lg:w-56 text-2xs h-7 bg-ink-900 border-ink-600 placeholder:uppercase placeholder:tracking-wider"
                 />
               </div>
             </form>
@@ -102,26 +103,26 @@ export async function TopHeader({
             {session ? (
               <UserMenu name={session.name} role={session.role} />
             ) : (
-              <Link href="/login" className="btn-secondary h-8 px-3">
-                <LogIn size={14} />
-                <span className="hidden sm:inline text-xs">Sign in</span>
+              <Link href="/login" className="btn-secondary h-7 px-2 text-3xs">
+                <LogIn size={12} />
+                <span className="hidden sm:inline">SIGN IN</span>
               </Link>
             )}
 
-            <Link href="/markets" className="lg:hidden btn-ghost h-8 px-2">
-              <TrendingUp size={16} />
+            <Link href="/markets" className="lg:hidden btn-ghost h-7 px-2">
+              <TrendingUp size={14} />
             </Link>
           </div>
         </div>
       </div>
 
       {/* Mobile nav */}
-      <nav className="container-tw lg:hidden flex items-center gap-1 overflow-x-auto py-2 scroll-shadow border-b border-ink-800/50">
+      <nav className="container-tw lg:hidden flex items-center gap-0 overflow-x-auto py-1 scroll-shadow border-b border-ink-700">
         {NAV.map((n) => (
           <Link
             key={n.href}
             href={n.href}
-            className="whitespace-nowrap rounded-sm px-3 py-1 text-xs font-medium text-ink-300 hover:bg-ink-800 hover:text-white transition-colors"
+            className="whitespace-nowrap px-3 py-1 text-3xs font-bold text-ink-400 hover:bg-ink-800 hover:text-accent transition-colors tracking-widest"
           >
             {n.label}
           </Link>
