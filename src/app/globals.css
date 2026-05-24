@@ -127,6 +127,29 @@
   }
 }
 
+/* Article body prose styles */
+.prose-mp a.outbound-link {
+  @apply text-accent underline underline-offset-2 decoration-accent/40 hover:decoration-accent transition-colors;
+}
+.prose-mp a.inbound-link {
+  @apply text-bloomberg-blue underline underline-offset-2 decoration-bloomberg-blue/40 hover:decoration-bloomberg-blue transition-colors;
+}
+.prose-mp figure.article-figure {
+  @apply my-6 rounded-sm overflow-hidden border border-ink-700;
+}
+.prose-mp figure.article-figure img {
+  @apply w-full max-h-[500px] object-cover;
+}
+.prose-mp figure.article-figure figcaption {
+  @apply px-3 py-2 text-2xs text-ink-400 italic bg-ink-850 border-t border-ink-700;
+}
+.prose-mp figure.article-figure figcaption:empty {
+  @apply hidden;
+}
+.prose-mp del {
+  @apply text-ink-400 line-through;
+}
+
 @layer utilities {
   .text-balance { text-wrap: balance; }
   .text-pretty { text-wrap: pretty; }

@@ -3,6 +3,8 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Save } from "lucide-react";
+import { ImageUpload } from "./ImageUpload";
+import { RichEditor } from "./RichEditor";
 
 interface Category { id: string; name: string }
 interface Tag { id: string; name: string }
@@ -87,21 +89,16 @@ export function ArticleForm({
         <label className="label">Excerpt</label>
         <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} required className="input min-h-[80px]" placeholder="Brief summary" />
       </div>
+
+      <RichEditor value={body} onChange={setBody} />
+
+      <ImageUpload value={coverImageUrl} onChange={setCoverImageUrl} />
+
       <div>
-        <label className="label">Body (Markdown)</label>
-        <textarea value={body} onChange={(e) => setBody(e.target.value)} required className="input min-h-[300px] font-mono text-sm" placeholder="Write article in markdown..." />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="label">Category</label>
-          <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="input">
-            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="label">Cover Image URL</label>
-          <input value={coverImageUrl} onChange={(e) => setCoverImageUrl(e.target.value)} className="input" placeholder="https://..." />
-        </div>
+        <label className="label">Category</label>
+        <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="input">
+          {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
       </div>
       <div>
         <label className="label">Tags</label>
