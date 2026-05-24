@@ -1,0 +1,50 @@
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { getSession } from "@/lib/auth";
+import { roleAtLeast } from "@/lib/types";
+import { LayoutDashboard, FileText, Tags, MessageSquare, Users, Mail, Activity, Settings } from "lucide-react";
+
+const NAV = [
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/articles", label: "Articles", icon: FileText },
+  { href: "/admin/categories", label: "Categories", icon: Tags },
+  { href: "/admin/tags", label: "Tags", icon: Tags },
+  { href: "/admin/comments", label: "Comments", icon: MessageSquare },
+  { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
+  { href: "/admin/tickers", label: "Tickers", icon: Activity },
+  { href: "/admin/audit-log", label: "Audit Log", icon: Settings },
+];
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession();
+  if (!session || !roleAtLeast(session.role, "EDITOR")) redirect("/login");
+
+  return (
+    <div className="container-tw py-6">
+      <div className="flex items-center gap-3 mb-6">
+        <LayoutDashboard size={20} className="text-accent" />
+        <h1 className="font-serif text-xl font-bold text-white">Admin</h1>
+        <span className="badge">{session.role}</span>
+      </div>
+      <div className="flex flex-col lg:flex-row gap-6">
+        <nav className="lg:w-48 flex-shrink-0">
+          <ul className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible">
+            {NAV.map((n) => (
+              <li key={n.href}>
+                <Link
+                  href={n.href}
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-ink-300 hover:text-white hover:bg-ink-800 rounded-sm transition-colors whitespace-nowrap"
+                >
+                  <n.icon size={14} />
+                  {n.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div className="flex-1 min-w-0">{children}</div>
+      </div>
+    </div>
+  );
+}

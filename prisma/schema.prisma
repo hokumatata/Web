@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  passwordHash  String
+  name          String
+  role          String        @default("READER")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  authorProfile AuthorProfile?
+  articles      Article[]     @relation("AuthorArticles")
+  comments      Comment[]
+  watchlist     Watchlist[]
+  saved         SavedArticle[]
+  preferences   UserPreferences?
+  auditLogs     AuditLog[]    @relation("ActorAudits")
+}
+
+model AuthorProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug      String   @unique
+  bio       String?
+  avatarUrl String?
+  twitter   String?
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String?
+  order       Int       @default(0)
+  articles    Article[]
+}
+
+model Tag {
+  id       String       @id @default(cuid())
+  slug     String       @unique
+  name     String
+  articles ArticleTag[]
+}
+
+model Article {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  title         String
+  excerpt       String
+  body          String
+  coverImageUrl String?
+  status        String        @default("DRAFT")
+  isFeatured    Boolean       @default(false)
+  isBreaking    Boolean       @default(false)
+  publishedAt   DateTime?
+  authorId      String
+  author        User          @relation("AuthorArticles", fields: [authorId], references: [id])
+  categoryId    String
+  category      Category      @relation(fields: [categoryId], references: [id])
+  tags          ArticleTag[]
+  comments      Comment[]
+  saved         SavedArticle[]
+  views         Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([categoryId])
+}
+
+model ArticleTag {
+  articleId String
+  tagId     String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  articleId String
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body      String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+
+  @@index([articleId, status])
+}
+
+model NewsletterSubscriber {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  createdAt   DateTime @default(now())
+  confirmedAt DateTime?
+}
+
+model Watchlist {
+  id     String  @id @default(cuid())
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  symbol String
+  type   String
+
+  @@unique([userId, symbol, type])
+}
+
+model SavedArticle {
+  userId    String
+  articleId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+}
+
+model UserPreferences {
+  userId      String  @id
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topicsJson  String  @default("[]")
+  emailDigest Boolean @default(false)
+  theme       String  @default("dark")
+}
+
+model TickerConfig {
+  id     String @id @default(cuid())
+  symbol String
+  label  String
+  type   String
+  order  Int    @default(0)
+
+  @@unique([symbol, type])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation("ActorAudits", fields: [actorId], references: [id])
+  action    String
+  target    String?
+  meta      String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

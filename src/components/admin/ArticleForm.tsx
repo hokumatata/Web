@@ -1,0 +1,138 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { Save } from "lucide-react";
+
+interface Category { id: string; name: string }
+interface Tag { id: string; name: string }
+interface ArticleData {
+  id?: string;
+  title: string;
+  excerpt: string;
+  body: string;
+  categoryId: string;
+  coverImageUrl: string;
+  isFeatured: boolean;
+  isBreaking: boolean;
+  tags: string[];
+}
+
+export function ArticleForm({
+  article,
+  categories,
+  tags,
+}: {
+  article?: ArticleData;
+  categories: Category[];
+  tags: Tag[];
+}) {
+  const router = useRouter();
+  const [title, setTitle] = useState(article?.title ?? "");
+  const [excerpt, setExcerpt] = useState(article?.excerpt ?? "");
+  const [body, setBody] = useState(article?.body ?? "");
+  const [categoryId, setCategoryId] = useState(article?.categoryId ?? categories[0]?.id ?? "");
+  const [coverImageUrl, setCoverImageUrl] = useState(article?.coverImageUrl ?? "");
+  const [isFeatured, setIsFeatured] = useState(article?.isFeatured ?? false);
+  const [isBreaking, setIsBreaking] = useState(article?.isBreaking ?? false);
+  const [selectedTags, setSelectedTags] = useState<string[]>(article?.tags ?? []);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const payload = {
+      title,
+      excerpt,
+      bodyText: body,
+      categoryId,
+      coverImageUrl: coverImageUrl || null,
+      isFeatured,
+      isBreaking,
+      tags: selectedTags,
+    };
+
+    try {
+      const url = article?.id ? `/api/articles/${article.id}` : "/api/articles";
+      const method = article?.id ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Failed to save");
+        return;
+      }
+      router.push("/admin/articles");
+      router.refresh();
+    } catch {
+      setError("Network error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-5">
+      <div>
+        <label className="label">Title</label>
+        <input value={title} onChange={(e) => setTitle(e.target.value)} required className="input" placeholder="Article title" />
+      </div>
+      <div>
+        <label className="label">Excerpt</label>
+        <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} required className="input min-h-[80px]" placeholder="Brief summary" />
+      </div>
+      <div>
+        <label className="label">Body (Markdown)</label>
+        <textarea value={body} onChange={(e) => setBody(e.target.value)} required className="input min-h-[300px] font-mono text-sm" placeholder="Write article in markdown..." />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="label">Category</label>
+          <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="input">
+            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="label">Cover Image URL</label>
+          <input value={coverImageUrl} onChange={(e) => setCoverImageUrl(e.target.value)} className="input" placeholder="https://..." />
+        </div>
+      </div>
+      <div>
+        <label className="label">Tags</label>
+        <div className="flex flex-wrap gap-2">
+          {tags.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setSelectedTags((prev) => prev.includes(t.id) ? prev.filter((id) => id !== t.id) : [...prev, t.id])}
+              className={selectedTags.includes(t.id) ? "badge-accent cursor-pointer" : "badge cursor-pointer hover:bg-ink-800"}
+            >
+              {t.name}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center gap-6">
+        <label className="flex items-center gap-2 text-sm text-ink-200 cursor-pointer">
+          <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} className="rounded border-ink-600" />
+          Featured
+        </label>
+        <label className="flex items-center gap-2 text-sm text-ink-200 cursor-pointer">
+          <input type="checkbox" checked={isBreaking} onChange={(e) => setIsBreaking(e.target.checked)} className="rounded border-ink-600" />
+          Breaking
+        </label>
+      </div>
+      {error && <p className="text-sm text-down">{error}</p>}
+      <button type="submit" disabled={loading} className="btn-primary h-10 px-6">
+        <Save size={16} />
+        {loading ? "Saving..." : article?.id ? "Update Article" : "Create Article"}
+      </button>
+    </form>
+  );
+}
