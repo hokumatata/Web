@@ -46,7 +46,7 @@ export default async function HomePage() {
 
   const lead = (featured[0] ?? latest[0]) as ArticleCardData | undefined;
   const subLeads = (featured.slice(1, 4).length >= 3 ? featured.slice(1, 4) : latest.slice(1, 4)) as ArticleCardData[];
-  const sideList = latest.slice(4, 12) as ArticleCardData[];
+  const sideList = latest.slice(1, 21) as ArticleCardData[];
   const topCrypto = crypto.slice(0, 4);
 
   return (
@@ -59,7 +59,7 @@ export default async function HomePage() {
             {topCrypto.map((q) => {
               const up = q.changePct24h >= 0;
               return (
-                <Link key={q.symbol} href="/markets" className="flex items-center gap-3 whitespace-nowrap flex-shrink-0 group">
+                <Link key={q.symbol} href="/economic-calendar" className="flex items-center gap-3 whitespace-nowrap flex-shrink-0 group">
                   <div className="flex items-center gap-2">
                     {q.imageUrl && <img src={q.imageUrl} alt="" className="h-5 w-5 rounded-full" />}
                     <span className="text-sm font-semibold text-ink-100">{q.symbol}</span>
@@ -72,8 +72,8 @@ export default async function HomePage() {
                 </Link>
               );
             })}
-            <Link href="/markets" className="text-xs font-semibold text-accent hover:underline whitespace-nowrap flex-shrink-0 ml-auto flex items-center gap-1">
-              All Markets <ArrowRight size={12} />
+            <Link href="/economic-calendar" className="text-xs font-semibold text-accent hover:underline whitespace-nowrap flex-shrink-0 ml-auto flex items-center gap-1">
+              Economic Calendar <ArrowRight size={12} />
             </Link>
           </div>
         </div>
@@ -95,15 +95,15 @@ export default async function HomePage() {
 
           {/* Right sidebar — Latest column */}
           <aside className="lg:col-span-4 space-y-6">
-            {/* Latest Headlines */}
+            {/* Latest Headlines — scrollable, up to 20 items */}
             <div className="card">
               <div className="flex items-center justify-between px-4 py-3 border-b border-ink-700 bg-ink-900">
-                <h3 className="text-sm font-bold text-ink-50">Latest</h3>
+                <h3 className="text-sm font-bold text-ink-50">Latest News</h3>
                 <Link href="/news" className="text-xs font-semibold text-accent hover:underline flex items-center gap-1">
                   View All <ArrowRight size={11} />
                 </Link>
               </div>
-              <div className="px-4">
+              <div className="px-4 max-h-[600px] overflow-y-auto">
                 {sideList.map((a) => (
                   <ArticleCard key={a.slug} a={a as ArticleCardData} variant="headline-only" />
                 ))}
@@ -145,11 +145,11 @@ export default async function HomePage() {
         {/* Bottom CTA Cards */}
         <section className="mt-14 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <Link href="/markets" className="card-hover p-6 group">
-              <div className="text-xs font-bold text-accent uppercase tracking-wider mb-2">Markets</div>
-              <div className="text-sm text-ink-200 leading-relaxed">Real-time crypto, forex, and equity data from global exchanges.</div>
+            <Link href="/economic-calendar" className="card-hover p-6 group">
+              <div className="text-xs font-bold text-accent uppercase tracking-wider mb-2">Economic Calendar</div>
+              <div className="text-sm text-ink-200 leading-relaxed">Track key economic events, central bank decisions, and data releases.</div>
               <div className="text-sm text-accent mt-3 font-semibold group-hover:underline flex items-center gap-1">
-                Explore Markets <ArrowRight size={13} />
+                View Calendar <ArrowRight size={13} />
               </div>
             </Link>
             <Link href="/news" className="card-hover p-6 group">

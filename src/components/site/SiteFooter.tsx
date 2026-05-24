@@ -25,7 +25,8 @@ export function SiteFooter({ siteName }: { siteName: string }) {
               { href: "/category/forex", label: "Forex" },
               { href: "/category/stocks", label: "Stocks" },
               { href: "/category/macro", label: "Macro" },
-              { href: "/markets", label: "Markets" },
+              { href: "/category/gold", label: "Gold" },
+              { href: "/economic-calendar", label: "Economic Calendar" },
             ].map((l) => (
               <li key={l.href}>
                 <Link href={l.href} className="text-sm text-ink-400 hover:text-accent transition-colors">

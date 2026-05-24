@@ -9,8 +9,8 @@ export async function MarketSnapshot() {
     <div className="card">
       <div className="flex items-center justify-between px-4 py-3 border-b border-ink-700 bg-ink-900">
         <h3 className="text-sm font-bold text-ink-50">Market Data</h3>
-        <Link href="/markets" className="text-xs font-semibold text-accent hover:underline flex items-center gap-1">
-          Full View <ArrowRight size={11} />
+        <Link href="/economic-calendar" className="text-xs font-semibold text-accent hover:underline flex items-center gap-1">
+          Calendar <ArrowRight size={11} />
         </Link>
       </div>
       <div>

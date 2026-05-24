@@ -12,9 +12,10 @@ const NAV = [
   { href: "/category/forex", label: "Forex" },
   { href: "/category/stocks", label: "Stocks" },
   { href: "/category/macro", label: "Macro" },
+  { href: "/category/gold", label: "Gold" },
   { href: "/category/analysis", label: "Analysis" },
   { href: "/category/opinion", label: "Opinion" },
-  { href: "/markets", label: "Markets" },
+  { href: "/economic-calendar", label: "Calendar" },
 ];
 
 export async function TopHeader({

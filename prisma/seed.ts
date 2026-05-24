@@ -66,8 +66,9 @@ async function main() {
     prisma.category.upsert({ where: { slug: "forex" }, update: {}, create: { slug: "forex", name: "Forex", description: "Currency markets and central bank policy", order: 2 } }),
     prisma.category.upsert({ where: { slug: "stocks" }, update: {}, create: { slug: "stocks", name: "Stocks", description: "Equities, IPOs, and corporate earnings", order: 3 } }),
     prisma.category.upsert({ where: { slug: "macro" }, update: {}, create: { slug: "macro", name: "Macro", description: "Global economics, rates, and fiscal policy", order: 4 } }),
-    prisma.category.upsert({ where: { slug: "analysis" }, update: {}, create: { slug: "analysis", name: "Analysis", description: "Deep dives and research notes", order: 5 } }),
-    prisma.category.upsert({ where: { slug: "opinion" }, update: {}, create: { slug: "opinion", name: "Opinion", description: "Commentary and editorials", order: 6 } }),
+    prisma.category.upsert({ where: { slug: "gold" }, update: {}, create: { slug: "gold", name: "Gold", description: "Gold markets, precious metals, and commodities", order: 5 } }),
+    prisma.category.upsert({ where: { slug: "analysis" }, update: {}, create: { slug: "analysis", name: "Analysis", description: "Deep dives and research notes", order: 6 } }),
+    prisma.category.upsert({ where: { slug: "opinion" }, update: {}, create: { slug: "opinion", name: "Opinion", description: "Commentary and editorials", order: 7 } }),
   ]);
 
   const tags = await Promise.all([
@@ -81,7 +82,7 @@ async function main() {
     prisma.tag.upsert({ where: { slug: "inflation" }, update: {}, create: { slug: "inflation", name: "Inflation" } }),
   ]);
 
-  const [crypto, forex, stocks, macro, analysis, opinion] = categories;
+  const [crypto, forex, stocks, macro, gold, analysis, opinion] = categories;
 
   const articles = [
     {
@@ -640,6 +641,75 @@ The surge in activity has had mixed effects on Solana:
       publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 26),
       authorId: admin.id,
       categoryId: crypto.id,
+    },
+    {
+      slug: "gold-hits-record-high-central-bank-buying",
+      title: "Gold Hits Record High as Central Bank Buying Accelerates",
+      excerpt: "Gold prices surged to an all-time high above $2,400 per ounce, driven by unprecedented central bank purchases and growing geopolitical uncertainty.",
+      body: `# Gold Hits Record High as Central Bank Buying Accelerates
+
+Gold reached a new all-time high of $2,431 per ounce on Wednesday, extending a rally fueled by central bank diversification away from the US dollar and heightened geopolitical risks.
+
+## Key Drivers
+
+Several factors are converging to push gold higher:
+
+- **Central Bank Buying**: Global central banks purchased over 1,000 tonnes of gold in 2023, the second-highest annual total on record
+- **Geopolitical Risk**: Ongoing conflicts in the Middle East and Ukraine are boosting safe-haven demand
+- **Rate Cut Expectations**: Anticipated Fed easing reduces the opportunity cost of holding non-yielding gold
+- **De-dollarization**: BRICS nations are increasingly adding gold to reserves as a dollar alternative
+
+## Market Impact
+
+The rally has lifted gold mining stocks significantly, with the GDX ETF rising 28% year-to-date. Silver has also benefited, trading above $28 per ounce.
+
+## Outlook
+
+Analysts at major banks have raised their gold forecasts, with several targeting $2,600-$2,800 by year-end. The combination of structural central bank demand and cyclical monetary easing creates a powerful tailwind for precious metals.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1610375461246-83df859d849d?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 4),
+      authorId: editor.id,
+      categoryId: gold.id,
+    },
+    {
+      slug: "gold-vs-bitcoin-safe-haven-debate",
+      title: "Gold vs Bitcoin: The Modern Safe-Haven Debate Intensifies",
+      excerpt: "As both gold and Bitcoin reach new highs, investors are debating which asset truly serves as the ultimate store of value in an era of fiscal uncertainty.",
+      body: `# Gold vs Bitcoin: The Modern Safe-Haven Debate Intensifies
+
+The simultaneous rallies in gold and Bitcoin have reignited the debate about which asset best serves as a hedge against inflation and currency debasement.
+
+## The Case for Gold
+
+Gold advocates point to its 5,000-year track record:
+
+- **Proven Store of Value**: Gold has maintained purchasing power across millennia
+- **Central Bank Reserves**: Over 35,000 tonnes held by central banks globally
+- **Physical Scarcity**: Limited annual mine supply of approximately 3,500 tonnes
+- **Low Correlation**: Historically low correlation with equities during crises
+
+## The Case for Bitcoin
+
+Bitcoin proponents highlight its digital advantages:
+
+- **Fixed Supply**: Hard cap of 21 million coins, with halvings reducing new supply
+- **Portability**: Can be transferred globally in minutes
+- **Transparency**: Blockchain provides complete transaction history
+- **Growing Adoption**: Spot ETFs have legitimized Bitcoin as an institutional asset
+
+## Portfolio Implications
+
+Many analysts now recommend allocating to both assets, viewing them as complementary rather than competing stores of value. A combined 5-10% allocation to gold and Bitcoin has shown improved risk-adjusted returns in portfolio backtests.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1624365168968-f283d506c6b6?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 10),
+      authorId: author1.id,
+      categoryId: gold.id,
     },
   ];
 
