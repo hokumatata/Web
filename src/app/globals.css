@@ -110,7 +110,7 @@
   .prose-mp ul { @apply list-disc list-outside pl-6 my-5 space-y-2 text-ink-200; }
   .prose-mp ol { @apply list-decimal list-outside pl-6 my-5 space-y-2 text-ink-200; }
   .prose-mp li { @apply leading-[1.8]; }
-  .prose-mp a  { @apply text-accent font-medium underline-offset-4 decoration-accent/40 hover:decoration-accent transition-colors; }
+  .prose-mp a  { @apply text-accent font-medium underline-offset-4 decoration-accent hover:decoration-accent transition-colors; }
   .prose-mp blockquote {
     @apply border-l-[3px] border-accent pl-5 italic text-ink-300 my-6;
     font-size: 1.125rem;
