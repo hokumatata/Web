@@ -14,7 +14,7 @@ export default async function AdminCommentsPage() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="font-serif text-xl font-semibold text-white mb-6">Comments</h2>
+      <h2 className="font-serif text-xl font-semibold text-ink-50 mb-6">Comments</h2>
       <CommentsModeration
         comments={comments.map((c) => ({
           ...c,

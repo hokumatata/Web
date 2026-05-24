@@ -34,7 +34,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
       <div className="max-w-3xl mx-auto mb-8">
         <div className="flex items-center gap-3 mb-4">
           <Search size={20} className="text-accent" />
-          <h1 className="font-serif text-2xl font-bold text-white">Search</h1>
+          <h1 className="font-serif text-2xl font-bold text-ink-50">Search</h1>
         </div>
         <form action="/search" className="relative">
           <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-400" size={18} />

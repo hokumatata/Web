@@ -49,14 +49,14 @@ export default async function DashboardPage() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="font-serif text-xl font-semibold text-white mb-6">Your Dashboard</h2>
+      <h2 className="font-serif text-xl font-semibold text-ink-50 mb-6">Your Dashboard</h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {cards.map((c) => (
           <Link key={c.href} href={c.href} className="card-hover p-5 group">
             <c.icon size={20} className="text-accent mb-3" />
             <div className="data-label">{c.label}</div>
-            <div className="text-lg font-semibold text-white">{c.value}</div>
+            <div className="text-lg font-semibold text-ink-50">{c.value}</div>
           </Link>
         ))}
       </div>
@@ -85,7 +85,7 @@ export default async function DashboardPage() {
             </div>
             <div className="card p-4 text-center">
               <div className="data-label">Total Views</div>
-              <div className="text-lg font-semibold text-white tabular">{totalViews.toLocaleString()}</div>
+              <div className="text-lg font-semibold text-ink-50 tabular">{totalViews.toLocaleString()}</div>
             </div>
           </div>
 
@@ -105,7 +105,7 @@ export default async function DashboardPage() {
                   className="card-hover p-4 flex items-center justify-between group"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="font-medium text-ink-100 truncate group-hover:text-white transition-colors">{a.title}</div>
+                    <div className="font-medium text-ink-100 truncate group-hover:text-ink-50 transition-colors">{a.title}</div>
                     <div className="text-2xs text-ink-400 mt-0.5">{timeAgo(a.updatedAt)}</div>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0 ml-4">

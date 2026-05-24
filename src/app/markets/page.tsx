@@ -83,7 +83,7 @@ function MarketSummaryCard({ q }: { q: MarketQuote }) {
         <span className="text-3xs font-bold text-accent tracking-wider">{q.symbol}</span>
         <span className="text-3xs text-ink-500 tracking-wider">{q.label}</span>
       </div>
-      <div className="font-mono text-base font-bold text-white tabular">
+      <div className="font-mono text-base font-bold text-ink-50 tabular">
         ${formatNumber(q.price, q.price < 1 ? 4 : 2)}
       </div>
       <div className={`text-2xs font-mono font-bold tabular mt-0.5 ${up ? "text-up" : "text-down"}`}>
@@ -102,7 +102,7 @@ function MarketRow({ q, index, digits }: { q: MarketQuote; index: number; digits
         <div className="flex items-center gap-2">
           {q.imageUrl && <img src={q.imageUrl} alt="" className="h-4 w-4" />}
           <div>
-            <span className="text-2xs font-bold text-white">{q.symbol}</span>
+            <span className="text-2xs font-bold text-ink-50">{q.symbol}</span>
             <span className="text-3xs text-ink-500 ml-2">{q.label}</span>
           </div>
         </div>

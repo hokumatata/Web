@@ -2,34 +2,33 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: ["./src/**/*.{ts,tsx,mdx}"],
-  darkMode: "class",
   theme: {
     extend: {
       colors: {
         ink: {
-          950: "#000000",
-          900: "#050505",
-          850: "#0a0a0a",
-          800: "#111111",
-          700: "#1a1a1a",
-          600: "#252525",
-          500: "#333333",
-          400: "#555555",
-          300: "#888888",
-          200: "#aaaaaa",
-          100: "#cccccc",
-          50: "#eeeeee",
+          950: "var(--ink-950)",
+          900: "var(--ink-900)",
+          850: "var(--ink-850)",
+          800: "var(--ink-800)",
+          700: "var(--ink-700)",
+          600: "var(--ink-600)",
+          500: "var(--ink-500)",
+          400: "var(--ink-400)",
+          300: "var(--ink-300)",
+          200: "var(--ink-200)",
+          100: "var(--ink-100)",
+          50: "var(--ink-50)",
         },
         accent: {
-          DEFAULT: "#ff8800",
-          soft: "#ffaa44",
-          dim: "#663300",
+          DEFAULT: "var(--accent)",
+          soft: "var(--accent-soft)",
+          dim: "var(--accent-dim)",
         },
-        up: "#00d26a",
-        down: "#ff3333",
+        up: "var(--up)",
+        down: "var(--down)",
         bloomberg: {
           blue: "#2962ff",
-          dark: "#000000",
+          dark: "#0a1628",
           gold: "#f5a623",
           orange: "#ff8800",
         },
@@ -51,8 +50,8 @@ const config: Config = {
       },
       boxShadow: {
         rail: "inset 0 -1px 0 0 rgba(255,255,255,0.05)",
-        glow: "0 0 12px rgba(255, 136, 0, 0.2)",
-        terminal: "inset 0 0 0 1px #1a1a1a",
+        glow: "0 0 12px var(--accent-glow)",
+        terminal: "inset 0 0 0 1px var(--ink-700)",
       },
       animation: {
         "ticker-scroll": "ticker-scroll 60s linear infinite",

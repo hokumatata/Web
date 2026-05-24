@@ -28,7 +28,7 @@ export default async function AuthorEditArticlePage({ params }: { params: { id: 
 
   return (
     <div className="animate-fade-in">
-      <h2 className="font-serif text-xl font-semibold text-white mb-6">Edit Article</h2>
+      <h2 className="font-serif text-xl font-semibold text-ink-50 mb-6">Edit Article</h2>
       <div className="card p-6">
         <ArticleForm
           article={{

@@ -44,7 +44,7 @@ export default async function CategoryPage({
     <div className="container-tw py-8 animate-fade-in">
       <div className="mb-8">
         <span className="kicker">{cat.name}</span>
-        <h1 className="font-serif text-3xl md:text-4xl font-bold text-white mt-1">
+        <h1 className="font-serif text-3xl md:text-4xl font-bold text-ink-50 mt-1">
           {cat.description ?? cat.name}
         </h1>
         <div className="mt-2 text-sm text-ink-300">{total} articles</div>

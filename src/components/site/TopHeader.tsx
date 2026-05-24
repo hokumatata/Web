@@ -4,6 +4,7 @@ import type { SessionPayload } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { LiveClock } from "./LiveClock";
 import { UserMenu } from "./UserMenu";
+import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
   { href: "/news", label: "NEWS" },
@@ -108,6 +109,8 @@ export async function TopHeader({
                 <span className="hidden sm:inline">SIGN IN</span>
               </Link>
             )}
+
+            <ThemeToggle />
 
             <Link href="/markets" className="lg:hidden btn-ghost h-7 px-2">
               <TrendingUp size={14} />

@@ -28,7 +28,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             {session.name[0]}
           </div>
           <div>
-            <h1 className="font-serif text-xl font-bold text-white">{session.name}</h1>
+            <h1 className="font-serif text-xl font-bold text-ink-50">{session.name}</h1>
             <p className="text-2xs text-ink-400">{session.email}</p>
           </div>
         </div>
@@ -41,7 +41,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <li key={n.href}>
                 <Link
                   href={n.href}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-ink-300 hover:text-white hover:bg-ink-800 rounded-sm transition-colors whitespace-nowrap"
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-ink-300 hover:text-ink-50 hover:bg-ink-800 rounded-sm transition-colors whitespace-nowrap"
                 >
                   <n.icon size={14} />
                   {n.label}

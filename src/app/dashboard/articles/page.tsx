@@ -28,7 +28,7 @@ export default async function AuthorArticlesPage() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="font-serif text-xl font-semibold text-white">My Articles</h2>
+        <h2 className="font-serif text-xl font-semibold text-ink-50">My Articles</h2>
         <Link href="/dashboard/articles/new" className="btn-primary text-xs h-8">
           <Plus size={14} /> Write Article
         </Link>
@@ -46,7 +46,7 @@ export default async function AuthorArticlesPage() {
         </div>
         <div className="card p-4 text-center">
           <div className="data-label">Total Views</div>
-          <div className="text-lg font-semibold text-white tabular">{totalViews.toLocaleString()}</div>
+          <div className="text-lg font-semibold text-ink-50 tabular">{totalViews.toLocaleString()}</div>
         </div>
       </div>
 

@@ -63,7 +63,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       <div className="max-w-4xl mx-auto">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-2xs text-ink-400 mb-6">
-          <Link href="/" className="hover:text-white transition-colors flex items-center gap-1">
+          <Link href="/" className="hover:text-ink-50 transition-colors flex items-center gap-1">
             <ArrowLeft size={10} /> Home
           </Link>
           <span>/</span>
@@ -89,7 +89,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             </Link>
           </div>
 
-          <h1 className="font-serif text-3xl md:text-5xl font-bold text-white leading-tight tracking-tight text-balance">
+          <h1 className="font-serif text-3xl md:text-5xl font-bold text-ink-50 leading-tight tracking-tight text-balance">
             {article.title}
           </h1>
 

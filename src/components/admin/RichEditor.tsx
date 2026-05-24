@@ -171,7 +171,7 @@ export function RichEditor({ value, onChange }: RichEditorProps) {
                 type="button"
                 title={tool.label}
                 onClick={() => applyTool(tool)}
-                className="p-1.5 rounded-sm text-ink-300 hover:text-white hover:bg-ink-700 transition-colors"
+                className="p-1.5 rounded-sm text-ink-300 hover:text-ink-50 hover:bg-ink-700 transition-colors"
               >
                 <tool.icon size={14} />
               </button>

@@ -54,7 +54,7 @@ export function ImageUpload({ value, onChange, label = "Cover Image" }: ImageUpl
           <button
             type="button"
             onClick={() => onChange("")}
-            className="absolute top-2 right-2 bg-ink-900/80 text-ink-200 hover:text-white p-1.5 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-2 right-2 bg-ink-900/80 text-ink-200 hover:text-ink-50 p-1.5 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <X size={14} />
           </button>

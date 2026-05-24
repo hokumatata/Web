@@ -18,7 +18,7 @@ export default async function AdminArticlesPage() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="font-serif text-xl font-semibold text-white">Articles</h2>
+        <h2 className="font-serif text-xl font-semibold text-ink-50">Articles</h2>
         <Link href="/admin/articles/new" className="btn-primary text-xs h-8">
           <Plus size={14} /> New Article
         </Link>

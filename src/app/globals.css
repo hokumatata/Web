@@ -4,13 +4,66 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════
+   THEME: Light (default) — clean white Bloomberg
+   ═══════════════════════════════════════════════════ */
+:root {
+  --ink-950: #ffffff;
+  --ink-900: #f8f9fa;
+  --ink-850: #f1f3f5;
+  --ink-800: #e9ecef;
+  --ink-700: #dee2e6;
+  --ink-600: #ced4da;
+  --ink-500: #adb5bd;
+  --ink-400: #868e96;
+  --ink-300: #495057;
+  --ink-200: #343a40;
+  --ink-100: #212529;
+  --ink-50: #0d1117;
+
+  --accent: #e06800;
+  --accent-soft: #ff9933;
+  --accent-dim: #fff3e6;
+  --accent-glow: rgba(224, 104, 0, 0.15);
+
+  --up: #0a8a3e;
+  --down: #cc2222;
+
+  color-scheme: light;
+}
+
+/* ═══════════════════════════════════════════════════
+   THEME: Dark — deep dark blue Bloomberg terminal
+   ═══════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  --ink-950: #0a1628;
+  --ink-900: #0d1b30;
+  --ink-850: #111f38;
+  --ink-800: #162440;
+  --ink-700: #1c2d4a;
+  --ink-600: #263a5c;
+  --ink-500: #3a5070;
+  --ink-400: #5a7090;
+  --ink-300: #8899b0;
+  --ink-200: #b0bfcf;
+  --ink-100: #d0d8e4;
+  --ink-50: #eef1f6;
+
+  --accent: #ff8800;
+  --accent-soft: #ffaa44;
+  --accent-dim: #331a00;
+  --accent-glow: rgba(255, 136, 0, 0.2);
+
+  --up: #00d26a;
+  --down: #ff3333;
+
+  color-scheme: dark;
+}
+
 @layer base {
-  :root {
-    color-scheme: dark;
-  }
   html {
-    background: #000000;
-    color: #cccccc;
+    background: var(--ink-950);
+    color: var(--ink-100);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -20,19 +73,19 @@
     letter-spacing: -0.01em;
   }
   ::selection {
-    background: #ff8800;
-    color: #000000;
+    background: var(--accent);
+    color: var(--ink-950);
   }
   *:focus-visible {
-    outline: 1px solid #ff8800;
+    outline: 1px solid var(--accent);
     outline-offset: 1px;
   }
 
   /* Article prose — serif for readability */
-  .prose-mp h1 { @apply font-serif text-2xl md:text-3xl font-bold text-white mt-8 mb-3; }
-  .prose-mp h2 { @apply font-serif text-xl md:text-2xl font-semibold text-white mt-8 mb-3; }
-  .prose-mp h3 { @apply font-serif text-lg md:text-xl font-semibold text-white mt-6 mb-2; }
-  .prose-mp h4 { @apply font-serif text-base font-semibold text-white mt-5 mb-2; }
+  .prose-mp h1 { @apply font-serif text-2xl md:text-3xl font-bold text-ink-50 mt-8 mb-3; }
+  .prose-mp h2 { @apply font-serif text-xl md:text-2xl font-semibold text-ink-50 mt-8 mb-3; }
+  .prose-mp h3 { @apply font-serif text-lg md:text-xl font-semibold text-ink-50 mt-6 mb-2; }
+  .prose-mp h4 { @apply font-serif text-base font-semibold text-ink-50 mt-5 mb-2; }
   .prose-mp p  { @apply text-ink-200 leading-7 my-4 font-serif text-base; }
   .prose-mp ul { @apply list-disc list-outside pl-6 my-4 space-y-1 text-ink-200 font-serif; }
   .prose-mp ol { @apply list-decimal list-outside pl-6 my-4 space-y-1 text-ink-200 font-serif; }
@@ -42,7 +95,7 @@
   .prose-mp code { @apply bg-ink-800 text-accent px-1.5 py-0.5 text-xs font-mono; }
   .prose-mp pre { @apply bg-ink-900 border border-ink-700 p-4 overflow-x-auto my-4; }
   .prose-mp pre code { @apply bg-transparent p-0; }
-  .prose-mp strong { @apply text-white font-semibold; }
+  .prose-mp strong { @apply text-ink-50 font-semibold; }
   .prose-mp table { @apply w-full my-4 border-collapse; }
   .prose-mp th { @apply text-left text-2xs uppercase tracking-wider text-ink-300 border-b border-ink-700 pb-2 px-3; }
   .prose-mp td { @apply border-b border-ink-800 py-2 px-3 text-sm; }
@@ -58,16 +111,17 @@
     @apply inline-flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed border;
   }
   .btn-primary {
-    @apply btn bg-accent text-black border-accent hover:bg-accent-soft;
+    @apply btn bg-accent border-accent hover:bg-accent-soft;
+    color: white;
   }
   .btn-secondary {
     @apply btn border-ink-600 text-ink-100 hover:bg-ink-800 hover:border-ink-500;
   }
   .btn-ghost {
-    @apply btn border-transparent text-ink-300 hover:bg-ink-800 hover:text-white;
+    @apply btn border-transparent text-ink-300 hover:bg-ink-800 hover:text-ink-50;
   }
   .btn-danger {
-    @apply btn border-down/40 text-down hover:bg-down/10;
+    @apply btn border-down text-down hover:bg-ink-800;
   }
   .input {
     @apply w-full border border-ink-600 bg-ink-900 px-3 py-2 text-sm text-ink-100 placeholder:text-ink-500 focus:border-accent focus:outline-none transition-colors font-mono;
@@ -79,28 +133,35 @@
     @apply border border-ink-700 bg-ink-900 transition-all duration-150;
   }
   .card-hover {
-    @apply card hover:border-accent/40 hover:bg-ink-850;
+    @apply card hover:border-accent hover:bg-ink-850;
   }
   .badge {
     @apply inline-flex items-center border border-ink-600 bg-ink-800 px-2 py-0.5 text-3xs font-semibold uppercase tracking-widest text-ink-300;
   }
   .badge-accent {
-    @apply inline-flex items-center bg-accent/10 text-accent border border-accent/30 px-2 py-0.5 text-3xs font-semibold uppercase tracking-widest;
+    @apply inline-flex items-center bg-accent-dim text-accent border border-accent px-2 py-0.5 text-3xs font-semibold uppercase tracking-widest;
   }
   .badge-up {
-    @apply inline-flex items-center bg-up/10 text-up border border-up/30 px-2 py-0.5 text-3xs font-semibold uppercase tracking-widest;
+    @apply inline-flex items-center border border-up px-2 py-0.5 text-3xs font-semibold uppercase tracking-widest;
+    color: var(--up);
+    background: color-mix(in srgb, var(--up) 10%, transparent);
   }
   .badge-down {
-    @apply inline-flex items-center bg-down/10 text-down border border-down/30 px-2 py-0.5 text-3xs font-semibold uppercase tracking-widest;
+    @apply inline-flex items-center border border-down px-2 py-0.5 text-3xs font-semibold uppercase tracking-widest;
+    color: var(--down);
+    background: color-mix(in srgb, var(--down) 10%, transparent);
   }
   .section-title {
-    @apply flex items-center justify-between border-b border-accent/40 pb-2 mb-5;
+    @apply flex items-center justify-between border-b-2 pb-2 mb-5;
+    border-color: var(--accent);
   }
   .section-title h2 {
     @apply text-sm font-semibold text-accent uppercase tracking-widest;
   }
   .kicker {
-    @apply text-3xs uppercase tracking-[0.2em] text-accent font-bold;
+    @apply text-3xs uppercase font-bold;
+    letter-spacing: 0.2em;
+    color: var(--accent);
   }
   .rule {
     @apply border-t border-ink-700;
@@ -118,22 +179,22 @@
     @apply text-3xs uppercase tracking-widest text-ink-400 mb-0.5;
   }
   .data-value {
-    @apply text-base font-mono font-semibold text-white tabular;
+    @apply text-base font-mono font-semibold text-ink-50 tabular;
   }
   .flash-up {
-    @apply text-up;
+    color: var(--up);
   }
   .flash-down {
-    @apply text-down;
+    color: var(--down);
   }
 }
 
 /* Article body prose styles */
 .prose-mp a.outbound-link {
-  @apply text-accent underline underline-offset-2 decoration-accent/40 hover:decoration-accent transition-colors;
+  @apply text-accent underline underline-offset-2 hover:opacity-80 transition-opacity;
 }
 .prose-mp a.inbound-link {
-  @apply text-bloomberg-blue underline underline-offset-2 decoration-bloomberg-blue/40 hover:decoration-bloomberg-blue transition-colors;
+  @apply text-bloomberg-blue underline underline-offset-2 hover:opacity-80 transition-opacity;
 }
 .prose-mp figure.article-figure {
   @apply my-6 overflow-hidden border border-ink-700;

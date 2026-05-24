@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { TopHeader } from "@/components/site/TopHeader";
 import { TickerTape } from "@/components/site/TickerTape";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { ThemeProvider } from "@/components/site/ThemeProvider";
 import { getSession } from "@/lib/auth";
 
 const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "TradeWave";
@@ -19,12 +20,21 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('tw-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body>
-        <TopHeader session={session} siteName={SITE_NAME} />
-        <TickerTape />
-        <main className="min-h-screen">{children}</main>
-        <SiteFooter siteName={SITE_NAME} />
+        <ThemeProvider>
+          <TopHeader session={session} siteName={SITE_NAME} />
+          <TickerTape />
+          <main className="min-h-screen">{children}</main>
+          <SiteFooter siteName={SITE_NAME} />
+        </ThemeProvider>
       </body>
     </html>
   );

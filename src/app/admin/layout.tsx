@@ -26,7 +26,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <LayoutDashboard size={20} className="text-accent" />
-          <h1 className="font-serif text-xl font-bold text-white">Admin</h1>
+          <h1 className="font-serif text-xl font-bold text-ink-50">Admin</h1>
           <span className="badge">{session.role}</span>
         </div>
         <LogoutButton />
@@ -38,7 +38,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <li key={n.href}>
                 <Link
                   href={n.href}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-ink-300 hover:text-white hover:bg-ink-800 rounded-sm transition-colors whitespace-nowrap"
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-ink-300 hover:text-ink-50 hover:bg-ink-800 rounded-sm transition-colors whitespace-nowrap"
                 >
                   <n.icon size={14} />
                   {n.label}

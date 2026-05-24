@@ -15,7 +15,7 @@ export default async function WatchlistPage() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="font-serif text-xl font-semibold text-white mb-6">Watchlist</h2>
+      <h2 className="font-serif text-xl font-semibold text-ink-50 mb-6">Watchlist</h2>
       <WatchlistManager items={items} />
     </div>
   );

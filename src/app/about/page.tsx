@@ -7,7 +7,7 @@ export default function AboutPage() {
     <div className="container-tw py-12 animate-fade-in">
       <div className="max-w-3xl mx-auto">
         <span className="kicker">About</span>
-        <h1 className="font-serif text-3xl md:text-4xl font-bold text-white mt-2 mb-6">
+        <h1 className="font-serif text-3xl md:text-4xl font-bold text-ink-50 mt-2 mb-6">
           Professional Market Intelligence
         </h1>
         <p className="text-lg text-ink-200 leading-relaxed mb-8">
@@ -23,7 +23,7 @@ export default function AboutPage() {
           ].map((item) => (
             <div key={item.title} className="card p-6">
               <item.icon size={24} className="text-accent mb-3" />
-              <h3 className="font-serif text-lg font-semibold text-white mb-1">{item.title}</h3>
+              <h3 className="font-serif text-lg font-semibold text-ink-50 mb-1">{item.title}</h3>
               <p className="text-sm text-ink-300">{item.desc}</p>
             </div>
           ))}

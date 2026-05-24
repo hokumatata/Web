@@ -7,7 +7,7 @@ export default function ContactPage() {
     <div className="container-tw py-12 animate-fade-in">
       <div className="max-w-xl mx-auto">
         <span className="kicker">Contact</span>
-        <h1 className="font-serif text-3xl font-bold text-white mt-2 mb-6">Get in Touch</h1>
+        <h1 className="font-serif text-3xl font-bold text-ink-50 mt-2 mb-6">Get in Touch</h1>
         <div className="space-y-4 mb-8">
           <div className="flex items-center gap-3 text-ink-200">
             <Mail size={16} className="text-accent" />

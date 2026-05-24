@@ -47,7 +47,7 @@ export function UserMenu({ name, role }: UserMenuProps) {
       {open && (
         <div className="absolute right-0 top-full mt-1 w-52 bg-ink-900 border border-ink-700 shadow-xl z-50">
           <div className="px-3 py-2 border-b border-ink-700 bg-ink-800">
-            <p className="text-2xs font-bold text-white uppercase tracking-wider">{name}</p>
+            <p className="text-2xs font-bold text-ink-50 uppercase tracking-wider">{name}</p>
             <p className="text-3xs text-accent uppercase tracking-widest">{role}</p>
           </div>
 

@@ -64,7 +64,7 @@ export default async function HomePage() {
                       {up ? "+" : ""}{formatPercent(q.changePct24h)}
                     </span>
                   </div>
-                  <div className="text-sm font-mono font-bold text-white tabular mt-0.5">
+                  <div className="text-sm font-mono font-bold text-ink-50 tabular mt-0.5">
                     ${formatNumber(q.price, q.price < 1 ? 4 : 2)}
                   </div>
                 </div>

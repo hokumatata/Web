@@ -140,7 +140,7 @@ export function ArticleCard({ a, variant = "default" }: { a: ArticleCardData; va
           <Link href={`/category/${a.category.slug}`} className="kicker hover:underline">{a.category.name.toUpperCase()}</Link>
           <span className="text-3xs text-ink-500 tracking-wider">{timeAgo(a.publishedAt)}</span>
         </div>
-        <h3 className="mt-1 text-xs font-semibold text-white leading-snug tracking-tight">
+        <h3 className="mt-1 text-xs font-semibold text-ink-50 leading-snug tracking-tight">
           <Link href={`/article/${a.slug}`} className="hover:text-accent transition-colors">{a.title}</Link>
         </h3>
         <p className="mt-1.5 text-2xs text-ink-300 line-clamp-2 flex-1">{a.excerpt}</p>

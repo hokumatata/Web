@@ -43,7 +43,7 @@ export default async function NewsPage({
     <div className="container-tw py-8 animate-fade-in">
       <div className="flex items-center gap-3 mb-6">
         <Newspaper size={20} className="text-accent" />
-        <h1 className="font-serif text-2xl md:text-3xl font-bold text-white">
+        <h1 className="font-serif text-2xl md:text-3xl font-bold text-ink-50">
           {searchParams.breaking === "1" ? "Breaking News" : "Latest News"}
         </h1>
         <span className="badge ml-2">{total} articles</span>
