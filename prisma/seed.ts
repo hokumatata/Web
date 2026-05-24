@@ -711,6 +711,260 @@ Many analysts now recommend allocating to both assets, viewing them as complemen
       authorId: author1.id,
       categoryId: gold.id,
     },
+    {
+      slug: "gold-etf-inflows-surge-2024",
+      title: "Gold ETF Inflows Hit $4.7 Billion in Q1, Reversing Three-Year Outflow Trend",
+      excerpt: "Global gold-backed ETFs recorded their strongest quarterly inflows since 2020, signaling a major shift in institutional sentiment toward the precious metal.",
+      body: `# Gold ETF Inflows Hit $4.7 Billion in Q1
+
+Global gold-backed exchange-traded funds saw net inflows of $4.7 billion in the first quarter, according to data from the World Gold Council, reversing a prolonged period of outflows that began in mid-2021.
+
+## Regional Breakdown
+
+The inflows were broad-based across geographies:
+
+- **North America**: $2.1 billion in net inflows, led by GLD and IAU
+- **Europe**: $1.8 billion, with UK and German funds leading
+- **Asia**: $600 million, driven by Chinese and Indian investors
+- **Other regions**: $200 million across Australia and South Africa
+
+## Driving Factors
+
+Several forces converged to bring investors back to gold ETFs:
+
+- **Geopolitical uncertainty** across multiple regions
+- **Inflation persistence** despite aggressive central bank tightening
+- **Dollar weakness** as the Fed signals a pivot
+- **Portfolio rebalancing** after a strong equity rally raised concentration risk
+
+## Holdings Update
+
+Total global gold ETF holdings now stand at 3,250 tonnes, valued at approximately $230 billion. While still below the 2020 peak of 3,900 tonnes, the trend has clearly reversed.
+
+## Analyst Commentary
+
+"The ETF flow data confirms what we've been seeing in the physical market — institutional investors are rebuilding their gold allocations," noted a senior strategist at a major investment bank. "We expect this trend to accelerate as rate cuts materialize."`,
+      coverImageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 6),
+      authorId: admin.id,
+      categoryId: gold.id,
+    },
+    {
+      slug: "silver-gold-ratio-signals-precious-metals-rally",
+      title: "Gold-to-Silver Ratio Drops Below 80: What It Means for Precious Metals",
+      excerpt: "The gold-to-silver ratio has fallen below 80 for the first time in two years, a level that historically precedes outperformance by silver and broader precious metals rallies.",
+      body: `# Gold-to-Silver Ratio Drops Below 80
+
+The gold-to-silver ratio — measuring how many ounces of silver it takes to buy one ounce of gold — has dropped below 80 for the first time since 2022, a development that precious metals analysts are watching closely.
+
+## Historical Context
+
+The ratio has averaged around 65 over the past 50 years:
+
+- **Above 80**: Silver is considered historically cheap relative to gold
+- **60-80**: Normal range
+- **Below 60**: Silver is expensive relative to gold
+
+When the ratio falls from elevated levels, silver has historically outperformed gold by a significant margin in the following 6-12 months.
+
+## Industrial Demand Factor
+
+Unlike gold, silver has substantial industrial applications:
+
+- **Solar panels**: Each panel uses approximately 20 grams of silver
+- **Electronics**: Growing demand from EV production and 5G infrastructure
+- **Medical devices**: Antimicrobial properties drive healthcare demand
+
+Global solar installations are projected to exceed 500 GW in 2024, requiring over 180 million ounces of silver — roughly 20% of annual mine supply.
+
+## Investment Implications
+
+Silver mining stocks have begun to outperform their gold counterparts, with the SIL ETF up 32% year-to-date versus 18% for GDX. Analysts see further upside as the industrial demand narrative combines with monetary demand.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1592473891873-4c5c45ee2a1b?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 14),
+      authorId: editor.id,
+      categoryId: gold.id,
+    },
+    {
+      slug: "china-gold-reserves-record-accumulation",
+      title: "China Adds Gold for 18th Consecutive Month as De-Dollarization Accelerates",
+      excerpt: "The People's Bank of China continued its record gold buying streak, adding 12 tonnes in March as the nation diversifies reserves away from US Treasury holdings.",
+      body: `# China Adds Gold for 18th Consecutive Month
+
+The People's Bank of China (PBOC) increased its gold reserves by 12 tonnes in March, marking the 18th consecutive month of purchases and bringing total reported holdings to 2,262 tonnes.
+
+## The De-Dollarization Strategy
+
+China's gold accumulation is part of a broader strategy to reduce dependence on the US dollar:
+
+- **Treasury Reduction**: China has reduced US Treasury holdings from $1.1 trillion in 2021 to below $800 billion
+- **Gold Share Rising**: Gold now represents approximately 4.3% of China's total reserves, up from 3.2% two years ago
+- **BRICS Coordination**: Fellow BRICS members India, Russia, and Turkey are also aggressive gold buyers
+
+## Scale of Purchases
+
+The PBOC has added over 300 tonnes to its reserves since late 2022. However, many analysts believe actual purchases are significantly higher, as China may be acquiring gold through non-reported channels such as the State Administration of Foreign Exchange (SAFE).
+
+## Market Impact
+
+Chinese demand has been a key factor supporting gold prices above $2,000:
+
+- **Physical premium**: Shanghai Gold Exchange premiums have averaged $30-50 per ounce above London spot
+- **Consumer demand**: Chinese retail gold purchases rose 28% year-over-year in Q1
+- **Central bank demand**: PBOC purchases account for roughly 15% of global mine supply
+
+## Geopolitical Implications
+
+The sustained gold accumulation reflects growing concerns about potential US financial sanctions and the weaponization of the dollar-based payment system. Analysts note that gold provides a sanctions-proof reserve asset that cannot be frozen or seized.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 18),
+      authorId: author1.id,
+      categoryId: gold.id,
+    },
+    {
+      slug: "gold-mining-costs-squeeze-margins",
+      title: "Rising Mining Costs Squeeze Gold Producers Despite Record Prices",
+      excerpt: "All-in sustaining costs for gold miners have climbed to $1,350 per ounce, eroding margins even as gold trades near record highs and raising questions about future supply growth.",
+      body: `# Rising Mining Costs Squeeze Gold Producers
+
+Despite gold prices hovering near all-time highs, the world's largest gold miners are grappling with escalating production costs that threaten to constrain future supply growth.
+
+## Cost Escalation
+
+The industry's average all-in sustaining cost (AISC) has risen sharply:
+
+- **2020**: $1,000/oz average
+- **2022**: $1,200/oz average
+- **2024**: $1,350/oz average (estimated)
+
+Key cost drivers include:
+
+- **Energy prices**: Diesel and electricity account for 15-20% of mining costs
+- **Labor shortages**: Skilled mining workers are in high demand globally
+- **Declining ore grades**: Average grades have fallen 30% over the past two decades
+- **Regulatory costs**: ESG compliance and permitting expenses continue to rise
+
+## Production Outlook
+
+Global gold mine production has plateaued at approximately 3,600 tonnes per year, with limited new discoveries and lengthy permitting timelines constraining growth.
+
+Major projects in the pipeline face significant hurdles:
+
+- Average time from discovery to production now exceeds 15 years
+- Capital costs for new mines have doubled since 2015
+- Environmental permitting has become increasingly complex
+
+## Investment Implications
+
+The cost squeeze creates a bifurcation among miners. Low-cost producers with Tier 1 assets are generating record free cash flow, while marginal producers face diminishing returns. Analysts recommend focusing on operators with AISC below $1,100/oz and strong reserve replacement pipelines.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1605792657660-596af9009e82?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 22),
+      authorId: admin.id,
+      categoryId: gold.id,
+    },
+    {
+      slug: "gold-jewelry-demand-india-wedding-season",
+      title: "Indian Gold Demand Surges 40% Ahead of Peak Wedding Season",
+      excerpt: "India's gold imports jumped to 120 tonnes in March as jewelers stock up ahead of the Akshaya Tritiya festival and the peak wedding season, supporting global prices.",
+      body: `# Indian Gold Demand Surges 40% Ahead of Peak Wedding Season
+
+India, the world's second-largest gold consumer, imported 120 tonnes of gold in March — a 40% increase from the previous year — as the nation gears up for its peak demand season.
+
+## Seasonal Demand Drivers
+
+Gold plays a central role in Indian culture and commerce:
+
+- **Akshaya Tritiya**: One of the most auspicious days for buying gold, falling in late April
+- **Wedding Season**: April through June sees millions of weddings, each traditionally involving significant gold purchases
+- **Dhanteras and Diwali**: The autumn festival season drives another wave of demand
+
+## Market Dynamics
+
+India's gold market has several unique characteristics:
+
+- **Annual consumption**: 700-800 tonnes per year, approximately 20% of global demand
+- **Import duty**: The government recently reduced import duties from 15% to 12.5%, boosting legal imports
+- **Rural demand**: Over 60% of Indian gold purchases come from rural areas, closely tied to agricultural incomes
+
+## Impact on Global Prices
+
+Indian demand has historically been a significant price driver:
+
+- Strong monsoon forecasts have boosted rural income expectations
+- The wedding count is projected to reach 12 million this season, up from 10 million last year
+- Jewelers report advance orders running 25% above last year's levels
+
+## Digital Gold Growth
+
+While physical gold remains dominant, digital gold platforms have gained traction in India, with over 100 million users now holding fractional gold through apps. This has expanded the buyer base significantly, particularly among younger consumers.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1515562141589-67f0d569b6f5?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 30),
+      authorId: editor.id,
+      categoryId: gold.id,
+    },
+    {
+      slug: "gold-price-forecast-major-banks-2024",
+      title: "Wall Street Raises Gold Targets: Major Banks See $3,000 by 2025",
+      excerpt: "Goldman Sachs, JPMorgan, and Citigroup have all raised their gold price forecasts, with the most bullish calls targeting $3,000 per ounce within the next 12 months.",
+      body: `# Wall Street Raises Gold Targets
+
+In a remarkable display of consensus, Wall Street's top investment banks have simultaneously raised their gold price forecasts, reflecting growing conviction in a structural bull market for the precious metal.
+
+## Updated Forecasts
+
+| Bank | Previous Target | New Target | Timeline |
+|------|----------------|------------|----------|
+| Goldman Sachs | $2,300 | $2,700 | Year-end 2024 |
+| JPMorgan | $2,175 | $2,600 | Q3 2024 |
+| Citigroup | $2,400 | $3,000 | Mid-2025 |
+| UBS | $2,200 | $2,500 | Year-end 2024 |
+| Bank of America | $2,400 | $2,800 | Q1 2025 |
+
+## Bull Case Arguments
+
+The banks cite converging bullish factors:
+
+- **Central bank buying** showing no signs of slowing, with 2024 on pace to match 2023's record purchases
+- **Fed rate cuts** will reduce the opportunity cost of holding gold and weaken the dollar
+- **Geopolitical risks** from ongoing conflicts and US-China tensions
+- **Fiscal concerns** over rising US government debt levels ($34 trillion and counting)
+- **Election uncertainty** with a contentious US presidential election ahead
+
+## Bear Case Risks
+
+Despite the bullish consensus, analysts note several headwinds:
+
+- A resilient US economy could delay rate cuts
+- A sudden de-escalation of geopolitical tensions would remove safe-haven premium
+- Chinese economic weakness could dampen physical demand
+- Profit-taking after a strong rally could trigger short-term pullbacks
+
+## Historical Perspective
+
+Gold has delivered a 15% annualized return since 2019, outperforming the S&P 500 on a risk-adjusted basis. The current rally bears similarities to the 2009-2011 bull run, which saw gold rise from $800 to $1,900 following the financial crisis and subsequent monetary easing.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: true,
+      isBreaking: false,
+      publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
+      authorId: admin.id,
+      categoryId: gold.id,
+    },
   ];
 
   for (const data of articles) {
