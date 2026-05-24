@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Search, User, LogIn, TrendingUp, Zap } from "lucide-react";
+import { Search, LogIn, TrendingUp, Zap } from "lucide-react";
 import type { SessionPayload } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { LiveClock } from "./LiveClock";
+import { UserMenu } from "./UserMenu";
 
 const NAV = [
   { href: "/news", label: "News" },
@@ -99,20 +100,11 @@ export async function TopHeader({
             </form>
 
             {session ? (
-              <Link href="/dashboard" className="btn-secondary h-8 px-3">
-                <User size={14} />
-                <span className="hidden sm:inline text-xs">{session.name.split(" ")[0]}</span>
-              </Link>
+              <UserMenu name={session.name} role={session.role} />
             ) : (
               <Link href="/login" className="btn-secondary h-8 px-3">
                 <LogIn size={14} />
                 <span className="hidden sm:inline text-xs">Sign in</span>
-              </Link>
-            )}
-
-            {session && (session.role === "ADMIN" || session.role === "EDITOR") && (
-              <Link href="/admin" className="btn-primary h-8 px-3 text-xs">
-                Admin
               </Link>
             )}
 

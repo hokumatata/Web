@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { roleAtLeast } from "@/lib/types";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 import { LayoutDashboard, FileText, Tags, MessageSquare, Users, Mail, Activity, Settings } from "lucide-react";
 
 const NAV = [
@@ -22,10 +23,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="container-tw py-6">
-      <div className="flex items-center gap-3 mb-6">
-        <LayoutDashboard size={20} className="text-accent" />
-        <h1 className="font-serif text-xl font-bold text-white">Admin</h1>
-        <span className="badge">{session.role}</span>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <LayoutDashboard size={20} className="text-accent" />
+          <h1 className="font-serif text-xl font-bold text-white">Admin</h1>
+          <span className="badge">{session.role}</span>
+        </div>
+        <LogoutButton />
       </div>
       <div className="flex flex-col lg:flex-row gap-6">
         <nav className="lg:w-48 flex-shrink-0">
