@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { json, error, unauthorized, notFound } from "@/lib/api";
 import { requireRole } from "@/lib/auth";
+import { roleAtLeast } from "@/lib/types";
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const article = await prisma.article.findUnique({
@@ -22,6 +23,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
   const article = await prisma.article.findUnique({ where: { id: params.id } });
   if (!article) return notFound("Article");
+
+  // Authors can only edit their own articles; editors+ can edit any
+  if (!roleAtLeast(auth.session.role, "EDITOR") && article.authorId !== auth.session.uid) {
+    return error("You can only edit your own articles", 403);
+  }
 
   const body = await req.json();
   const { title, excerpt, bodyText, categoryId, coverImageUrl, isFeatured, isBreaking, status, tags } = body;

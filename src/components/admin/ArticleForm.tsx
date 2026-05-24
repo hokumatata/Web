@@ -24,10 +24,12 @@ export function ArticleForm({
   article,
   categories,
   tags,
+  redirectTo = "/admin/articles",
 }: {
   article?: ArticleData;
   categories: Category[];
   tags: Tag[];
+  redirectTo?: string;
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(article?.title ?? "");
@@ -70,7 +72,7 @@ export function ArticleForm({
         setError(data.error || "Failed to save");
         return;
       }
-      router.push("/admin/articles");
+      router.push(redirectTo);
       router.refresh();
     } catch {
       setError("Network error");

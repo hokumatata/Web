@@ -1,11 +1,16 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
+import { roleAtLeast } from "@/lib/types";
 import { LogoutButton } from "@/components/auth/LogoutButton";
-import { User, Bookmark, Eye, Settings } from "lucide-react";
+import { User, Bookmark, Eye, Settings, FileText, Plus } from "lucide-react";
 
-const NAV = [
+type NavItem = { href: string; label: string; icon: typeof User; minRole?: "AUTHOR" | "EDITOR" | "ADMIN" };
+
+const NAV: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: User },
+  { href: "/dashboard/articles", label: "My Articles", icon: FileText, minRole: "AUTHOR" },
+  { href: "/dashboard/articles/new", label: "Write Article", icon: Plus, minRole: "AUTHOR" },
   { href: "/dashboard/saved", label: "Saved Articles", icon: Bookmark },
   { href: "/dashboard/watchlist", label: "Watchlist", icon: Eye },
   { href: "/dashboard/preferences", label: "Preferences", icon: Settings },
@@ -32,7 +37,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="flex flex-col lg:flex-row gap-6">
         <nav className="lg:w-48 flex-shrink-0">
           <ul className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible">
-            {NAV.map((n) => (
+            {NAV.filter((n) => !n.minRole || roleAtLeast(session.role, n.minRole)).map((n) => (
               <li key={n.href}>
                 <Link
                   href={n.href}

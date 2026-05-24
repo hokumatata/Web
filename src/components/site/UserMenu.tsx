@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, LayoutDashboard, Bookmark, Eye, Settings, LogOut, ChevronDown } from "lucide-react";
+import { User, LayoutDashboard, Bookmark, Eye, Settings, LogOut, ChevronDown, FileText } from "lucide-react";
 
 interface UserMenuProps {
   name: string;
@@ -31,6 +31,7 @@ export function UserMenu({ name, role }: UserMenuProps) {
   }
 
   const isAdmin = role === "ADMIN" || role === "EDITOR";
+  const isAuthor = role === "ADMIN" || role === "EDITOR" || role === "AUTHOR";
 
   return (
     <div ref={ref} className="relative">
@@ -59,6 +60,16 @@ export function UserMenu({ name, role }: UserMenuProps) {
               <User size={14} />
               My Dashboard
             </Link>
+            {isAuthor && (
+              <Link
+                href="/dashboard/articles"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 text-sm text-ink-200 hover:text-white hover:bg-ink-800 transition-colors"
+              >
+                <FileText size={14} />
+                My Articles
+              </Link>
+            )}
             <Link
               href="/dashboard/saved"
               onClick={() => setOpen(false)}
