@@ -8,7 +8,7 @@ export default async function AdminNewsletterPage() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="font-serif text-xl font-semibold text-ink-50 mb-6">Newsletter</h2>
+      <h2 className="text-xl font-bold text-ink-50 mb-6">Newsletter</h2>
       <NewsletterAdmin
         subscribers={subscribers.map((s) => ({
           id: s.id,

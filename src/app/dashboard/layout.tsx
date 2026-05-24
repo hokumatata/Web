@@ -28,7 +28,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             {session.name[0]}
           </div>
           <div>
-            <h1 className="font-serif text-xl font-bold text-ink-50">{session.name}</h1>
+            <h1 className="text-xl font-bold text-ink-50">{session.name}</h1>
             <p className="text-2xs text-ink-400">{session.email}</p>
           </div>
         </div>

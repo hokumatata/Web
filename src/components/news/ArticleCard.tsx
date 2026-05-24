@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { timeAgo, readTime } from "@/lib/utils";
+import { Clock, Zap } from "lucide-react";
 
 export interface ArticleCardData {
   slug: string;
@@ -15,41 +16,37 @@ export interface ArticleCardData {
 
 export function HeroLead({ a }: { a: ArticleCardData }) {
   return (
-    <article className="card overflow-hidden group relative">
-      <Link href={`/article/${a.slug}`} className="block aspect-[16/9] w-full overflow-hidden bg-ink-800 relative">
+    <article className="relative overflow-hidden rounded-md group">
+      <Link href={`/article/${a.slug}`} className="block aspect-[16/9] md:aspect-[2/1] w-full overflow-hidden bg-ink-800 relative">
         {a.coverImageUrl && (
           <img
             src={a.coverImageUrl}
             alt={a.title}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+            className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+          <div className="flex items-center gap-3 mb-3">
             {a.isBreaking && (
-              <span className="badge-accent flex items-center gap-1">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping bg-down opacity-70" />
-                  <span className="relative inline-flex h-1.5 w-1.5 bg-down" />
-                </span>
-                LIVE
+              <span className="inline-flex items-center gap-1.5 bg-down/90 text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-sm">
+                <Zap size={9} className="fill-white" />
+                Breaking
               </span>
             )}
-            <Link href={`/category/${a.category.slug}`} className="kicker hover:underline">
-              {a.category.name.toUpperCase()}
+            <Link href={`/category/${a.category.slug}`} className="text-[11px] uppercase font-bold tracking-wider text-accent hover:underline">
+              {a.category.name}
             </Link>
-            <span className="text-3xs text-ink-400 tracking-wider">
-              {timeAgo(a.publishedAt)}
-            </span>
           </div>
-          <h2 className="font-serif text-xl md:text-3xl font-bold text-white leading-tight tracking-tight text-balance">
-            <Link href={`/article/${a.slug}`} className="hover:text-accent transition-colors">{a.title}</Link>
+          <h2 className="font-serif text-2xl md:text-4xl font-bold text-white leading-[1.15] tracking-tight text-balance">
+            <Link href={`/article/${a.slug}`} className="hover:underline decoration-2 underline-offset-4">{a.title}</Link>
           </h2>
-          <p className="mt-2 text-ink-200 text-xs md:text-sm text-pretty max-w-2xl line-clamp-2">{a.excerpt}</p>
-          {a.author && (
-            <p className="mt-2 text-3xs text-ink-500 uppercase tracking-widest">{a.author.name} | {readTime(a.body)} MIN READ</p>
-          )}
+          <p className="mt-3 text-white/80 text-sm md:text-base text-pretty max-w-2xl line-clamp-2 leading-relaxed">{a.excerpt}</p>
+          <div className="mt-4 flex items-center gap-3 text-white/60 text-xs">
+            {a.author && <span className="font-medium">{a.author.name}</span>}
+            <span className="flex items-center gap-1"><Clock size={11} /> {readTime(a.body)} min read</span>
+            <span>{timeAgo(a.publishedAt)}</span>
+          </div>
         </div>
       </Link>
     </article>
@@ -59,36 +56,36 @@ export function HeroLead({ a }: { a: ArticleCardData }) {
 export function ArticleCard({ a, variant = "default" }: { a: ArticleCardData; variant?: "default" | "compact" | "image-left" | "headline-only" }) {
   if (variant === "headline-only") {
     return (
-      <div className="border-b border-ink-700 py-2.5 last:border-b-0 group">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <div className="flex items-center gap-2 mb-0.5">
-              <Link href={`/category/${a.category.slug}`} className="kicker hover:underline">
-                {a.category.name.toUpperCase()}
-              </Link>
-              <span className="text-3xs text-ink-500 tracking-wider">{timeAgo(a.publishedAt)}</span>
-            </div>
-            <h3 className="text-xs font-semibold text-ink-100 leading-snug">
-              <Link href={`/article/${a.slug}`} className="hover:text-accent transition-colors">{a.title}</Link>
-            </h3>
-          </div>
+      <div className="py-3 border-b border-ink-800 last:border-b-0 group">
+        <div className="flex items-center gap-2 mb-1">
+          <Link href={`/category/${a.category.slug}`} className="kicker hover:underline">
+            {a.category.name}
+          </Link>
+          <span className="text-xs text-ink-500">{timeAgo(a.publishedAt)}</span>
         </div>
+        <h3 className="text-sm font-semibold text-ink-100 leading-snug group-hover:text-accent transition-colors">
+          <Link href={`/article/${a.slug}`}>{a.title}</Link>
+        </h3>
       </div>
     );
   }
 
   if (variant === "compact") {
     return (
-      <div className="border-b border-ink-700 py-2.5 last:border-b-0">
-        <div className="flex items-center gap-2">
-          {a.isBreaking && <span className="badge-down text-[8px] py-0">LIVE</span>}
+      <div className="py-3 border-b border-ink-800 last:border-b-0 group">
+        <div className="flex items-center gap-2 mb-1">
+          {a.isBreaking && (
+            <span className="inline-flex items-center gap-1 text-down text-[10px] font-bold uppercase">
+              <Zap size={8} className="fill-down" /> Live
+            </span>
+          )}
           <Link href={`/category/${a.category.slug}`} className="kicker hover:underline">
-            {a.category.name.toUpperCase()}
+            {a.category.name}
           </Link>
-          <span className="text-3xs text-ink-500 tracking-wider">{timeAgo(a.publishedAt)}</span>
+          <span className="text-xs text-ink-500">{timeAgo(a.publishedAt)}</span>
         </div>
-        <h3 className="mt-0.5 text-xs font-semibold text-ink-100 leading-snug">
-          <Link href={`/article/${a.slug}`} className="hover:text-accent transition-colors">{a.title}</Link>
+        <h3 className="text-sm font-semibold text-ink-100 leading-snug group-hover:text-accent transition-colors">
+          <Link href={`/article/${a.slug}`}>{a.title}</Link>
         </h3>
       </div>
     );
@@ -96,56 +93,58 @@ export function ArticleCard({ a, variant = "default" }: { a: ArticleCardData; va
 
   if (variant === "image-left") {
     return (
-      <div className="flex gap-3 border-b border-ink-700 py-2.5 last:border-b-0 group">
-        <Link href={`/article/${a.slug}`} className="h-16 w-24 flex-shrink-0 overflow-hidden bg-ink-800">
+      <div className="flex gap-4 py-3 border-b border-ink-800 last:border-b-0 group">
+        <Link href={`/article/${a.slug}`} className="h-20 w-28 flex-shrink-0 overflow-hidden bg-ink-800 rounded-md">
           {a.coverImageUrl && (
-            <img src={a.coverImageUrl} alt={a.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            <img src={a.coverImageUrl} alt={a.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
           )}
         </Link>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <Link href={`/category/${a.category.slug}`} className="kicker hover:underline">{a.category.name.toUpperCase()}</Link>
-            <span className="text-3xs text-ink-500 tracking-wider">{timeAgo(a.publishedAt)}</span>
+          <div className="flex items-center gap-2 mb-1">
+            <Link href={`/category/${a.category.slug}`} className="kicker hover:underline">{a.category.name}</Link>
+            <span className="text-xs text-ink-500">{timeAgo(a.publishedAt)}</span>
           </div>
-          <h3 className="mt-0.5 text-xs font-semibold text-ink-100 leading-snug line-clamp-2">
-            <Link href={`/article/${a.slug}`} className="hover:text-accent transition-colors">{a.title}</Link>
+          <h3 className="text-sm font-semibold text-ink-100 leading-snug line-clamp-2 group-hover:text-accent transition-colors">
+            <Link href={`/article/${a.slug}`}>{a.title}</Link>
           </h3>
         </div>
       </div>
     );
   }
 
+  /* Default card */
   return (
-    <article className="card-hover overflow-hidden h-full flex flex-col group border border-ink-700">
+    <article className="card-hover h-full flex flex-col group">
       <Link href={`/article/${a.slug}`} className="block aspect-[16/10] w-full overflow-hidden bg-ink-800 relative">
         {a.coverImageUrl && (
           <img
             src={a.coverImageUrl}
             alt={a.title}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+            className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
           />
         )}
         {a.isBreaking && (
-          <span className="absolute top-2 left-2 badge-down text-[8px] flex items-center gap-1">
-            <span className="relative flex h-1 w-1">
-              <span className="absolute inline-flex h-full w-full animate-ping bg-down opacity-70" />
-              <span className="relative inline-flex h-1 w-1 bg-down" />
-            </span>
-            LIVE
+          <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-down/90 text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-sm">
+            <Zap size={8} className="fill-white" />
+            Live
           </span>
         )}
       </Link>
-      <div className="p-3 flex-1 flex flex-col">
-        <div className="flex items-center gap-2">
-          <Link href={`/category/${a.category.slug}`} className="kicker hover:underline">{a.category.name.toUpperCase()}</Link>
-          <span className="text-3xs text-ink-500 tracking-wider">{timeAgo(a.publishedAt)}</span>
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="flex items-center gap-2 mb-2">
+          <Link href={`/category/${a.category.slug}`} className="kicker hover:underline">{a.category.name}</Link>
+          <span className="text-xs text-ink-500">{timeAgo(a.publishedAt)}</span>
         </div>
-        <h3 className="mt-1 text-xs font-semibold text-ink-50 leading-snug tracking-tight">
-          <Link href={`/article/${a.slug}`} className="hover:text-accent transition-colors">{a.title}</Link>
+        <h3 className="font-serif text-lg font-bold text-ink-50 leading-snug tracking-tight group-hover:text-accent transition-colors">
+          <Link href={`/article/${a.slug}`}>{a.title}</Link>
         </h3>
-        <p className="mt-1.5 text-2xs text-ink-300 line-clamp-2 flex-1">{a.excerpt}</p>
+        <p className="mt-2 text-sm text-ink-300 line-clamp-2 flex-1 leading-relaxed">{a.excerpt}</p>
         {a.author && (
-          <p className="mt-2 text-3xs text-ink-500 uppercase tracking-widest">{a.author.name} | {readTime(a.body)} MIN</p>
+          <div className="mt-3 flex items-center gap-2 text-xs text-ink-400">
+            <span className="font-medium">{a.author.name}</span>
+            <span>·</span>
+            <span>{readTime(a.body)} min read</span>
+          </div>
         )}
       </div>
     </article>

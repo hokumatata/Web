@@ -28,7 +28,7 @@ export default async function AuthorArticlesPage() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="font-serif text-xl font-semibold text-ink-50">My Articles</h2>
+        <h2 className="text-xl font-bold text-ink-50">My Articles</h2>
         <Link href="/dashboard/articles/new" className="btn-primary text-xs h-8">
           <Plus size={14} /> Write Article
         </Link>

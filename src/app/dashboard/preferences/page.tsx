@@ -15,7 +15,7 @@ export default async function PreferencesPage() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="font-serif text-xl font-semibold text-ink-50 mb-6">Preferences</h2>
+      <h2 className="text-xl font-bold text-ink-50 mb-6">Preferences</h2>
       <div className="card p-6">
         <PreferencesForm
           prefs={prefs ?? { topicsJson: "[]", emailDigest: false, theme: "dark" }}

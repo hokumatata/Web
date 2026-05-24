@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { Mail, ArrowRight } from "lucide-react";
 
 export function NewsletterInline() {
   const [email, setEmail] = useState("");
@@ -24,33 +25,38 @@ export function NewsletterInline() {
 
   return (
     <div className="card">
-      <div className="px-3 py-2 border-b border-ink-700 bg-ink-800">
-        <span className="text-3xs font-bold text-accent tracking-widest">DAILY BRIEFING</span>
-      </div>
-      <div className="p-3">
-        <p className="text-3xs text-ink-400 uppercase tracking-wider mb-2">MARKETS, CRYPTO &amp; MACRO — EVERY MORNING</p>
+      <div className="p-5">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-9 h-9 rounded-md bg-accent/10 flex items-center justify-center flex-shrink-0">
+            <Mail size={16} className="text-accent" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-ink-50">Daily Briefing</h3>
+            <p className="text-xs text-ink-400 mt-0.5">Markets &amp; crypto — every morning</p>
+          </div>
+        </div>
         {status === "ok" ? (
-          <p className="text-2xs text-up font-bold uppercase tracking-wider">SUBSCRIBED. CHECK YOUR INBOX.</p>
+          <p className="text-sm font-semibold text-up">Subscribed! Check your inbox.</p>
         ) : (
-          <form onSubmit={onSubmit} className="flex gap-1">
+          <form onSubmit={onSubmit} className="flex gap-2">
             <input
               type="email"
               required
-              placeholder="YOUR@EMAIL.COM"
+              placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="input flex-1 text-2xs h-7 placeholder:uppercase placeholder:tracking-wider"
+              className="input flex-1 text-sm h-10"
             />
             <button
               type="submit"
               disabled={status === "loading"}
-              className="btn-primary h-7 px-3 text-3xs whitespace-nowrap"
+              className="btn-primary h-10 px-4 text-sm whitespace-nowrap"
             >
-              GO
+              <ArrowRight size={14} />
             </button>
           </form>
         )}
-        {status === "error" && <p className="text-3xs text-down mt-1 uppercase tracking-wider">ERROR. TRY AGAIN.</p>}
+        {status === "error" && <p className="text-xs text-down mt-2 font-medium">Something went wrong. Try again.</p>}
       </div>
     </div>
   );

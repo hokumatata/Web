@@ -161,7 +161,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       {related.length > 0 && (
         <section className="mt-16 max-w-4xl mx-auto">
           <div className="section-title">
-            <h2 className="font-serif text-lg">Related Coverage</h2>
+            <h2>Related Coverage</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {related.map((a) => (

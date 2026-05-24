@@ -8,7 +8,7 @@ export default async function AdminTagsPage() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="font-serif text-xl font-semibold text-ink-50 mb-6">Tags</h2>
+      <h2 className="text-xl font-bold text-ink-50 mb-6">Tags</h2>
       <TagsManager tags={tags} />
     </div>
   );

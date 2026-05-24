@@ -25,7 +25,7 @@ export default async function AdminDashboard() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="font-serif text-xl font-semibold text-ink-50 mb-6">Overview</h2>
+      <h2 className="text-xl font-bold text-ink-50 mb-6">Overview</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {stats.map((s) => (
           <div key={s.label} className="card p-5">

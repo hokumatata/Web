@@ -3,11 +3,12 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { roleAtLeast } from "@/lib/types";
 import { LogoutButton } from "@/components/auth/LogoutButton";
-import { LayoutDashboard, FileText, Tags, MessageSquare, Users, Mail, Activity, Settings } from "lucide-react";
+import { LayoutDashboard, FileText, Tags, MessageSquare, Users, Mail, Activity, Settings, UserPlus } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/articles", label: "Articles", icon: FileText },
+  { href: "/admin/authors", label: "Authors", icon: UserPlus },
   { href: "/admin/categories", label: "Categories", icon: Tags },
   { href: "/admin/tags", label: "Tags", icon: Tags },
   { href: "/admin/comments", label: "Comments", icon: MessageSquare },
@@ -26,21 +27,21 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <LayoutDashboard size={20} className="text-accent" />
-          <h1 className="font-serif text-xl font-bold text-ink-50">Admin</h1>
+          <h1 className="text-xl font-bold text-ink-50">Admin</h1>
           <span className="badge">{session.role}</span>
         </div>
         <LogoutButton />
       </div>
       <div className="flex flex-col lg:flex-row gap-6">
-        <nav className="lg:w-48 flex-shrink-0">
-          <ul className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible">
+        <nav className="lg:w-52 flex-shrink-0">
+          <ul className="flex lg:flex-col gap-0.5 overflow-x-auto lg:overflow-visible">
             {NAV.map((n) => (
               <li key={n.href}>
                 <Link
                   href={n.href}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-ink-300 hover:text-ink-50 hover:bg-ink-800 rounded-sm transition-colors whitespace-nowrap"
+                  className="flex items-center gap-2.5 px-3 py-2 text-sm text-ink-300 hover:text-ink-50 hover:bg-ink-850 rounded-md transition-colors whitespace-nowrap"
                 >
-                  <n.icon size={14} />
+                  <n.icon size={14} className="text-ink-400" />
                   {n.label}
                 </Link>
               </li>

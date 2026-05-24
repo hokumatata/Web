@@ -11,7 +11,7 @@ export default async function NewArticlePage() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="font-serif text-xl font-semibold text-ink-50 mb-6">New Article</h2>
+      <h2 className="text-xl font-bold text-ink-50 mb-6">New Article</h2>
       <div className="card p-6">
         <ArticleForm
           categories={categories.map((c) => ({ id: c.id, name: c.name }))}

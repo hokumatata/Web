@@ -7,7 +7,7 @@ export default async function AdminTickersPage() {
   const tickers = await prisma.tickerConfig.findMany({ orderBy: { order: "asc" } });
   return (
     <div className="animate-fade-in">
-      <h2 className="font-serif text-xl font-semibold text-ink-50 mb-6">Ticker Config</h2>
+      <h2 className="text-xl font-bold text-ink-50 mb-6">Ticker Config</h2>
       <TickersManager tickers={tickers} />
     </div>
   );

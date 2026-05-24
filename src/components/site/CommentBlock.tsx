@@ -41,7 +41,7 @@ export function CommentBlock({ articleId, comments }: { articleId: string; comme
       <div className="section-title">
         <div className="flex items-center gap-2">
           <MessageSquare size={16} className="text-accent" />
-          <h2 className="font-serif text-lg">Discussion ({list.length})</h2>
+          <h2 className="text-lg font-bold text-ink-50">Discussion ({list.length})</h2>
         </div>
       </div>
 

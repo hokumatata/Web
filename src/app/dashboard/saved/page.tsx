@@ -23,7 +23,7 @@ export default async function SavedPage() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="font-serif text-xl font-semibold text-ink-50 mb-6">Saved Articles</h2>
+      <h2 className="text-xl font-bold text-ink-50 mb-6">Saved Articles</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {saved.map((s) => (
           <ArticleCard key={s.articleId} a={s.article as unknown as ArticleCardData} />
