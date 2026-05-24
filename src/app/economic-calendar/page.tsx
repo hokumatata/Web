@@ -1,6 +1,7 @@
 import { Calendar, Clock, AlertTriangle, TrendingUp, Globe } from "lucide-react";
 
 export const metadata = { title: "Economic Calendar" };
+export const revalidate = 3600;
 
 interface EconEvent {
   time: string;

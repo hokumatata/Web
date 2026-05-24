@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { json, error, unauthorized, notFound } from "@/lib/api";
 import { requireRole } from "@/lib/auth";
@@ -53,6 +54,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
   }
 
+  revalidateTag("articles");
   return json(updated);
 }
 
@@ -61,5 +63,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   if (!auth.ok) return unauthorized();
 
   await prisma.article.delete({ where: { id: params.id } }).catch(() => {});
+  revalidateTag("articles");
   return json({ ok: true });
 }

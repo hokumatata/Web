@@ -8,21 +8,6 @@ export interface MarketQuote {
   imageUrl?: string;
 }
 
-interface CacheEntry<T> {
-  value: T;
-  expiresAt: number;
-}
-
-const cache = new Map<string, CacheEntry<unknown>>();
-
-async function cached<T>(key: string, ttlMs: number, loader: () => Promise<T>): Promise<T> {
-  const hit = cache.get(key);
-  if (hit && hit.expiresAt > Date.now()) return hit.value as T;
-  const value = await loader();
-  cache.set(key, { value, expiresAt: Date.now() + ttlMs });
-  return value;
-}
-
 interface CoinGeckoCoin {
   id: string;
   symbol: string;
@@ -38,25 +23,23 @@ const CRYPTO_IDS = [
 ];
 
 export async function getCryptoQuotes(): Promise<MarketQuote[]> {
-  return cached("crypto", 60_000, async () => {
-    const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${CRYPTO_IDS.join(",")}&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h`;
-    try {
-      const res = await fetch(url, { next: { revalidate: 60 } });
-      if (!res.ok) throw new Error(`coingecko ${res.status}`);
-      const data = (await res.json()) as CoinGeckoCoin[];
-      return data.map((c) => ({
-        symbol: c.symbol.toUpperCase(),
-        label: c.name,
-        type: "CRYPTO" as const,
-        price: c.current_price,
-        changePct24h: c.price_change_percentage_24h ?? 0,
-        currency: "USD",
-        imageUrl: c.image,
-      }));
-    } catch {
-      return FALLBACK_CRYPTO;
-    }
-  });
+  const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${CRYPTO_IDS.join(",")}&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h`;
+  try {
+    const res = await fetch(url, { next: { revalidate: 60 } });
+    if (!res.ok) throw new Error(`coingecko ${res.status}`);
+    const data = (await res.json()) as CoinGeckoCoin[];
+    return data.map((c) => ({
+      symbol: c.symbol.toUpperCase(),
+      label: c.name,
+      type: "CRYPTO" as const,
+      price: c.current_price,
+      changePct24h: c.price_change_percentage_24h ?? 0,
+      currency: "USD",
+      imageUrl: c.image,
+    }));
+  } catch {
+    return FALLBACK_CRYPTO;
+  }
 }
 
 const FX_PAIRS = [
@@ -76,37 +59,35 @@ interface FxResponse {
 }
 
 export async function getFxQuotes(): Promise<MarketQuote[]> {
-  return cached("fx", 120_000, async () => {
-    try {
-      const today = await fetch(
-        `https://api.exchangerate.host/latest?base=USD&symbols=EUR,GBP,JPY,AUD,CAD,CHF,NZD,INR`,
-        { next: { revalidate: 120 } }
-      );
-      const yest = await fetch(
-        `https://api.exchangerate.host/${yesterdayISO()}?base=USD&symbols=EUR,GBP,JPY,AUD,CAD,CHF,NZD,INR`,
-        { next: { revalidate: 3600 } }
-      );
-      if (!today.ok || !yest.ok) throw new Error("fx fetch failed");
-      const t = (await today.json()) as FxResponse;
-      const y = (await yest.json()) as FxResponse;
-      if (!t.rates || !y.rates) throw new Error("fx empty");
-      return FX_PAIRS.map((p) => {
-        const tRate = p.base === "USD" ? t.rates[p.quote] : 1 / t.rates[p.base];
-        const yRate = p.base === "USD" ? y.rates[p.quote] : 1 / y.rates[p.base];
-        const change = yRate ? ((tRate - yRate) / yRate) * 100 : 0;
-        return {
-          symbol: p.label.replace("/", ""),
-          label: p.label,
-          type: "FX" as const,
-          price: tRate,
-          changePct24h: change,
-          currency: p.quote,
-        };
-      });
-    } catch {
-      return FALLBACK_FX;
-    }
-  });
+  try {
+    const today = await fetch(
+      `https://api.exchangerate.host/latest?base=USD&symbols=EUR,GBP,JPY,AUD,CAD,CHF,NZD,INR`,
+      { next: { revalidate: 120 } }
+    );
+    const yest = await fetch(
+      `https://api.exchangerate.host/${yesterdayISO()}?base=USD&symbols=EUR,GBP,JPY,AUD,CAD,CHF,NZD,INR`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!today.ok || !yest.ok) throw new Error("fx fetch failed");
+    const t = (await today.json()) as FxResponse;
+    const y = (await yest.json()) as FxResponse;
+    if (!t.rates || !y.rates) throw new Error("fx empty");
+    return FX_PAIRS.map((p) => {
+      const tRate = p.base === "USD" ? t.rates[p.quote] : 1 / t.rates[p.base];
+      const yRate = p.base === "USD" ? y.rates[p.quote] : 1 / y.rates[p.base];
+      const change = yRate ? ((tRate - yRate) / yRate) * 100 : 0;
+      return {
+        symbol: p.label.replace("/", ""),
+        label: p.label,
+        type: "FX" as const,
+        price: tRate,
+        changePct24h: change,
+        currency: p.quote,
+      };
+    });
+  } catch {
+    return FALLBACK_FX;
+  }
 }
 
 function yesterdayISO(): string {

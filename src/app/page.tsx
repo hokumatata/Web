@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { HeroLead, ArticleCard, type ArticleCardData } from "@/components/news/ArticleCard";
 import { MarketSnapshot } from "@/components/site/MarketSnapshot";
@@ -16,20 +17,32 @@ const INCLUDE = {
   },
 } as const;
 
-export default async function HomePage() {
-  const [latest, featured, byCategory, crypto] = await Promise.all([
+const getLatestArticles = unstable_cache(
+  () =>
     prisma.article.findMany({
       where: { status: "PUBLISHED" },
       orderBy: { publishedAt: "desc" },
       take: 20,
       include: INCLUDE,
     }),
+  ["latest-articles"],
+  { revalidate: 60, tags: ["articles"] }
+);
+
+const getFeaturedArticles = unstable_cache(
+  () =>
     prisma.article.findMany({
       where: { status: "PUBLISHED", isFeatured: true },
       orderBy: { publishedAt: "desc" },
       take: 5,
       include: INCLUDE,
     }),
+  ["featured-articles"],
+  { revalidate: 60, tags: ["articles"] }
+);
+
+const getCategoriesWithArticles = unstable_cache(
+  () =>
     prisma.category.findMany({
       orderBy: { order: "asc" },
       include: {
@@ -41,6 +54,15 @@ export default async function HomePage() {
         },
       },
     }),
+  ["categories-with-articles"],
+  { revalidate: 120, tags: ["articles", "categories"] }
+);
+
+export default async function HomePage() {
+  const [latest, featured, byCategory, crypto] = await Promise.all([
+    getLatestArticles(),
+    getFeaturedArticles(),
+    getCategoriesWithArticles(),
     getCryptoQuotes(),
   ]);
 
