@@ -56,16 +56,16 @@ const config: Config = {
         dropdown: "0 8px 24px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
       },
       animation: {
-        "ticker-scroll": "ticker-scroll 60s linear infinite",
+        marquee: "marquee 30s linear infinite",
         "pulse-dot": "pulse-dot 1.5s ease-in-out infinite",
         "fade-in": "fade-in 0.4s ease-out",
         "slide-up": "slide-up 0.4s ease-out",
         blink: "blink 1s step-end infinite",
       },
       keyframes: {
-        "ticker-scroll": {
-          from: { transform: "translateX(0)" },
-          to: { transform: "translateX(-50%)" },
+        marquee: {
+          "0%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(-100%)" },
         },
         "pulse-dot": {
           "0%, 100%": { opacity: "1" },
