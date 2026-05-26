@@ -4,6 +4,7 @@ import { TopHeader } from "@/components/site/TopHeader";
 import { TickerTape } from "@/components/site/TickerTape";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ThemeProvider } from "@/components/site/ThemeProvider";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import { getSession } from "@/lib/auth";
 
 const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "TradeWave";
@@ -29,12 +30,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body>
-        <ThemeProvider>
-          <TopHeader session={session} siteName={SITE_NAME} />
-          <TickerTape />
-          <main className="min-h-screen">{children}</main>
-          <SiteFooter siteName={SITE_NAME} />
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider>
+            <TopHeader session={session} siteName={SITE_NAME} />
+            <TickerTape />
+            <main className="min-h-screen">{children}</main>
+            <SiteFooter siteName={SITE_NAME} />
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );
