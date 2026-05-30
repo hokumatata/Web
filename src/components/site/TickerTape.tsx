@@ -1,27 +1,38 @@
-import { getCryptoQuotes, getFxQuotes, type MarketQuote } from "@/lib/markets";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { type MarketQuote } from "@/lib/markets";
 import { formatNumber, formatPercent } from "@/lib/utils";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
-export async function TickerTape() {
-  const [crypto, fx] = await Promise.all([getCryptoQuotes(), getFxQuotes()]);
-  const items = [...crypto.slice(0, 8), ...fx.slice(0, 6)];
-  if (items.length === 0) return null;
+async function fetchTicker(): Promise<MarketQuote[]> {
+  const res = await fetch("/api/ticker");
+  if (!res.ok) throw new Error(`ticker ${res.status}`);
+  return res.json();
+}
+
+export function TickerTape() {
+  const { data: items, isLoading, isError } = useQuery({
+    queryKey: ["ticker"],
+    queryFn: fetchTicker,
+    refetchInterval: 30_000,
+    retry: 2,
+  });
+
+  if (isLoading) return <TickerSkeleton />;
+  if (isError || !items || items.length === 0) return <TickerError />;
 
   return (
     <div className="relative flex w-full overflow-x-hidden bg-ink-900 border-b border-ink-700 group">
-      {/* Edge fade overlays */}
       <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-16 bg-gradient-to-r from-ink-900 to-transparent" />
       <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-16 bg-gradient-to-l from-ink-900 to-transparent" />
 
-      {/* Dual-track seamless marquee */}
       <div className="flex w-max group-hover:[animation-play-state:paused]">
-        {/* Track 1 */}
         <div className="flex animate-marquee shrink-0 items-center gap-6 pr-6 py-2">
           {items.map((q) => (
             <TickerItem key={`${q.type}-${q.symbol}`} q={q} />
           ))}
         </div>
-        {/* Track 2: clone for seamless loop */}
         <div className="flex animate-marquee shrink-0 items-center gap-6 pr-6 py-2" aria-hidden="true">
           {items.map((q) => (
             <TickerItem key={`${q.type}-${q.symbol}-clone`} q={q} />
@@ -43,6 +54,32 @@ function TickerItem({ q }: { q: MarketQuote }) {
         {up ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
         {up ? "+" : ""}{formatPercent(q.changePct24h)}
       </span>
+    </div>
+  );
+}
+
+function TickerSkeleton() {
+  return (
+    <div className="bg-ink-900 border-b border-ink-700 py-2">
+      <div className="flex items-center gap-6 overflow-hidden px-4">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-2 shrink-0">
+            <div className="h-3 w-10 rounded-sm bg-ink-700 animate-pulse" />
+            <div className="h-3 w-16 rounded-sm bg-ink-700 animate-pulse" />
+            <div className="h-3 w-12 rounded-sm bg-ink-700 animate-pulse" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TickerError() {
+  return (
+    <div className="bg-ink-900 border-b border-ink-700 py-2">
+      <div className="flex items-center justify-center gap-2 px-4">
+        <span className="text-2xs text-ink-500">Market data temporarily unavailable</span>
+      </div>
     </div>
   );
 }

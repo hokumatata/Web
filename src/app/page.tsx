@@ -3,6 +3,7 @@ import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { HeroLead, ArticleCard, type ArticleCardData } from "@/components/news/ArticleCard";
 import { MarketSnapshot } from "@/components/site/MarketSnapshot";
+import { MarketChart } from "@/components/charts/MarketChart";
 import { NewsletterInline } from "@/components/site/NewsletterInline";
 import { getCryptoQuotes } from "@/lib/markets";
 import { formatNumber, formatPercent } from "@/lib/utils";
@@ -138,6 +139,14 @@ export default async function HomePage() {
             {/* Newsletter CTA */}
             <NewsletterInline />
           </aside>
+        </section>
+
+        {/* Market Chart */}
+        <section className="mt-10">
+          <div className="section-title">
+            <h2>Market Overview</h2>
+          </div>
+          <MarketChart />
         </section>
 
         {/* Category Content Ribbons */}
