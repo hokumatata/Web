@@ -8,6 +8,7 @@ import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
   { href: "/news", label: "News" },
+  { href: "/price", label: "Prices" },
   { href: "/category/crypto", label: "Crypto" },
   { href: "/category/forex", label: "Forex" },
   { href: "/category/stocks", label: "Stocks" },

@@ -17,13 +17,23 @@ interface CoinGeckoCoin {
   image: string;
 }
 
+const CG_BASE = "https://api.coingecko.com/api/v3";
+const CG_KEY = process.env.COINGECKO_API_KEY ?? "";
+
+/** Build a CoinGecko URL, appending the demo API key when configured. */
+function cgUrl(path: string): string {
+  if (!CG_KEY) return `${CG_BASE}${path}`;
+  const sep = path.includes("?") ? "&" : "?";
+  return `${CG_BASE}${path}${sep}x_cg_demo_api_key=${CG_KEY}`;
+}
+
 const CRYPTO_IDS = [
   "bitcoin", "ethereum", "solana", "binancecoin", "ripple",
   "cardano", "dogecoin", "tron", "avalanche-2", "polkadot",
 ];
 
 export async function getCryptoQuotes(): Promise<MarketQuote[]> {
-  const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${CRYPTO_IDS.join(",")}&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h`;
+  const url = cgUrl(`/coins/markets?vs_currency=usd&ids=${CRYPTO_IDS.join(",")}&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h`);
   try {
     const res = await fetch(url, { next: { revalidate: 60 } });
     if (!res.ok) throw new Error(`coingecko ${res.status}`);
@@ -39,6 +49,116 @@ export async function getCryptoQuotes(): Promise<MarketQuote[]> {
     }));
   } catch {
     return FALLBACK_CRYPTO;
+  }
+}
+
+/** Coins shown in the top marquee, fetched via the lightweight simple/price endpoint. */
+const TICKER_COINS = [
+  { id: "bitcoin", symbol: "BTC", label: "Bitcoin" },
+  { id: "ethereum", symbol: "ETH", label: "Ethereum" },
+  { id: "binancecoin", symbol: "BNB", label: "BNB" },
+  { id: "ripple", symbol: "XRP", label: "XRP" },
+  { id: "solana", symbol: "SOL", label: "Solana" },
+];
+
+interface SimplePriceEntry {
+  usd: number;
+  usd_24h_change?: number;
+}
+type SimplePriceResponse = Record<string, SimplePriceEntry>;
+
+/**
+ * Fetch live crypto prices for the ticker from CoinGecko's `simple/price`
+ * endpoint, parsing the nested `{ bitcoin: { usd, usd_24h_change } }` payload.
+ */
+export async function getCryptoSimplePrices(): Promise<MarketQuote[]> {
+  const ids = TICKER_COINS.map((c) => c.id).join(",");
+  const url = cgUrl(`/simple/price?vs_currencies=usd&ids=${ids}&include_24hr_change=true`);
+  try {
+    const res = await fetch(url, { next: { revalidate: 45 } });
+    if (!res.ok) throw new Error(`coingecko ${res.status}`);
+    const data = (await res.json()) as SimplePriceResponse;
+    const quotes = TICKER_COINS.flatMap((c) => {
+      const entry = data[c.id];
+      if (!entry || typeof entry.usd !== "number") return [];
+      return [{
+        symbol: c.symbol,
+        label: c.label,
+        type: "CRYPTO" as const,
+        price: entry.usd,
+        changePct24h: entry.usd_24h_change ?? 0,
+        currency: "USD",
+      }];
+    });
+    if (quotes.length === 0) throw new Error("simple/price empty");
+    return quotes;
+  } catch {
+    return FALLBACK_CRYPTO.filter((c) => TICKER_COINS.some((t) => t.symbol === c.symbol));
+  }
+}
+
+export interface MarketRow {
+  id: string;
+  rank: number;
+  symbol: string;
+  name: string;
+  image: string;
+  price: number;
+  change1h: number;
+  change24h: number;
+  change7d: number;
+  marketCap: number;
+  volume24h: number;
+  high24h: number;
+  low24h: number;
+  circulatingSupply: number;
+  sparkline: number[];
+}
+
+interface CoinGeckoMarket {
+  id: string;
+  symbol: string;
+  name: string;
+  image: string;
+  current_price: number;
+  market_cap: number;
+  market_cap_rank: number;
+  total_volume: number;
+  high_24h: number;
+  low_24h: number;
+  price_change_percentage_1h_in_currency: number | null;
+  price_change_percentage_24h_in_currency: number | null;
+  price_change_percentage_7d_in_currency: number | null;
+  circulating_supply: number;
+  sparkline_in_7d?: { price: number[] };
+}
+
+/** Detailed market table used by the /price page. */
+export async function getMarketsTable(perPage = 50): Promise<MarketRow[]> {
+  const url = cgUrl(`/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${perPage}&page=1&sparkline=true&price_change_percentage=1h,24h,7d`);
+  try {
+    const res = await fetch(url, { next: { revalidate: 60 } });
+    if (!res.ok) throw new Error(`coingecko ${res.status}`);
+    const data = (await res.json()) as CoinGeckoMarket[];
+    return data.map((c) => ({
+      id: c.id,
+      rank: c.market_cap_rank,
+      symbol: c.symbol.toUpperCase(),
+      name: c.name,
+      image: c.image,
+      price: c.current_price,
+      change1h: c.price_change_percentage_1h_in_currency ?? 0,
+      change24h: c.price_change_percentage_24h_in_currency ?? 0,
+      change7d: c.price_change_percentage_7d_in_currency ?? 0,
+      marketCap: c.market_cap ?? 0,
+      volume24h: c.total_volume ?? 0,
+      high24h: c.high_24h ?? 0,
+      low24h: c.low_24h ?? 0,
+      circulatingSupply: c.circulating_supply ?? 0,
+      sparkline: c.sparkline_in_7d?.price ?? [],
+    }));
+  } catch {
+    return [];
   }
 }
 

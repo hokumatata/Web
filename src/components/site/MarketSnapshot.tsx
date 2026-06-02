@@ -43,7 +43,7 @@ function QuoteRow({ q, digits }: { q: MarketQuote; digits: number }) {
         <span className="text-sm font-mono text-ink-200 tabular">{formatNumber(q.price, digits)}</span>
         <span className={`flex items-center gap-0.5 text-xs font-mono font-semibold tabular min-w-[60px] justify-end ${up ? "text-up" : "text-down"}`}>
           {up ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-          {up ? "+" : ""}{formatPercent(q.changePct24h)}
+          {formatPercent(q.changePct24h)}
         </span>
       </div>
     </div>
