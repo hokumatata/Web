@@ -15,7 +15,7 @@ const NAV = [
   { href: "/category/gold", label: "Gold" },
   { href: "/category/analysis", label: "Analysis" },
   { href: "/category/opinion", label: "Opinion" },
-  { href: "/economic-calendar", label: "Calendar" },
+  { href: "/economic-calendar", label: "Economic Calendar" },
 ];
 
 export async function TopHeader({

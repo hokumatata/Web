@@ -27,7 +27,7 @@ export function TickerTape() {
       <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-16 bg-gradient-to-r from-ink-900 to-transparent" />
       <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-16 bg-gradient-to-l from-ink-900 to-transparent" />
 
-      <div className="flex w-max group-hover:[animation-play-state:paused]">
+      <div className="flex w-max group-hover:[&>div]:[animation-play-state:paused]">
         <div className="flex animate-marquee shrink-0 items-center gap-6 pr-6 py-2">
           {items.map((q) => (
             <TickerItem key={`${q.type}-${q.symbol}`} q={q} />
