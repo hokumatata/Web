@@ -910,7 +910,393 @@ Gold has delivered a 15% annualized return since 2019, outperforming the S&P 500
       authorKey: "admin",
       categorySlug: "gold",
     },
-  ];;
+
+    // ── Additional editorial content (headlines inspired by FXStreet, CoinDesk, CoinTelegraph) ──
+    {
+      slug: "btc-etf-options-launch-volatility",
+      title: "Bitcoin ETF Options Go Live, Reshaping the Volatility Landscape",
+      excerpt: "The debut of listed options on spot Bitcoin ETFs hands institutions a regulated hedging tool — and could dampen the wild price swings traders have long relied on.",
+      body: `# Bitcoin ETF Options Go Live, Reshaping the Volatility Landscape
+
+The first listed options on U.S. spot Bitcoin ETFs began trading this week, opening a new chapter for institutional risk management in digital assets.
+
+## Why It Matters
+
+- **Hedging at scale**: Asset managers can now write covered calls and buy protective puts without touching native crypto rails.
+- **Implied vol pricing**: A liquid options surface gives the market a cleaner read on forward-looking volatility.
+- **Structured products**: Expect a wave of yield notes and buffered strategies built on top of the new contracts.
+
+## The Trade-Off
+
+Deeper derivatives liquidity tends to compress realized volatility over time. For long-term allocators that is a feature; for momentum traders it may mean fewer of the violent moves that defined prior cycles.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 5,
+      authorKey: "author1",
+      categorySlug: "crypto",
+    },
+    {
+      slug: "stablecoin-supply-record-high",
+      title: "Stablecoin Supply Hits All-Time High as On-Chain Settlement Booms",
+      excerpt: "Total stablecoin market value pushed to a fresh record, with USDT and USDC dominating a settlement layer now rivaling major card networks by volume.",
+      body: `# Stablecoin Supply Hits All-Time High
+
+The aggregate supply of dollar-pegged stablecoins climbed to a record this month, underscoring how quickly tokenized cash has become core financial plumbing.
+
+## Settlement, Not Speculation
+
+Much of the growth is transactional rather than speculative:
+
+- Cross-border B2B payments are increasingly routed through stablecoin rails.
+- Treasuries backing the largest tokens now hold tens of billions in short-dated U.S. paper.
+- Emerging-market users continue to adopt dollar tokens as an inflation hedge.
+
+## Regulatory Backdrop
+
+With clearer frameworks emerging in the EU and parts of Asia, issuers are racing to secure licenses that would let them serve regulated institutions directly.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 9,
+      authorKey: "editor",
+      categorySlug: "crypto",
+    },
+    {
+      slug: "ethereum-staking-yield-compression",
+      title: "Ethereum Staking Yields Compress as Validator Queue Swells",
+      excerpt: "A surge of new validators has pushed staking rewards lower, prompting large holders to weigh restaking and liquid staking alternatives.",
+      body: `# Ethereum Staking Yields Compress
+
+Base staking yields on Ethereum have drifted toward multi-year lows as the validator set continues to expand.
+
+## The Mechanics
+
+More validators sharing a roughly fixed issuance pool means a thinner slice for each. Net real yield is increasingly driven by:
+
+- **Priority fees** during periods of network congestion
+- **MEV** captured by sophisticated operators
+- **Restaking** premiums from securing additional services
+
+## What Holders Are Doing
+
+Liquid staking tokens continue to absorb inflows from users who want yield without locking capital, while institutions explore restaking to juice returns.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1622630998477-20aa696ecb05?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 16,
+      authorKey: "author1",
+      categorySlug: "crypto",
+    },
+    {
+      slug: "dollar-index-firms-yield-divergence",
+      title: "Dollar Firms as Rate-Cut Bets Diverge Across Central Banks",
+      excerpt: "The greenback strengthened against most majors as traders priced a slower Fed easing path versus more dovish moves from the ECB and BoC.",
+      body: `# Dollar Firms on Policy Divergence
+
+The U.S. dollar index advanced this week as interest-rate expectations split across the major economies.
+
+## The Divergence Trade
+
+- **Fed**: Sticky services inflation has pushed the first cut later into the year.
+- **ECB**: Softening growth keeps Frankfurt on a clearly dovish track.
+- **BoC**: The Bank of Canada has already moved, widening the rate gap.
+
+## Levels to Watch
+
+EUR/USD slipped back toward its recent range lows, while USD/JPY pressed higher, keeping intervention chatter alive among Tokyo officials.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 7,
+      authorKey: "editor",
+      categorySlug: "forex",
+    },
+    {
+      slug: "yen-intervention-watch-usdjpy",
+      title: "Yen Slides Toward Intervention Zone as USD/JPY Tests Resistance",
+      excerpt: "Japanese officials sharpened their warnings as the yen weakened to levels that triggered direct intervention in prior episodes.",
+      body: `# Yen Slides Toward Intervention Zone
+
+The Japanese yen extended losses against the dollar, dragging USD/JPY back into territory that has historically drawn official action.
+
+## Verbal Warnings First
+
+Tokyo's playbook typically escalates from rhetoric to action:
+
+1. Officials describe moves as "rapid" and "one-sided."
+2. Rate-check operations test market liquidity.
+3. Direct intervention follows if depreciation continues.
+
+## The Carry Backdrop
+
+A wide rate differential keeps the yen a favored funding currency, leaving it vulnerable until the Bank of Japan signals a firmer normalization path.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1554260570-9140fd3b7614?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 20,
+      authorKey: "author1",
+      categorySlug: "forex",
+    },
+    {
+      slug: "sp500-record-megacap-breadth",
+      title: "S&P 500 Notches Fresh Record but Breadth Warning Lingers",
+      excerpt: "Another all-time high masked a familiar concern: gains remain concentrated in a handful of megacap names while the average stock lags.",
+      body: `# S&P 500 Notches Fresh Record
+
+The benchmark index closed at a record high, extending a rally that has been narrow but persistent.
+
+## The Breadth Problem
+
+- A small cluster of megacap technology stocks accounts for the bulk of year-to-date gains.
+- The equal-weight index continues to trail the cap-weighted version by a wide margin.
+- Market internals suggest fewer stocks are participating in each new high.
+
+## Bull Case vs. Bear Case
+
+Bulls argue earnings strength justifies leadership concentration; bears warn that narrow rallies are historically more fragile when sentiment turns.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 4,
+      authorKey: "editor",
+      categorySlug: "stocks",
+    },
+    {
+      slug: "ipo-window-reopens-tech-listings",
+      title: "IPO Window Cracks Open as Tech Names Test Investor Appetite",
+      excerpt: "A string of high-profile filings signals the primary market may finally be thawing after a prolonged drought in new listings.",
+      body: `# IPO Window Cracks Open
+
+After two lean years, the new-issue market is showing signs of life as several technology companies move toward public debuts.
+
+## What Changed
+
+- Equity volatility has cooled, giving bankers a calmer pricing environment.
+- Strong secondary-market performance has rebuilt confidence in risk appetite.
+- Late-stage private valuations have reset closer to public comparables.
+
+## The Risk
+
+A few disappointing debuts could slam the window shut again, so issuers are racing to list while sentiment holds.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 26,
+      authorKey: "author1",
+      categorySlug: "stocks",
+    },
+    {
+      slug: "global-pmi-soft-landing-signals",
+      title: "Global PMIs Point to Resilient Growth, Bolstering Soft-Landing Hopes",
+      excerpt: "Composite activity gauges across major economies held in expansion, easing fears of an imminent downturn even as price pressures linger.",
+      body: `# Global PMIs Point to Resilient Growth
+
+Purchasing managers' indices across the U.S., euro area, and parts of Asia stayed in expansionary territory, reinforcing the soft-landing narrative.
+
+## Under the Hood
+
+- **Services** continue to do the heavy lifting for activity.
+- **Manufacturing** is stabilizing after a long contraction.
+- **Input prices** remain sticky, complicating the disinflation story.
+
+## Policy Implications
+
+Resilient demand gives central banks room to be patient on rate cuts — a double-edged sword for risk assets hoping for faster easing.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1535320903710-d993d3d77d29?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 12,
+      authorKey: "editor",
+      categorySlug: "macro",
+    },
+    {
+      slug: "treasury-yields-curve-resteepening",
+      title: "Treasury Curve Resteepens as Long-End Yields Climb",
+      excerpt: "The closely watched 2s10s spread narrowed its inversion as long-dated yields rose on supply concerns and sticky inflation prints.",
+      body: `# Treasury Curve Resteepens
+
+The U.S. yield curve moved toward dis-inversion this week as the long end sold off faster than the front.
+
+## The Drivers
+
+- **Heavy issuance** of longer-dated paper is pressuring prices.
+- **Term premium** is rebuilding after years of compression.
+- **Inflation stickiness** keeps the front end anchored.
+
+## Why It Matters
+
+A resteepening driven by rising long yields ("bear steepener") tightens financial conditions and can weigh on rate-sensitive equities.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 30,
+      authorKey: "author1",
+      categorySlug: "macro",
+    },
+    {
+      slug: "central-banks-gold-buying-streak",
+      title: "Central Banks Extend Gold-Buying Streak Into Another Quarter",
+      excerpt: "Official-sector demand stayed robust as reserve managers continued to diversify away from the dollar, underpinning bullion near record highs.",
+      body: `# Central Banks Extend Gold-Buying Streak
+
+Reserve managers added meaningfully to gold holdings again last quarter, sustaining a multi-year accumulation trend.
+
+## The Diversification Theme
+
+- Emerging-market central banks are leading the charge.
+- Geopolitical risk has elevated the appeal of a neutral reserve asset.
+- Gold's share of global reserves continues to creep higher.
+
+## Price Impact
+
+Persistent official buying provides a structural floor under prices, even when speculative flows wobble.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1610375461246-83df859d849d?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 14,
+      authorKey: "editor",
+      categorySlug: "gold",
+    },
+    {
+      slug: "silver-breakout-industrial-demand",
+      title: "Silver Breaks Out as Industrial Demand Meets Safe-Haven Bid",
+      excerpt: "Silver outpaced gold this month, propelled by tight supply, solar-driven industrial demand, and a falling gold-to-silver ratio.",
+      body: `# Silver Breaks Out
+
+Silver surged to multi-year highs, outperforming gold as a rare dual-demand story took hold.
+
+## Two Engines
+
+1. **Industrial pull** — solar panels and electronics are consuming record volumes.
+2. **Monetary appeal** — investors treat it as a higher-beta precious metal.
+
+## The Ratio Trade
+
+The gold-to-silver ratio compressed sharply, a move technicians often read as a sign of broadening strength across the metals complex.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1633158829585-23ba8f7c8caf?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 22,
+      authorKey: "author1",
+      categorySlug: "gold",
+    },
+    {
+      slug: "liquidity-regime-risk-assets-analysis",
+      title: "Analysis: The Liquidity Regime That Really Drives Risk Assets",
+      excerpt: "Beyond headline rates, shifts in central-bank balance sheets and reserve balances are quietly steering the path of stocks and crypto alike.",
+      body: `# The Liquidity Regime That Really Drives Risk Assets
+
+Investors fixate on policy rates, but the plumbing of liquidity often matters more for asset prices.
+
+## The Levers
+
+- **Balance-sheet runoff** drains reserves from the system.
+- **Reverse repo** balances act as a release valve.
+- **Treasury issuance mix** shifts where cash sits.
+
+## The Takeaway
+
+When net liquidity expands, risk assets tend to grind higher regardless of the policy-rate narrative; when it contracts, even good news struggles to lift markets.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 18,
+      authorKey: "editor",
+      categorySlug: "analysis",
+    },
+    {
+      slug: "bitcoin-halving-cycle-analysis",
+      title: "Analysis: What Past Halving Cycles Do and Don't Tell Us",
+      excerpt: "Historical patterns around Bitcoin halvings are seductive, but sample size and a maturing market argue for humility in cycle forecasting.",
+      body: `# What Past Halving Cycles Do and Don't Tell Us
+
+Each Bitcoin halving spawns a wave of cycle-based price predictions. The history is intriguing — and easy to over-fit.
+
+## The Pattern
+
+Prior cycles featured a supply shock followed by a delayed, powerful rally. But:
+
+- The sample is tiny — only a handful of halvings exist.
+- ETF-driven demand is a structural change with no historical analog.
+- Macro liquidity conditions differ sharply from prior cycles.
+
+## A Sober Framework
+
+Treat the halving as one input among many, not a deterministic clock.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1640340434855-6084b1f4901c?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 28,
+      authorKey: "author1",
+      categorySlug: "analysis",
+    },
+    {
+      slug: "opinion-crypto-needs-boring-infrastructure",
+      title: "Opinion: Crypto's Next Chapter Will Be Gloriously Boring",
+      excerpt: "The industry's maturation depends less on the next narrative and more on unglamorous infrastructure: custody, compliance, and reliable rails.",
+      body: `# Crypto's Next Chapter Will Be Gloriously Boring
+
+The most important developments in digital assets are no longer the loudest ones.
+
+## The Unsexy Foundations
+
+- **Custody** that institutions can actually trust.
+- **Compliance** tooling that satisfies regulators.
+- **Settlement rails** that just work, every time.
+
+## Why Boring Wins
+
+Every durable financial technology eventually fades into the background. Crypto's success will be measured by how invisible it becomes — not how often it trends.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 34,
+      authorKey: "editor",
+      categorySlug: "opinion",
+    },
+    {
+      slug: "opinion-fed-credibility-test",
+      title: "Opinion: The Fed's Real Test Is Credibility, Not Timing",
+      excerpt: "Markets obsess over the exact month of the first cut. The more consequential question is whether the central bank can anchor expectations.",
+      body: `# The Fed's Real Test Is Credibility, Not Timing
+
+The debate over whether easing begins this meeting or next misses the larger point.
+
+## Credibility Is the Asset
+
+A central bank's most valuable possession is the market's belief that it will do what it says. That belief:
+
+- Lowers the cost of policy by moving expectations in advance.
+- Buys flexibility during genuine shocks.
+- Is slow to build and fast to lose.
+
+## The Bottom Line
+
+Getting the timing slightly wrong is survivable. Losing the anchor is not.`,
+      coverImageUrl: "https://images.unsplash.com/photo-1591033594798-33227a05780d?w=1200&h=630&fit=crop",
+      status: "PUBLISHED",
+      isFeatured: false,
+      isBreaking: false,
+      publishedAgoMs: 1000 * 60 * 60 * 40,
+      authorKey: "author1",
+      categorySlug: "opinion",
+    },
+  ];
 
 // Tag assignments by article slug. Kept here so all editorial metadata lives in
 // one place and can be swapped for a headless CMS feed later.
@@ -923,4 +1309,19 @@ export const articleTagMap: Record<string, string[]> = {
   "defi-total-value-locked-rebounds": ["defi", "ethereum"],
   "ai-stocks-bubble-or-revolution": ["ai", "earnings"],
   "solana-meme-coin-trading-volumes": ["defi"],
+  "btc-etf-options-launch-volatility": ["bitcoin"],
+  "stablecoin-supply-record-high": ["regulation", "defi"],
+  "ethereum-staking-yield-compression": ["ethereum", "defi"],
+  "dollar-index-firms-yield-divergence": ["fed"],
+  "yen-intervention-watch-usdjpy": ["fed"],
+  "sp500-record-megacap-breadth": ["earnings", "ai"],
+  "ipo-window-reopens-tech-listings": ["earnings"],
+  "global-pmi-soft-landing-signals": ["inflation"],
+  "treasury-yields-curve-resteepening": ["fed", "inflation"],
+  "central-banks-gold-buying-streak": ["inflation"],
+  "silver-breakout-industrial-demand": ["inflation"],
+  "liquidity-regime-risk-assets-analysis": ["fed"],
+  "bitcoin-halving-cycle-analysis": ["bitcoin"],
+  "opinion-crypto-needs-boring-infrastructure": ["regulation"],
+  "opinion-fed-credibility-test": ["fed", "inflation"],
 };
