@@ -15,7 +15,7 @@ export function TickerTape() {
   const { data: items, isLoading, isError } = useQuery({
     queryKey: ["ticker"],
     queryFn: fetchTicker,
-    refetchInterval: 30_000,
+    refetchInterval: 45_000,
     retry: 2,
   });
 
@@ -52,7 +52,7 @@ function TickerItem({ q }: { q: MarketQuote }) {
       <span className="text-xs font-mono text-ink-100 tabular">{formatNumber(q.price, digits)}</span>
       <span className={`flex items-center gap-0.5 text-xs font-mono font-semibold tabular ${up ? "text-up" : "text-down"}`}>
         {up ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-        {up ? "+" : ""}{formatPercent(q.changePct24h)}
+        {formatPercent(q.changePct24h)}
       </span>
     </div>
   );

@@ -74,6 +74,13 @@ export function formatPercent(n: number, digits = 2): string {
   return `${sign}${n.toFixed(digits)}%`;
 }
 
+export function formatCompact(n: number, digits = 2): string {
+  return new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: digits,
+  }).format(n);
+}
+
 export function safeJsonParse<T>(input: string | null | undefined, fallback: T): T {
   if (!input) return fallback;
   try {

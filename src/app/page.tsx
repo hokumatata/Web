@@ -81,7 +81,7 @@ export default async function HomePage() {
             {topCrypto.map((q) => {
               const up = q.changePct24h >= 0;
               return (
-                <Link key={q.symbol} href="/economic-calendar" className="flex items-center gap-3 whitespace-nowrap flex-shrink-0 group">
+                <Link key={q.symbol} href="/price" className="flex items-center gap-3 whitespace-nowrap flex-shrink-0 group">
                   <div className="flex items-center gap-2">
                     {q.imageUrl && <img src={q.imageUrl} alt="" className="h-5 w-5 rounded-full" />}
                     <span className="text-sm font-semibold text-ink-100">{q.symbol}</span>
@@ -89,13 +89,13 @@ export default async function HomePage() {
                   <span className="text-sm font-mono text-ink-200 tabular">${formatNumber(q.price, q.price < 1 ? 4 : 2)}</span>
                   <span className={`flex items-center gap-0.5 text-sm font-mono font-semibold tabular ${up ? "text-up" : "text-down"}`}>
                     {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                    {up ? "+" : ""}{formatPercent(q.changePct24h)}
+                    {formatPercent(q.changePct24h)}
                   </span>
                 </Link>
               );
             })}
-            <Link href="/economic-calendar" className="text-xs font-semibold text-accent hover:underline whitespace-nowrap flex-shrink-0 ml-auto flex items-center gap-1">
-              Economic Calendar <ArrowRight size={12} />
+            <Link href="/price" className="text-xs font-semibold text-accent hover:underline whitespace-nowrap flex-shrink-0 ml-auto flex items-center gap-1">
+              All Prices <ArrowRight size={12} />
             </Link>
           </div>
         </div>
