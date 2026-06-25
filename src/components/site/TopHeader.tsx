@@ -14,7 +14,6 @@ const NAV = [
   { href: "/category/stocks", label: "Stocks" },
   { href: "/category/macro", label: "Macro" },
   { href: "/category/gold", label: "Gold" },
-  { href: "/category/analysis", label: "Analysis" },
   { href: "/category/opinion", label: "Opinion" },
   { href: "/economic-calendar", label: "Economic Calendar" },
 ];
@@ -87,7 +86,7 @@ export async function TopHeader({
               <Link
                 key={n.href}
                 href={n.href}
-                className="px-3 py-1.5 text-sm font-medium text-ink-300 hover:text-accent rounded-md hover:bg-ink-850 transition-all duration-150"
+                className="px-3 py-1.5 text-sm font-medium text-ink-300 hover:text-accent rounded-md hover:bg-ink-850 transition-all duration-150 whitespace-nowrap"
               >
                 {n.label}
               </Link>
