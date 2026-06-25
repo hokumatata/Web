@@ -7,9 +7,11 @@ import { ThemeProvider } from "@/components/site/ThemeProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { getSession } from "@/lib/auth";
 
-const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "TradeWave";
+const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "The Forex Republic";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://theforexrepublic.com";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: `${SITE_NAME} — Markets, Crypto & Financial News`,
     template: `%s | ${SITE_NAME}`,

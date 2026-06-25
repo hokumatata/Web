@@ -8,7 +8,7 @@ export function SiteFooter({ siteName }: { siteName: string }) {
         <div className="col-span-2">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="w-7 h-7 bg-accent rounded-sm flex items-center justify-center">
-              <span className="text-white font-bold text-xs">TW</span>
+              <span className="text-white font-bold text-xs">FR</span>
             </div>
             <span className="text-lg font-extrabold text-ink-50 tracking-tight">{siteName}</span>
           </div>

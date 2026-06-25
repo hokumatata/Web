@@ -12,7 +12,7 @@ export default function LoginPage() {
             <LogIn size={20} className="text-accent" />
           </div>
           <h1 className="text-2xl font-bold text-ink-50 tracking-tight">Sign In</h1>
-          <p className="text-sm text-ink-400 mt-1">Access your TradeWave account</p>
+          <p className="text-sm text-ink-400 mt-1">Access your Forex Republic account</p>
         </div>
         <div className="card p-6">
           <LoginForm />

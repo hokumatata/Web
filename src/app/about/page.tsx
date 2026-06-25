@@ -11,7 +11,7 @@ export default function AboutPage() {
           Professional Market Intelligence
         </h1>
         <p className="text-lg text-ink-200 leading-relaxed mb-8">
-          TradeWave delivers real-time market data, breaking financial news, and expert analysis across crypto, forex, equities, and global macro. Built for traders, analysts, and operators who need accurate, timely information to make informed decisions.
+          The Forex Republic delivers real-time market data, breaking financial news, and expert analysis across crypto, forex, equities, and global macro. Built for traders, analysts, and operators who need accurate, timely information to make informed decisions.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">

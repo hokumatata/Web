@@ -11,7 +11,7 @@ export default function ContactPage() {
         <div className="space-y-4 mb-8">
           <div className="flex items-center gap-3 text-ink-200">
             <Mail size={16} className="text-accent" />
-            <span>contact@tradewave.io</span>
+            <span>contact@theforexrepublic.com</span>
           </div>
           <div className="flex items-center gap-3 text-ink-200">
             <MapPin size={16} className="text-accent" />

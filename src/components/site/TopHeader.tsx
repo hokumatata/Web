@@ -70,7 +70,7 @@ export async function TopHeader({
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-8 h-8 bg-accent rounded-sm flex items-center justify-center">
-              <span className="text-white font-bold text-sm">TW</span>
+              <span className="text-white font-bold text-sm">FR</span>
             </div>
             <div className="flex flex-col">
               <span className="text-lg font-extrabold tracking-tight text-ink-50 leading-none">

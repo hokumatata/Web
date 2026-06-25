@@ -98,7 +98,7 @@ export function AuthorsManager({ authors }: { authors: AuthorData[] }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="input"
-                  placeholder="jane@tradewave.io"
+                  placeholder="jane@theforexrepublic.com"
                 />
               </div>
               <div>
