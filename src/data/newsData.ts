@@ -1,4 +1,4 @@
-// Centralized, structured editorial content for TradeWave.
+// Centralized, structured editorial content for The Forex Republic.
 //
 // This is the single source of truth for the demo/seed news content. The Prisma
 // seed script (`prisma/seed.ts`) imports `newsArticles` and maps over it to
