@@ -37,6 +37,27 @@ npm run typecheck
 npm run build
 ```
 
+## Deploy on Vercel
+
+This app lives in a subfolder, so it deploys as its **own Vercel project** (separate from
+the root TradeWave app). When creating the project in Vercel:
+
+1. Import the repo, then set **Root Directory = `grovia-ai`** (Project → Settings → General).
+2. Leave Framework Preset as **Next.js** — build/install commands are pinned in
+   [`vercel.json`](vercel.json), so no env vars or database are required.
+
+`vercel.json` config:
+
+```json
+{
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "buildCommand": "next build",
+  "devCommand": "next dev",
+  "outputDirectory": ".next"
+}
+```
+
 ## Rebranding
 
 All brand strings (name, tagline, WhatsApp number, contact, socials) live in
