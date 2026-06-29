@@ -15,7 +15,7 @@ export function TickerTape() {
   const { data: items, isLoading, isError } = useQuery({
     queryKey: ["ticker"],
     queryFn: fetchTicker,
-    refetchInterval: 45_000,
+    refetchInterval: 15_000,
     retry: 2,
   });
 
@@ -43,12 +43,19 @@ export function TickerTape() {
   );
 }
 
+function tickerName(q: MarketQuote): string {
+  if (q.type === "CRYPTO") return q.symbol;
+  if (q.symbol === "DXY") return "DXY";
+  return q.label;
+}
+
 function TickerItem({ q }: { q: MarketQuote }) {
   const up = q.changePct24h >= 0;
-  const digits = q.type === "CRYPTO" && q.price < 1 ? 4 : q.type === "FX" ? 4 : 2;
+  const isFxPair = q.type === "FX" && q.symbol !== "DXY";
+  const digits = q.type === "CRYPTO" && q.price < 1 ? 4 : isFxPair ? 4 : 2;
   return (
     <div className="flex items-center gap-2 whitespace-nowrap cursor-default">
-      <span className="text-xs font-semibold text-ink-200">{q.symbol}</span>
+      <span className="text-xs font-semibold text-ink-200">{tickerName(q)}</span>
       <span className="text-xs font-mono text-ink-100 tabular">{formatNumber(q.price, digits)}</span>
       <span className={`flex items-center gap-0.5 text-xs font-mono font-semibold tabular ${up ? "text-up" : "text-down"}`}>
         {up ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
