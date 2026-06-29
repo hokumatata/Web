@@ -68,17 +68,17 @@ export async function TopHeader({
       <div className="container-tw flex h-14 items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 bg-accent rounded-sm flex items-center justify-center">
+            <span className="w-8 h-8 bg-accent rounded-sm flex items-center justify-center">
               <span className="text-white font-bold text-sm">FR</span>
-            </div>
-            <div className="flex flex-col">
+            </span>
+            <span className="flex flex-col">
               <span className="text-lg font-extrabold tracking-tight text-ink-50 leading-none">
                 {siteName}
               </span>
               <span className="text-[10px] text-ink-400 font-medium tracking-wider leading-none mt-0.5">
                 Financial Intelligence
               </span>
-            </div>
+            </span>
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1">

@@ -11,3 +11,5 @@ public/uploads/*
 !public/uploads/.gitkeep
 .DS_Store
 *.swp
+VERCEL_DEPLOYMENT_PLAN.md
+test-report.md

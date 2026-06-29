@@ -57,6 +57,7 @@ const config: Config = {
       },
       animation: {
         marquee: "marquee 80s linear infinite",
+        "marquee-slow": "marquee 120s linear infinite",
         "pulse-dot": "pulse-dot 1.5s ease-in-out infinite",
         "fade-in": "fade-in 0.4s ease-out",
         "slide-up": "slide-up 0.4s ease-out",

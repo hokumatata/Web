@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { TopHeader } from "@/components/site/TopHeader";
 import { TickerTape } from "@/components/site/TickerTape";
+import { BreakingTicker } from "@/components/site/BreakingTicker";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ThemeProvider } from "@/components/site/ThemeProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
@@ -36,6 +37,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <ThemeProvider>
             <TopHeader session={session} siteName={SITE_NAME} />
             <TickerTape />
+            <BreakingTicker />
             <main className="min-h-screen">{children}</main>
             <SiteFooter siteName={SITE_NAME} />
           </ThemeProvider>

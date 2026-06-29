@@ -4,6 +4,10 @@ import { prisma } from "@/lib/db";
 import { HeroLead, ArticleCard, type ArticleCardData } from "@/components/news/ArticleCard";
 import { MarketSnapshot } from "@/components/site/MarketSnapshot";
 import { NewsletterInline } from "@/components/site/NewsletterInline";
+import { NewsWire } from "@/components/site/NewsWire";
+import { MostReadWidget } from "@/components/site/MostReadWidget";
+import { MarketMovers } from "@/components/site/MarketMovers";
+import type { HeadlineItem } from "@/app/api/headlines/route";
 import { getCryptoQuotes } from "@/lib/markets";
 import { formatNumber, formatPercent } from "@/lib/utils";
 import { TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
@@ -41,28 +45,10 @@ const getFeaturedArticles = unstable_cache(
   { revalidate: 60, tags: ["articles"] }
 );
 
-const getCategoriesWithArticles = unstable_cache(
-  () =>
-    prisma.category.findMany({
-      orderBy: { order: "asc" },
-      include: {
-        articles: {
-          where: { status: "PUBLISHED" },
-          orderBy: { publishedAt: "desc" },
-          take: 4,
-          include: INCLUDE,
-        },
-      },
-    }),
-  ["categories-with-articles"],
-  { revalidate: 120, tags: ["articles", "categories"] }
-);
-
 export default async function HomePage() {
-  const [latest, featured, byCategory, crypto] = await Promise.all([
+  const [latest, featured, crypto] = await Promise.all([
     getLatestArticles(),
     getFeaturedArticles(),
-    getCategoriesWithArticles(),
     getCryptoQuotes(),
   ]);
 
@@ -70,6 +56,15 @@ export default async function HomePage() {
   const subLeads = (featured.slice(1, 4).length >= 3 ? featured.slice(1, 4) : latest.slice(1, 4)) as ArticleCardData[];
   const sideList = latest.slice(1, 21) as ArticleCardData[];
   const topCrypto = crypto.slice(0, 4);
+  const wireItems: HeadlineItem[] = latest.map((a) => ({
+    slug: a.slug,
+    title: a.title,
+    categorySlug: a.category.slug,
+    categoryName: a.category.name,
+    publishedAt: a.publishedAt ? new Date(a.publishedAt).toISOString() : null,
+    isBreaking: a.isBreaking,
+    views: a.views,
+  }));
 
   return (
     <div className="animate-fade-in">
@@ -82,10 +77,10 @@ export default async function HomePage() {
               const up = q.changePct24h >= 0;
               return (
                 <Link key={q.symbol} href="/price" className="flex items-center gap-3 whitespace-nowrap flex-shrink-0 group">
-                  <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-2">
                     {q.imageUrl && <img src={q.imageUrl} alt="" className="h-5 w-5 rounded-full" />}
                     <span className="text-sm font-semibold text-ink-100">{q.symbol}</span>
-                  </div>
+                  </span>
                   <span className="text-sm font-mono text-ink-200 tabular">${formatNumber(q.price, q.price < 1 ? 4 : 2)}</span>
                   <span className={`flex items-center gap-0.5 text-sm font-mono font-semibold tabular ${up ? "text-up" : "text-down"}`}>
                     {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
@@ -135,33 +130,20 @@ export default async function HomePage() {
             {/* Market Snapshot Widget */}
             <MarketSnapshot />
 
+            {/* Market Movers */}
+            <MarketMovers />
+
+            {/* Most Read */}
+            <MostReadWidget />
+
             {/* Newsletter CTA */}
             <NewsletterInline />
           </aside>
         </section>
 
-        {/* Category Content Ribbons */}
-        <section className="mt-14 space-y-14">
-          {byCategory
-            .filter((c) => c.articles.length > 0)
-            .map((c) => (
-              <div key={c.id} className="animate-slide-up">
-                <div className="section-title">
-                  <h2>{c.name}</h2>
-                  <Link
-                    href={`/category/${c.slug}`}
-                    className="text-sm font-semibold text-accent hover:underline flex items-center gap-1"
-                  >
-                    More <ArrowRight size={13} />
-                  </Link>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                  {c.articles.map((a) => (
-                    <ArticleCard key={a.slug} a={a as unknown as ArticleCardData} />
-                  ))}
-                </div>
-              </div>
-            ))}
+        {/* The Wire — live newsroom feed (TIME | HEADLINE | CATEGORY) */}
+        <section className="mt-12">
+          <NewsWire initialItems={wireItems} />
         </section>
 
         {/* Bottom CTA Cards */}
