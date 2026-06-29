@@ -156,11 +156,11 @@ export default async function HomePage() {
                 View Calendar <ArrowRight size={13} />
               </div>
             </Link>
-            <Link href="/news" className="card-hover p-6 group">
-              <div className="text-xs font-bold text-accent uppercase tracking-wider mb-2">News Feed</div>
-              <div className="text-sm text-ink-200 leading-relaxed">Breaking news and analysis from our editorial team worldwide.</div>
+            <Link href="/heatmap" className="card-hover p-6 group">
+              <div className="text-xs font-bold text-accent uppercase tracking-wider mb-2">Market Heatmap</div>
+              <div className="text-sm text-ink-200 leading-relaxed">Visual performance map across crypto, forex, commodities, and equity indices.</div>
               <div className="text-sm text-accent mt-3 font-semibold group-hover:underline flex items-center gap-1">
-                Read More <ArrowRight size={13} />
+                View Heatmap <ArrowRight size={13} />
               </div>
             </Link>
             <Link href="/newsletter" className="card-hover p-6 group">
