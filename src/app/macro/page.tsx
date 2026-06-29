@@ -10,6 +10,7 @@ export const revalidate = 120;
 export const metadata: Metadata = {
   title: "Macro Terminal",
   description: "Dollar Index (DXY), S&P 500, and Nasdaq charts with related macro news.",
+  alternates: { canonical: "/macro" },
 };
 
 const INSTRUMENTS = [

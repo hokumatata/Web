@@ -10,6 +10,7 @@ export const revalidate = 120;
 export const metadata: Metadata = {
   title: "Gold Terminal",
   description: "Live Gold (XAU/USD) price, candlestick chart, key levels, and related gold news.",
+  alternates: { canonical: "/gold" },
 };
 
 export default async function GoldPage() {

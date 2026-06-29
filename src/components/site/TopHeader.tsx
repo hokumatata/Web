@@ -18,6 +18,14 @@ const NAV = [
   { href: "/economic-calendar", label: "Economic Calendar" },
 ];
 
+const TERMINALS = [
+  { href: "/bitcoin", label: "Bitcoin" },
+  { href: "/forex", label: "Forex" },
+  { href: "/gold", label: "Gold" },
+  { href: "/macro", label: "Macro" },
+  { href: "/heatmap", label: "Heatmap" },
+];
+
 export async function TopHeader({
   session,
   siteName,
@@ -54,7 +62,17 @@ export async function TopHeader({
               </>
             )}
           </div>
-          <div className="hidden md:flex items-center gap-4 text-xs text-ink-400">
+          <div className="hidden md:flex items-center gap-3 text-xs text-ink-400">
+            <span className="flex items-center gap-1 text-2xs font-bold uppercase tracking-wider text-accent">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent inline-block animate-pulse-dot" />
+              Terminals
+            </span>
+            {TERMINALS.map((t) => (
+              <Link key={t.href} href={t.href} className="hover:text-accent transition-colors">
+                {t.label}
+              </Link>
+            ))}
+            <span className="text-ink-700">|</span>
             <Link href="/newsletter" className="hover:text-accent transition-colors font-medium">Subscribe</Link>
             <span className="text-ink-700">|</span>
             <Link href="/about" className="hover:text-accent transition-colors">About</Link>

@@ -6,6 +6,8 @@ import { BreakingTicker } from "@/components/site/BreakingTicker";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ThemeProvider } from "@/components/site/ThemeProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { organizationSchema, websiteSchema } from "@/lib/seo";
 import { getSession } from "@/lib/auth";
 
 const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "The Forex Republic";
@@ -33,6 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body>
+        <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <QueryProvider>
           <ThemeProvider>
             <TopHeader session={session} siteName={SITE_NAME} />

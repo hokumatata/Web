@@ -10,6 +10,7 @@ export const revalidate = 120;
 export const metadata: Metadata = {
   title: "Forex Terminal",
   description: "Live EUR/USD, GBP/USD, USD/JPY charts, key levels, and related forex news.",
+  alternates: { canonical: "/forex" },
 };
 
 const PAIRS = [
