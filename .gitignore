@@ -13,3 +13,5 @@ public/uploads/*
 *.swp
 VERCEL_DEPLOYMENT_PLAN.md
 test-report.md
+studio/node_modules
+studio/dist
