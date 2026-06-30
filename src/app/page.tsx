@@ -80,17 +80,39 @@ export default async function HomePage() {
     views: a.views,
   }));
 
+  const sideList = latest.slice(1, 21) as ArticleCardData[];
+
   return (
     <div className="animate-fade-in">
-      {/* Hero Grid */}
+      {/* Hero + Latest News Sidebar */}
       <div className="container-tw py-8">
-        <section>
-          {lead && <HeroLead a={lead} />}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
-            {subLeads.map((a) => (
-              <ArticleCard key={a.slug} a={a} />
-            ))}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Lead Story + Sub-leads */}
+          <div className="lg:col-span-8">
+            {lead && <HeroLead a={lead} />}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
+              {subLeads.map((a) => (
+                <ArticleCard key={a.slug} a={a} />
+              ))}
+            </div>
           </div>
+
+          {/* Latest News Sidebar */}
+          <aside className="lg:col-span-4">
+            <div className="card">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-ink-700 bg-ink-900">
+                <h3 className="text-sm font-bold text-ink-50">Latest News</h3>
+                <Link href="/news" className="text-xs font-semibold text-accent hover:underline flex items-center gap-1">
+                  View All <ArrowRight size={11} />
+                </Link>
+              </div>
+              <div className="px-4 max-h-[600px] overflow-y-auto">
+                {sideList.map((a) => (
+                  <ArticleCard key={a.slug} a={a as ArticleCardData} variant="headline-only" />
+                ))}
+              </div>
+            </div>
+          </aside>
         </section>
 
         {/* Category Sections */}

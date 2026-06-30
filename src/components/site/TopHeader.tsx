@@ -89,13 +89,8 @@ export async function TopHeader({
             <span className="w-8 h-8 bg-accent rounded-sm flex items-center justify-center">
               <span className="text-white font-bold text-sm">FR</span>
             </span>
-            <span className="flex flex-col">
-              <span className="text-lg font-extrabold tracking-tight text-ink-50 leading-none">
-                {siteName}
-              </span>
-              <span className="text-[10px] text-ink-400 font-medium tracking-wider leading-none mt-0.5">
-                Financial Intelligence
-              </span>
+            <span className="text-lg font-extrabold tracking-tight text-ink-50 leading-none">
+              {siteName}
             </span>
           </Link>
 
@@ -129,9 +124,9 @@ export async function TopHeader({
           {session ? (
             <UserMenu name={session.name} role={session.role} />
           ) : (
-            <Link href="/login" className="btn-primary h-9 px-4 text-sm">
-              <LogIn size={14} />
-              <span className="hidden sm:inline">Sign In</span>
+            <Link href="/login" className="btn-primary h-8 px-3 text-xs gap-1.5">
+              <LogIn size={12} />
+              <span>Sign In</span>
             </Link>
           )}
         </div>
