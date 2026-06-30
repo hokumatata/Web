@@ -2,15 +2,10 @@ import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { HeroLead, ArticleCard, type ArticleCardData } from "@/components/news/ArticleCard";
-import { MarketSnapshot } from "@/components/site/MarketSnapshot";
 import { NewsletterInline } from "@/components/site/NewsletterInline";
 import { NewsWire } from "@/components/site/NewsWire";
-import { MostReadWidget } from "@/components/site/MostReadWidget";
-import { MarketMovers } from "@/components/site/MarketMovers";
 import type { HeadlineItem } from "@/app/api/headlines/route";
-import { getCryptoQuotes } from "@/lib/markets";
-import { formatNumber, formatPercent } from "@/lib/utils";
-import { TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export const revalidate = 60;
 
@@ -45,17 +40,36 @@ const getFeaturedArticles = unstable_cache(
   { revalidate: 60, tags: ["articles"] }
 );
 
+const CATEGORY_SECTIONS = [
+  { slug: "crypto", name: "Crypto" },
+  { slug: "forex", name: "Forex" },
+  { slug: "macro", name: "Macro" },
+  { slug: "gold", name: "Gold" },
+  { slug: "stocks", name: "Stocks" },
+  { slug: "opinion", name: "Opinion" },
+];
+
+const getCategoryArticles = unstable_cache(
+  (slug: string) =>
+    prisma.article.findMany({
+      where: { status: "PUBLISHED", category: { slug } },
+      orderBy: { publishedAt: "desc" },
+      take: 5,
+      include: INCLUDE,
+    }),
+  ["category-articles"],
+  { revalidate: 60, tags: ["articles"] }
+);
+
 export default async function HomePage() {
-  const [latest, featured, crypto] = await Promise.all([
+  const [latest, featured, ...categoryResults] = await Promise.all([
     getLatestArticles(),
     getFeaturedArticles(),
-    getCryptoQuotes(),
+    ...CATEGORY_SECTIONS.map((c) => getCategoryArticles(c.slug)),
   ]);
 
   const lead = (featured[0] ?? latest[0]) as ArticleCardData | undefined;
   const subLeads = (featured.slice(1, 4).length >= 3 ? featured.slice(1, 4) : latest.slice(1, 4)) as ArticleCardData[];
-  const sideList = latest.slice(1, 21) as ArticleCardData[];
-  const topCrypto = crypto.slice(0, 4);
   const wireItems: HeadlineItem[] = latest.map((a) => ({
     slug: a.slug,
     title: a.title,
@@ -68,78 +82,40 @@ export default async function HomePage() {
 
   return (
     <div className="animate-fade-in">
-      {/* Market Data Strip */}
-      <section className="bg-ink-900 border-b border-ink-700">
-        <div className="container-tw py-3">
-          <div className="flex items-center gap-6 overflow-x-auto">
-            <span className="text-xs font-semibold text-ink-400 whitespace-nowrap flex-shrink-0">Top Movers</span>
-            {topCrypto.map((q) => {
-              const up = q.changePct24h >= 0;
-              return (
-                <Link key={q.symbol} href="/price" className="flex items-center gap-3 whitespace-nowrap flex-shrink-0 group">
-                  <span className="flex items-center gap-2">
-                    {q.imageUrl && <img src={q.imageUrl} alt="" className="h-5 w-5 rounded-full" />}
-                    <span className="text-sm font-semibold text-ink-100">{q.symbol}</span>
-                  </span>
-                  <span className="text-sm font-mono text-ink-200 tabular">${formatNumber(q.price, q.price < 1 ? 4 : 2)}</span>
-                  <span className={`flex items-center gap-0.5 text-sm font-mono font-semibold tabular ${up ? "text-up" : "text-down"}`}>
-                    {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                    {formatPercent(q.changePct24h)}
-                  </span>
-                </Link>
-              );
-            })}
-            <Link href="/price" className="text-xs font-semibold text-accent hover:underline whitespace-nowrap flex-shrink-0 ml-auto flex items-center gap-1">
-              All Prices <ArrowRight size={12} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Hero Grid — Bloomberg/CoinDesk asymmetric layout */}
+      {/* Hero Grid */}
       <div className="container-tw py-8">
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Lead Story — big hero on left */}
-          <div className="lg:col-span-8">
-            {lead && <HeroLead a={lead} />}
-            {/* Sub-leads below hero */}
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
-              {subLeads.map((a) => (
-                <ArticleCard key={a.slug} a={a} />
-              ))}
-            </div>
+        <section>
+          {lead && <HeroLead a={lead} />}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
+            {subLeads.map((a) => (
+              <ArticleCard key={a.slug} a={a} />
+            ))}
           </div>
+        </section>
 
-          {/* Right sidebar — Latest column */}
-          <aside className="lg:col-span-4 space-y-6">
-            {/* Latest Headlines — scrollable, up to 20 items */}
-            <div className="card">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-ink-700 bg-ink-900">
-                <h3 className="text-sm font-bold text-ink-50">Latest News</h3>
-                <Link href="/news" className="text-xs font-semibold text-accent hover:underline flex items-center gap-1">
-                  View All <ArrowRight size={11} />
+        {/* Category Sections */}
+        {CATEGORY_SECTIONS.map((cat, idx) => {
+          const articles = (categoryResults[idx] ?? []) as ArticleCardData[];
+          if (articles.length === 0) return null;
+          return (
+            <section key={cat.slug} className="mt-12">
+              <div className="flex items-center justify-between mb-6 border-b border-ink-700 pb-3">
+                <h2 className="text-lg font-bold text-ink-50 uppercase tracking-wide">{cat.name}</h2>
+                <Link
+                  href={`/category/${cat.slug}`}
+                  className="text-sm font-semibold text-accent hover:underline flex items-center gap-1"
+                >
+                  View All <ArrowRight size={14} />
                 </Link>
               </div>
-              <div className="px-4 max-h-[600px] overflow-y-auto">
-                {sideList.map((a) => (
-                  <ArticleCard key={a.slug} a={a as ArticleCardData} variant="headline-only" />
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
+                {articles.map((a) => (
+                  <ArticleCard key={a.slug} a={a} />
                 ))}
               </div>
-            </div>
-
-            {/* Market Snapshot Widget */}
-            <MarketSnapshot />
-
-            {/* Market Movers */}
-            <MarketMovers />
-
-            {/* Most Read */}
-            <MostReadWidget />
-
-            {/* Newsletter CTA */}
-            <NewsletterInline />
-          </aside>
-        </section>
+            </section>
+          );
+        })}
 
         {/* The Wire — live newsroom feed (TIME | HEADLINE | CATEGORY) */}
         <section className="mt-12">
@@ -172,6 +148,9 @@ export default async function HomePage() {
             </Link>
           </div>
         </section>
+
+        {/* Newsletter CTA */}
+        <NewsletterInline />
       </div>
     </div>
   );
