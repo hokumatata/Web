@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { TopHeader } from "@/components/site/TopHeader";
 import { TickerTape } from "@/components/site/TickerTape";
 import { BreakingTicker } from "@/components/site/BreakingTicker";
@@ -45,6 +46,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <SiteFooter siteName={SITE_NAME} />
           </ThemeProvider>
         </QueryProvider>
+        <Analytics />
       </body>
     </html>
   );
