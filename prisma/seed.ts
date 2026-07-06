@@ -5,63 +5,79 @@ import { newsArticles, articleTagMap, type AuthorKey } from "../src/data/newsDat
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminHash = await bcrypt.hash("admin123", 10);
-  const editorHash = await bcrypt.hash("editor123", 10);
+  // ------------------------------------------------------------------
+  // 1. Clear old articles, tags, and article-tag relations
+  // ------------------------------------------------------------------
+  await prisma.articleTag.deleteMany();
+  await prisma.savedArticle.deleteMany();
+  await prisma.comment.deleteMany();
+  await prisma.article.deleteMany();
+
+  console.log("Cleared existing articles.");
+
+  // ------------------------------------------------------------------
+  // 2. Users — upsert with current credentials
+  // ------------------------------------------------------------------
+  const adminHash = await bcrypt.hash("TFR_Admin2026!", 10);
+  const editorHash = await bcrypt.hash("TFR_Editor2026!", 10);
+  const authorHash = await bcrypt.hash("TFR_Author2026!", 10);
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@tradewave.io" },
-    update: {},
+    where: { email: "admin@theforexrepublic.com" },
+    update: { passwordHash: adminHash, name: "TFR Admin", role: "ADMIN" },
     create: {
-      email: "admin@tradewave.io",
+      email: "admin@theforexrepublic.com",
       passwordHash: adminHash,
-      name: "Sarah Chen",
+      name: "TFR Admin",
       role: "ADMIN",
       authorProfile: {
         create: {
-          slug: "sarah-chen",
-          bio: "Editor-in-chief covering global macro and digital assets.",
-          twitter: "@sarahchen",
+          slug: "tfr-admin",
+          bio: "Editor-in-chief at The Forex Republic.",
+          twitter: "@theforexrepublic",
         },
       },
     },
   });
 
   const editor = await prisma.user.upsert({
-    where: { email: "editor@tradewave.io" },
-    update: {},
+    where: { email: "editor@theforexrepublic.com" },
+    update: { passwordHash: editorHash, name: "TFR Editor", role: "EDITOR" },
     create: {
-      email: "editor@tradewave.io",
+      email: "editor@theforexrepublic.com",
       passwordHash: editorHash,
-      name: "Marcus Webb",
+      name: "TFR Editor",
       role: "EDITOR",
       authorProfile: {
         create: {
-          slug: "marcus-webb",
-          bio: "Senior markets reporter with a focus on crypto and DeFi.",
-          twitter: "@marcuswebb",
+          slug: "tfr-editor",
+          bio: "Senior markets reporter covering crypto and DeFi.",
+          twitter: "@tfrmarkets",
         },
       },
     },
   });
 
-  const author1Hash = await bcrypt.hash("author123", 10);
   const author1 = await prisma.user.upsert({
-    where: { email: "alex@tradewave.io" },
-    update: {},
+    where: { email: "author@theforexrepublic.com" },
+    update: { passwordHash: authorHash, name: "TFR Author", role: "AUTHOR" },
     create: {
-      email: "alex@tradewave.io",
-      passwordHash: author1Hash,
-      name: "Alex Rivera",
+      email: "author@theforexrepublic.com",
+      passwordHash: authorHash,
+      name: "TFR Author",
       role: "AUTHOR",
       authorProfile: {
         create: {
-          slug: "alex-rivera",
+          slug: "tfr-author",
           bio: "FX and rates analyst covering G10 and emerging markets.",
         },
       },
     },
   });
 
+  // ------------------------------------------------------------------
+  // 3. Categories
+  // ------------------------------------------------------------------
   const categories = await Promise.all([
     prisma.category.upsert({ where: { slug: "crypto" }, update: {}, create: { slug: "crypto", name: "Crypto", description: "Digital assets, DeFi, and blockchain", order: 1 } }),
     prisma.category.upsert({ where: { slug: "forex" }, update: {}, create: { slug: "forex", name: "Forex", description: "Currency markets and central bank policy", order: 2 } }),
@@ -72,6 +88,9 @@ async function main() {
     prisma.category.upsert({ where: { slug: "opinion" }, update: {}, create: { slug: "opinion", name: "Opinion", description: "Commentary and editorials", order: 7 } }),
   ]);
 
+  // ------------------------------------------------------------------
+  // 4. Tags — expanded set for real articles
+  // ------------------------------------------------------------------
   const tags = await Promise.all([
     prisma.tag.upsert({ where: { slug: "bitcoin" }, update: {}, create: { slug: "bitcoin", name: "Bitcoin" } }),
     prisma.tag.upsert({ where: { slug: "ethereum" }, update: {}, create: { slug: "ethereum", name: "Ethereum" } }),
@@ -81,8 +100,15 @@ async function main() {
     prisma.tag.upsert({ where: { slug: "earnings" }, update: {}, create: { slug: "earnings", name: "Earnings" } }),
     prisma.tag.upsert({ where: { slug: "ai" }, update: {}, create: { slug: "ai", name: "AI" } }),
     prisma.tag.upsert({ where: { slug: "inflation" }, update: {}, create: { slug: "inflation", name: "Inflation" } }),
+    prisma.tag.upsert({ where: { slug: "xrp" }, update: {}, create: { slug: "xrp", name: "XRP" } }),
+    prisma.tag.upsert({ where: { slug: "meme-coins" }, update: {}, create: { slug: "meme-coins", name: "Meme Coins" } }),
+    prisma.tag.upsert({ where: { slug: "stablecoins" }, update: {}, create: { slug: "stablecoins", name: "Stablecoins" } }),
+    prisma.tag.upsert({ where: { slug: "tokenization" }, update: {}, create: { slug: "tokenization", name: "Tokenization" } }),
   ]);
 
+  // ------------------------------------------------------------------
+  // 5. Seed articles
+  // ------------------------------------------------------------------
   const authorIdByKey: Record<AuthorKey, string> = {
     admin: admin.id,
     editor: editor.id,
@@ -112,6 +138,9 @@ async function main() {
     });
   }
 
+  // ------------------------------------------------------------------
+  // 6. Article → Tag mappings
+  // ------------------------------------------------------------------
   for (const [articleSlug, tagSlugs] of Object.entries(articleTagMap)) {
     const article = await prisma.article.findUnique({ where: { slug: articleSlug } });
     if (!article) continue;
@@ -128,6 +157,10 @@ async function main() {
 
   console.log("Seed completed successfully!");
   console.log(`Created ${newsArticles.length} articles, ${categories.length} categories, ${tags.length} tags`);
+  console.log("\nCredentials:");
+  console.log("  Admin:  admin@theforexrepublic.com / TFR_Admin2026!");
+  console.log("  Editor: editor@theforexrepublic.com / TFR_Editor2026!");
+  console.log("  Author: author@theforexrepublic.com / TFR_Author2026!");
 }
 
 main()
