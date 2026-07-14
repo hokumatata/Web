@@ -38,7 +38,7 @@ export async function TopHeader({
     .catch(() => 0);
 
   return (
-    <header className="sticky top-0 z-40 bg-ink-950/95 backdrop-blur-md border-b border-ink-700">
+    <header className="sticky top-0 z-40 glass-strong border-b border-[var(--glass-border)]">
       {/* Utility bar */}
       <div className="border-b border-ink-800">
         <div className="container-tw flex h-8 items-center justify-between">
@@ -86,7 +86,7 @@ export async function TopHeader({
       <div className="container-tw flex h-14 items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <span className="w-8 h-8 bg-accent rounded-sm flex items-center justify-center">
+            <span className="w-8 h-8 rounded-xl flex items-center justify-center shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5)]" style={{ background: "linear-gradient(180deg, var(--accent-soft), var(--accent))" }}>
               <span className="text-white font-bold text-sm">FR</span>
             </span>
             <span className="text-lg font-extrabold tracking-tight text-ink-50 leading-none">
@@ -99,7 +99,7 @@ export async function TopHeader({
               <Link
                 key={n.href}
                 href={n.href}
-                className="px-3 py-1.5 text-sm font-medium text-ink-300 hover:text-accent rounded-md hover:bg-ink-850 transition-all duration-150 whitespace-nowrap"
+                className="px-3 py-1.5 text-sm font-medium text-ink-300 hover:text-accent rounded-full hover:bg-[var(--glass-bg)] transition-all duration-150 whitespace-nowrap"
               >
                 {n.label}
               </Link>
@@ -114,7 +114,7 @@ export async function TopHeader({
               <input
                 name="q"
                 placeholder="Search news, markets..."
-                className="input pl-9 w-52 lg:w-64 text-sm h-9 bg-ink-900 border-ink-700"
+                className="input pl-9 w-52 lg:w-64 text-sm h-9"
               />
             </div>
           </form>
@@ -138,7 +138,7 @@ export async function TopHeader({
           <Link
             key={n.href}
             href={n.href}
-            className="whitespace-nowrap px-3 py-1 text-sm font-medium text-ink-400 hover:text-accent hover:bg-ink-850 rounded-md transition-colors"
+            className="whitespace-nowrap px-3 py-1 text-sm font-medium text-ink-400 hover:text-accent hover:bg-[var(--glass-bg)] rounded-full transition-colors"
           >
             {n.label}
           </Link>

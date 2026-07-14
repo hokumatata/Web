@@ -5,33 +5,46 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════
-   LIGHT THEME (default) — Bloomberg Professional
+   LIGHT THEME (default) — Liquid Glass
    ═══════════════════════════════════════════════════ */
 :root {
-  --ink-950: #ffffff;
-  --ink-900: #fafafa;
-  --ink-850: #f5f5f5;
-  --ink-800: #eeeeee;
-  --ink-700: #e0e0e0;
-  --ink-600: #bdbdbd;
-  --ink-500: #9e9e9e;
-  --ink-400: #757575;
-  --ink-300: #616161;
-  --ink-200: #424242;
-  --ink-100: #212121;
-  --ink-50: #121212;
+  --ink-950: #f4f6fb;
+  --ink-900: #eef1f8;
+  --ink-850: #e8ecf5;
+  --ink-800: #dfe4ef;
+  --ink-700: #d2d9e8;
+  --ink-600: #b3bdd1;
+  --ink-500: #8f9bb3;
+  --ink-400: #6b7689;
+  --ink-300: #545e70;
+  --ink-200: #3a4252;
+  --ink-100: #1f2634;
+  --ink-50: #0f1420;
 
   --accent: #e65100;
   --accent-soft: #ff8f00;
-  --accent-dim: #fff8e1;
-  --accent-glow: rgba(230, 81, 0, 0.08);
+  --accent-dim: #fff3e0;
+  --accent-glow: rgba(230, 81, 0, 0.10);
 
-  --up: #2e7d32;
-  --down: #c62828;
+  --up: #1b8a3f;
+  --down: #d32f2f;
 
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
-  --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+  /* Liquid Glass materials */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-strong: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-shadow: rgba(31, 38, 52, 0.10);
+  --glass-blur: 20px;
+
+  /* Ambient backdrop the glass refracts against */
+  --amb-1: rgba(255, 145, 64, 0.18);
+  --amb-2: rgba(41, 98, 255, 0.14);
+  --amb-3: rgba(0, 200, 150, 0.12);
+
+  --shadow-sm: 0 1px 2px rgba(31,38,52,0.06);
+  --shadow-md: 0 8px 24px -6px rgba(31,38,52,0.14), 0 2px 6px -2px rgba(31,38,52,0.08);
+  --shadow-lg: 0 20px 48px -12px rgba(31,38,52,0.20), 0 8px 16px -8px rgba(31,38,52,0.10);
 
   color-scheme: light;
 }
@@ -40,10 +53,10 @@
    DARK THEME — Deep Navy Bloomberg Terminal
    ═══════════════════════════════════════════════════ */
 [data-theme="dark"] {
-  --ink-950: #0b1426;
-  --ink-900: #0f1a32;
-  --ink-850: #13203e;
-  --ink-800: #182848;
+  --ink-950: #070c18;
+  --ink-900: #0c1424;
+  --ink-850: #111c33;
+  --ink-800: #172440;
   --ink-700: #1e3154;
   --ink-600: #2a4068;
   --ink-500: #3d5580;
@@ -55,15 +68,28 @@
 
   --accent: #ff9100;
   --accent-soft: #ffab40;
-  --accent-dim: rgba(255, 145, 0, 0.12);
-  --accent-glow: rgba(255, 145, 0, 0.15);
+  --accent-dim: rgba(255, 145, 0, 0.14);
+  --accent-glow: rgba(255, 145, 0, 0.18);
 
   --up: #00e676;
   --down: #ff5252;
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 8px rgba(0,0,0,0.4);
-  --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
+  /* Liquid Glass materials */
+  --glass-bg: rgba(23, 36, 64, 0.45);
+  --glass-bg-strong: rgba(23, 36, 64, 0.68);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.18);
+  --glass-shadow: rgba(0, 0, 0, 0.45);
+  --glass-blur: 22px;
+
+  /* Ambient backdrop the glass refracts against */
+  --amb-1: rgba(255, 145, 0, 0.22);
+  --amb-2: rgba(41, 98, 255, 0.20);
+  --amb-3: rgba(0, 230, 150, 0.14);
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 8px 28px -6px rgba(0,0,0,0.55), 0 2px 8px -2px rgba(0,0,0,0.4);
+  --shadow-lg: 0 24px 56px -12px rgba(0,0,0,0.7), 0 8px 20px -8px rgba(0,0,0,0.5);
 
   color-scheme: dark;
 }
@@ -84,6 +110,12 @@
     font-size: 0.9375rem;
     line-height: 1.6;
     letter-spacing: -0.011em;
+    background-image:
+      radial-gradient(60rem 60rem at 12% -10%, var(--amb-1), transparent 60%),
+      radial-gradient(50rem 50rem at 105% 8%, var(--amb-2), transparent 55%),
+      radial-gradient(45rem 45rem at 50% 115%, var(--amb-3), transparent 60%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
   ::selection {
     background: var(--accent);
@@ -136,74 +168,124 @@
 
   /* Buttons */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-md;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-full;
   }
   .btn-primary {
-    @apply btn text-white;
-    background: var(--accent);
-    border: 1px solid var(--accent);
+    @apply btn text-white relative overflow-hidden;
+    background: linear-gradient(180deg, var(--accent-soft), var(--accent));
+    border: 1px solid color-mix(in srgb, var(--accent) 70%, black);
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.4), 0 4px 12px -2px var(--accent-glow);
   }
   .btn-primary:hover {
-    background: var(--accent-soft);
-    border-color: var(--accent-soft);
+    filter: brightness(1.06);
+    box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.5), 0 6px 18px -2px var(--accent-glow);
   }
   .btn-secondary {
-    @apply btn border border-ink-600 text-ink-200 hover:bg-ink-850 hover:border-ink-500 hover:text-ink-50;
+    @apply btn text-ink-100;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+            backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-sm);
+  }
+  .btn-secondary:hover {
+    background: var(--glass-bg-strong);
+    color: var(--ink-50);
   }
   .btn-ghost {
-    @apply btn border border-transparent text-ink-400 hover:bg-ink-850 hover:text-ink-100;
+    @apply btn border border-transparent text-ink-400 hover:text-ink-100;
+  }
+  .btn-ghost:hover {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+            backdrop-filter: blur(var(--glass-blur));
   }
   .btn-danger {
-    @apply btn border border-down hover:bg-ink-850;
+    @apply btn border border-down;
     color: var(--down);
+    background: color-mix(in srgb, var(--down) 8%, transparent);
   }
 
   /* Inputs */
   .input {
-    @apply w-full border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-100 placeholder:text-ink-500 focus:border-accent focus:outline-none transition-colors rounded-md;
+    @apply w-full px-3 py-2.5 text-sm text-ink-100 placeholder:text-ink-500 focus:border-accent focus:outline-none transition-colors rounded-full;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+            backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight);
   }
   .label {
     @apply block text-xs font-semibold uppercase tracking-wider text-ink-400 mb-1.5;
   }
 
-  /* Cards */
+  /* Cards — Liquid Glass */
   .card {
-    @apply border border-ink-700 bg-ink-950 rounded-md overflow-hidden transition-all duration-200;
-    box-shadow: var(--shadow-sm);
+    @apply rounded-2xl overflow-hidden transition-all duration-300 relative;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+            backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-sm);
+  }
+  /* Specular top-edge highlight */
+  .card::before {
+    content: "";
+    @apply pointer-events-none absolute inset-x-0 top-0 h-px;
+    background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
   }
   .card-hover {
     @apply card cursor-pointer;
   }
   .card-hover:hover {
-    border-color: var(--accent);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
+    background: var(--glass-bg-strong);
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--glass-border));
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-lg);
+    transform: translateY(-3px);
+  }
+
+  /* Reusable glass surfaces */
+  .glass {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+            backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-sm);
+  }
+  .glass-strong {
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 1.3)) saturate(180%);
+            backdrop-filter: blur(calc(var(--glass-blur) * 1.3)) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 0 var(--glass-highlight), var(--shadow-md);
   }
 
   /* Badges */
   .badge {
-    @apply inline-flex items-center px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-sm;
-    background: var(--ink-850);
+    @apply inline-flex items-center px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
     color: var(--ink-300);
-    border: 1px solid var(--ink-700);
+    border: 1px solid var(--glass-border);
   }
   .badge-accent {
-    @apply inline-flex items-center px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-sm;
+    @apply inline-flex items-center px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full;
     background: var(--accent-dim);
     color: var(--accent);
-    border: 1px solid var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
   }
   .badge-up {
-    @apply inline-flex items-center px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-sm;
+    @apply inline-flex items-center px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full;
     color: var(--up);
-    border: 1px solid var(--up);
-    background: color-mix(in srgb, var(--up) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--up) 40%, transparent);
+    background: color-mix(in srgb, var(--up) 10%, transparent);
   }
   .badge-down {
-    @apply inline-flex items-center px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-sm;
+    @apply inline-flex items-center px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full;
     color: var(--down);
-    border: 1px solid var(--down);
-    background: color-mix(in srgb, var(--down) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--down) 40%, transparent);
+    background: color-mix(in srgb, var(--down) 10%, transparent);
   }
 
   /* Section titles */
