@@ -1,3 +1,8 @@
+import {
+  softLaunchArticles,
+  softLaunchArticleTagMap,
+} from "./softLaunchArticles";
+
 // Centralized, structured editorial content for The Forex Republic.
 //
 // This is the single source of truth for editorial content. The Prisma
@@ -25,6 +30,7 @@ export interface NewsArticle {
 const HOUR = 3_600_000;
 
 export const newsArticles: NewsArticle[] = [
+  ...softLaunchArticles,
   {
     slug: "strategy-no-longer-one-way-bitcoin-buyer-bitwise-cio",
     title: "Strategy Is No Longer a One-Way Bitcoin Buyer as Bitwise CIO Flags New Market Risk",
@@ -393,6 +399,7 @@ The market implication is reputational, not immediate. XRP is increasingly appea
 ];
 
 export const articleTagMap: Record<string, string[]> = {
+  ...softLaunchArticleTagMap,
   "strategy-no-longer-one-way-bitcoin-buyer-bitwise-cio": ["bitcoin"],
   "revolut-delist-usdt-august-europe-stablecoin-rules": ["regulation", "stablecoins"],
   "pepe-bonk-meme-coin-rally-high-beta-crypto-rotation": ["meme-coins", "ethereum"],
