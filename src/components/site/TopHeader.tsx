@@ -18,6 +18,14 @@ const NAV = [
   { href: "/economic-calendar", label: "Economic Calendar" },
 ];
 
+const TERMINALS = [
+  { href: "/bitcoin", label: "Bitcoin" },
+  { href: "/forex", label: "Forex" },
+  { href: "/gold", label: "Gold" },
+  { href: "/macro", label: "Macro" },
+  { href: "/heatmap", label: "Heatmap" },
+];
+
 export async function TopHeader({
   session,
   siteName,
@@ -30,7 +38,7 @@ export async function TopHeader({
     .catch(() => 0);
 
   return (
-    <header className="sticky top-0 z-40 bg-ink-950/95 backdrop-blur-md border-b border-ink-700">
+    <header className="sticky top-0 z-40 glass-strong border-b border-[var(--glass-border)]">
       {/* Utility bar */}
       <div className="border-b border-ink-800">
         <div className="container-tw flex h-8 items-center justify-between">
@@ -54,7 +62,17 @@ export async function TopHeader({
               </>
             )}
           </div>
-          <div className="hidden md:flex items-center gap-4 text-xs text-ink-400">
+          <div className="hidden md:flex items-center gap-3 text-xs text-ink-400">
+            <span className="flex items-center gap-1 text-2xs font-bold uppercase tracking-wider text-accent">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent inline-block animate-pulse-dot" />
+              Terminals
+            </span>
+            {TERMINALS.map((t) => (
+              <Link key={t.href} href={t.href} className="hover:text-accent transition-colors">
+                {t.label}
+              </Link>
+            ))}
+            <span className="text-ink-700">|</span>
             <Link href="/newsletter" className="hover:text-accent transition-colors font-medium">Subscribe</Link>
             <span className="text-ink-700">|</span>
             <Link href="/about" className="hover:text-accent transition-colors">About</Link>
@@ -68,17 +86,12 @@ export async function TopHeader({
       <div className="container-tw flex h-14 items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 bg-accent rounded-sm flex items-center justify-center">
+            <span className="w-8 h-8 rounded-xl flex items-center justify-center shadow-[inset_0_1px_0_0_rgba(255,255,255,0.5)]" style={{ background: "linear-gradient(180deg, var(--accent-soft), var(--accent))" }}>
               <span className="text-white font-bold text-sm">FR</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-lg font-extrabold tracking-tight text-ink-50 leading-none">
-                {siteName}
-              </span>
-              <span className="text-[10px] text-ink-400 font-medium tracking-wider leading-none mt-0.5">
-                Financial Intelligence
-              </span>
-            </div>
+            </span>
+            <span className="text-lg font-extrabold tracking-tight text-ink-50 leading-none">
+              {siteName}
+            </span>
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1">
@@ -86,7 +99,7 @@ export async function TopHeader({
               <Link
                 key={n.href}
                 href={n.href}
-                className="px-3 py-1.5 text-sm font-medium text-ink-300 hover:text-accent rounded-md hover:bg-ink-850 transition-all duration-150 whitespace-nowrap"
+                className="px-3 py-1.5 text-sm font-medium text-ink-300 hover:text-accent rounded-full hover:bg-[var(--glass-bg)] transition-all duration-150 whitespace-nowrap"
               >
                 {n.label}
               </Link>
@@ -101,7 +114,7 @@ export async function TopHeader({
               <input
                 name="q"
                 placeholder="Search news, markets..."
-                className="input pl-9 w-52 lg:w-64 text-sm h-9 bg-ink-900 border-ink-700"
+                className="input pl-9 w-52 lg:w-64 text-sm h-9"
               />
             </div>
           </form>
@@ -111,9 +124,9 @@ export async function TopHeader({
           {session ? (
             <UserMenu name={session.name} role={session.role} />
           ) : (
-            <Link href="/login" className="btn-primary h-9 px-4 text-sm">
-              <LogIn size={14} />
-              <span className="hidden sm:inline">Sign In</span>
+            <Link href="/login" className="btn-primary h-8 px-3 text-xs gap-1.5">
+              <LogIn size={12} />
+              <span>Sign In</span>
             </Link>
           )}
         </div>
@@ -125,7 +138,7 @@ export async function TopHeader({
           <Link
             key={n.href}
             href={n.href}
-            className="whitespace-nowrap px-3 py-1 text-sm font-medium text-ink-400 hover:text-accent hover:bg-ink-850 rounded-md transition-colors"
+            className="whitespace-nowrap px-3 py-1 text-sm font-medium text-ink-400 hover:text-accent hover:bg-[var(--glass-bg)] rounded-full transition-colors"
           >
             {n.label}
           </Link>

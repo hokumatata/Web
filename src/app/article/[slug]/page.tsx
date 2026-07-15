@@ -6,11 +6,35 @@ import { formatDate, readTime, timeAgo } from "@/lib/utils";
 import { CommentBlock } from "@/components/site/CommentBlock";
 import { ArticleCard, type ArticleCardData } from "@/components/news/ArticleCard";
 import { Clock, User, Tag, ArrowLeft } from "lucide-react";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { newsArticleSchema, breadcrumbSchema, absUrl } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const article = await prisma.article.findUnique({ where: { slug: params.slug } });
+  const article = await prisma.article.findUnique({
+    where: { slug: params.slug },
+    include: { category: { select: { name: true } } },
+  });
   if (!article) return { title: "Not found" };
-  return { title: article.title, description: article.excerpt };
+  const canonical = `/article/${article.slug}`;
+  return {
+    title: article.title,
+    description: article.excerpt,
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      title: article.title,
+      description: article.excerpt,
+      url: absUrl(canonical),
+      images: article.coverImageUrl ? [article.coverImageUrl] : undefined,
+      publishedTime: article.publishedAt?.toISOString(),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.excerpt,
+      images: article.coverImageUrl ? [article.coverImageUrl] : undefined,
+    },
+  };
 }
 
 const INCLUDE = {
@@ -58,8 +82,26 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     data: { views: { increment: 1 } },
   });
 
+  const articleSchema = newsArticleSchema({
+    slug: article.slug,
+    title: article.title,
+    excerpt: article.excerpt,
+    coverImageUrl: article.coverImageUrl,
+    publishedAt: article.publishedAt,
+    updatedAt: article.updatedAt,
+    authorName: article.author?.name,
+    authorSlug: article.author?.authorProfile?.slug,
+    categoryName: article.category.name,
+  });
+  const crumbs = breadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: article.category.name, path: `/category/${article.category.slug}` },
+    { name: article.title, path: `/article/${article.slug}` },
+  ]);
+
   return (
     <div className="container-tw py-8 animate-fade-in">
+      <JsonLd data={[articleSchema, crumbs]} />
       <div className="max-w-4xl mx-auto">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-2xs text-ink-400 mb-6">

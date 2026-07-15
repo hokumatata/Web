@@ -31,7 +31,7 @@ export function NewsletterInline() {
             <Mail size={16} className="text-accent" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-ink-50">Daily Briefing</h3>
+            <h3 className="text-sm font-bold text-ink-50">The Daily Macro Brief</h3>
             <p className="text-xs text-ink-400 mt-0.5">Markets &amp; crypto — every morning</p>
           </div>
         </div>

@@ -25,30 +25,30 @@ export function HeroLead({ a }: { a: ArticleCardData }) {
             className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-3">
-            {a.isBreaking && (
-              <span className="inline-flex items-center gap-1.5 bg-down/90 text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-sm">
-                <Zap size={9} className="fill-white" />
-                Breaking
-              </span>
-            )}
-            <Link href={`/category/${a.category.slug}`} className="text-[11px] uppercase font-bold tracking-wider text-accent hover:underline">
-              {a.category.name}
-            </Link>
-          </div>
-          <h2 className="font-serif text-2xl md:text-4xl font-bold text-white leading-[1.15] tracking-tight text-balance">
-            <Link href={`/article/${a.slug}`} className="hover:underline decoration-2 underline-offset-4">{a.title}</Link>
-          </h2>
-          <p className="mt-3 text-white/80 text-sm md:text-base text-pretty max-w-2xl line-clamp-2 leading-relaxed">{a.excerpt}</p>
-          <div className="mt-4 flex items-center gap-3 text-white/60 text-xs">
-            {a.author && <span className="font-medium">{a.author.name}</span>}
-            <span className="flex items-center gap-1"><Clock size={11} /> {readTime(a.body)} min read</span>
-            <span>{timeAgo(a.publishedAt)}</span>
-          </div>
-        </div>
+        <span className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
       </Link>
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 p-6 md:p-8">
+        <div className="flex items-center gap-3 mb-3">
+          {a.isBreaking && (
+            <span className="inline-flex items-center gap-1.5 bg-down/90 text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-sm">
+              <Zap size={9} className="fill-white" />
+              Breaking
+            </span>
+          )}
+          <Link href={`/category/${a.category.slug}`} className="pointer-events-auto text-[11px] uppercase font-bold tracking-wider text-accent hover:underline">
+            {a.category.name}
+          </Link>
+        </div>
+        <h2 className="font-serif text-2xl md:text-4xl font-bold text-white leading-[1.15] tracking-tight text-balance">
+          <Link href={`/article/${a.slug}`} className="pointer-events-auto hover:underline decoration-2 underline-offset-4">{a.title}</Link>
+        </h2>
+        <p className="mt-3 text-white/80 text-sm md:text-base text-pretty max-w-2xl line-clamp-2 leading-relaxed">{a.excerpt}</p>
+        <div className="mt-4 flex items-center gap-3 text-white/60 text-xs">
+          {a.author && <span className="font-medium">{a.author.name}</span>}
+          <span className="flex items-center gap-1"><Clock size={11} /> {readTime(a.body)} min read</span>
+          <span>{timeAgo(a.publishedAt)}</span>
+        </div>
+      </div>
     </article>
   );
 }

@@ -1,14 +1,8 @@
 // Centralized, structured editorial content for The Forex Republic.
 //
-// This is the single source of truth for the demo/seed news content. The Prisma
+// This is the single source of truth for editorial content. The Prisma
 // seed script (`prisma/seed.ts`) imports `newsArticles` and maps over it to
-// populate the database. Components and pages render from the database (Prisma),
-// so they are already CMS-ready: to attach a headless CMS later, point the data
-// layer at the CMS instead of this file.
-//
-// References to authors and categories are kept symbolic (`authorKey`,
-// `categorySlug`) and timestamps are relative (`publishedAgoMs`) so this module
-// stays free of any runtime/database IDs.
+// populate the database.
 
 export type AuthorKey = "admin" | "editor" | "author1";
 
@@ -23,1305 +17,390 @@ export interface NewsArticle {
   status: ArticleStatus;
   isFeatured?: boolean;
   isBreaking?: boolean;
-  /** Milliseconds before seed time that the article was published. */
   publishedAgoMs: number;
   authorKey: AuthorKey;
   categorySlug: string;
 }
 
+const HOUR = 3_600_000;
+
 export const newsArticles: NewsArticle[] = [
-    {
-      slug: "bitcoin-surges-past-70k-institutional-demand",
-      title: "Bitcoin Surges Past $70K as Institutional Demand Hits Record",
-      excerpt: "The world's largest cryptocurrency broke through the $70,000 barrier for the first time since March, driven by unprecedented ETF inflows and growing institutional adoption.",
-      body: `# Bitcoin Surges Past $70K as Institutional Demand Hits Record
+  {
+    slug: "strategy-no-longer-one-way-bitcoin-buyer-bitwise-cio",
+    title: "Strategy Is No Longer a One-Way Bitcoin Buyer as Bitwise CIO Flags New Market Risk",
+    excerpt: "Bitwise CIO Matt Hougan says Strategy is no longer only a one-way Bitcoin buyer, raising fresh questions about MSTR, STRC and Bitcoin treasury risk.",
+    body: `# Strategy Is No Longer a One-Way Bitcoin Buyer as Bitwise CIO Flags New Market Risk
 
-Bitcoin crossed the $70,000 mark on Tuesday, marking a significant milestone as institutional investors continue to pour capital into spot Bitcoin ETFs.
+## Key Pointers
+- Bitwise CIO Matt Hougan says Strategy is no longer only a one-way Bitcoin buyer.
+- Strategy's new capital framework may allow it to monetize BTC holdings when needed.
+- MSTR and STRC weakness may reflect broader crypto deleveraging, not just company-specific pressure.
 
-## Key Drivers
+## Introduction
 
-The rally was fueled by several factors:
+Strategy has long been treated by markets as a leveraged Bitcoin proxy with a simple rule: raise capital, buy BTC, repeat. That assumption is now being tested after Bitwise CIO Matt Hougan said the company's capital framework gives it more flexibility, including the ability to monetize part of its Bitcoin holdings.
 
-- **ETF Inflows**: Spot Bitcoin ETFs saw over $900 million in net inflows on Monday alone, the highest single-day figure since launch
-- **Halving Anticipation**: With the next halving event approaching, supply dynamics are tightening
-- **Macro Tailwinds**: Expectations of Federal Reserve rate cuts are supporting risk assets broadly
+## Market Context
 
-## Market Impact
+The long-held thesis of Strategy acting as a permanent, unidirectional black hole for Bitcoin is officially shifting. According to Bitwise CIO Matt Hougan, Strategy's evolving capital framework indicates the firm is transitioning from a "permanent accumulator" to a sophisticated "balance-sheet operator." This structural evolution means that Strategy is no longer locked into being a one-way buyer; its updated framework provides the operational flexibility to monetize portions of its Bitcoin holdings when market conditions dictate. This revelation has triggered fresh scrutiny across the market, visibly impacting public proxies like MSTR and introducing notable price volatility to related entities like STRC.
 
-The move higher has pushed Bitcoin's market capitalization above $1.4 trillion, making it the 8th largest asset globally by market cap.
+## Analysis
 
-> "We're seeing a structural shift in how institutional allocators view Bitcoin," said a senior portfolio manager at a major asset management firm. "This isn't speculative froth — it's portfolio construction."
+For years, the public-company BTC ownership trend was viewed through a singular lens, heavily dominated by Strategy's aggressive accumulation flows. However, the potential for active treasury management introduces an entirely new risk vector: NAV premium compression. Much like the historic GBTC premium unwind that reshaped institutional crypto markets, MSTR's premium or discount to its Net Asset Value (NAV) is now subject to intense evaluation. If the market begins pricing Strategy not as a pure accumulation vehicle but as an active manager that could introduce supply back into the market, the traditional leverage premium enjoyed by MSTR could face structural deleveraging pressure, irrespective of broader Bitcoin treasury company inflows.
 
-## Technical Outlook
+## Technical Analysis
 
-From a technical standpoint, Bitcoin has broken above a key resistance level that had capped gains since March. The next major resistance sits at the all-time high of $73,800.
+From a structural standpoint, tracking MSTR's support and resistance levels alongside its direct BTC correlation is critical. The immediate focus remains on whether MSTR can sustain its historical premium to its underlying Bitcoin holdings or if NAV premium compression will pull the asset toward a tighter correlation with spot BTC.
 
-Trading volumes across major exchanges surged 45% compared to the 30-day average, suggesting strong conviction behind the move.
+## Market Takeaway
 
-## What's Next
+The market risk is not only whether Strategy owns enough Bitcoin. It is whether investors still value the company as a permanent accumulator or start pricing it as an active treasury manager.`,
+    coverImageUrl: "",
+    status: "PUBLISHED",
+    isFeatured: true,
+    isBreaking: false,
+    publishedAgoMs: 1 * HOUR,
+    authorKey: "admin",
+    categorySlug: "crypto",
+  },
 
-Analysts are watching several catalysts that could sustain the rally:
+  {
+    slug: "revolut-delist-usdt-august-europe-stablecoin-rules",
+    title: "Revolut to Delist USDT by August 31 as Europe's Stablecoin Rules Tighten",
+    excerpt: "Revolut will end USDT support by August 31, with buy, deposit, withdrawal and auto-conversion deadlines as Europe tightens stablecoin oversight.",
+    body: `# Revolut to Delist USDT by August 31 as Europe's Stablecoin Rules Tighten
 
-1. Upcoming Federal Reserve meeting and potential dovish pivot
-2. Continued ETF demand from wealth management platforms
-3. The Bitcoin halving, expected in April
-4. Growing adoption in emerging markets`,
-      coverImageUrl: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: true,
-      isBreaking: true,
-      publishedAgoMs: 1000 * 60 * 30,
-      authorKey: "admin",
-      categorySlug: "crypto",
-    },
-    {
-      slug: "fed-holds-rates-steady-signals-june-cut",
-      title: "Fed Holds Rates Steady, Signals Potential June Cut as Inflation Cools",
-      excerpt: "The Federal Reserve kept interest rates unchanged at its latest meeting but signaled growing confidence that inflation is moving sustainably toward 2%, opening the door for rate cuts.",
-      body: `# Fed Holds Rates Steady, Signals Potential June Cut
+## Key Pointers
+- Revolut will end support for USDT by August 31.
+- Users can buy USDT until July 6, deposit until July 30, and sell or withdraw until August 31.
+- Remaining USDT balances will be converted into fiat after the deadline.
 
-The Federal Open Market Committee voted unanimously to maintain the federal funds rate at 5.25-5.50% on Wednesday, while updating its forward guidance to reflect progress on inflation.
+## Introduction
 
-## Key Takeaways
+USDT is facing another distribution setback in Europe as Revolut prepares to remove support for the stablecoin. The decision comes as platforms adjust stablecoin offerings around stricter European regulatory standards.
 
-Chair Jerome Powell struck a notably dovish tone in his press conference:
+## Market Context
 
-- Inflation has made "considerable further progress" toward the 2% target
-- The labor market remains strong but is coming into better balance
-- The committee sees risks as "roughly balanced" between doing too much and too little
+The transition away from non-compliant stablecoins in Europe is accelerating, driven by rigid operational deadlines. Fintech giant Revolut has laid out a strict, date-driven timeline for the complete phased removal of Tether (USDT). Users will only be permitted to buy USDT until July 6, while the window for deposits closes on July 30. The final deadline for users to actively sell or withdraw their remaining USDT balances is set for August 31. Following this cutoff, any remaining USDT balances held on the platform will be automatically converted into fiat currency. This move highlights Europe's tightening stablecoin environment and underscores the rapidly rising structural advantage of regulatory-compliant stablecoins.
 
-## Market Reaction
+## Analysis
 
-Markets rallied sharply following the announcement:
+This delisting is a direct consequence of the Markets in Crypto-Assets (MiCA) stablecoin compliance context, which mandates strict licensing and reserve requirements for asset-referenced tokens. As exchange delisting trends catch up with regional laws, the USDT vs USDC market share in Europe is experiencing a notable shift. While Tether's global liquidity impact remains massive, its European settlement flows are facing distribution bottlenecks. Compliance-first stablecoins like USDC are capturing the void left behind as major retail gateways like Revolut adjust their product suites to avoid regulatory penalties.
 
-- **S&P 500**: +1.2% to close at 5,180
-- **10Y Treasury**: Yield fell 8bp to 4.22%
-- **Dollar Index**: Dropped 0.4% to 103.8
-- **Gold**: Rose $22 to $2,065/oz
+## Market Takeaway
 
-## Economic Projections
+The market should treat Revolut's move as part of a broader European stablecoin sorting process, where distribution could increasingly favor compliant issuers.`,
+    coverImageUrl: "",
+    status: "PUBLISHED",
+    isFeatured: false,
+    isBreaking: true,
+    publishedAgoMs: 3 * HOUR,
+    authorKey: "editor",
+    categorySlug: "crypto",
+  },
 
-The updated Summary of Economic Projections showed:
+  {
+    slug: "pepe-bonk-meme-coin-rally-high-beta-crypto-rotation",
+    title: "PEPE and BONK Lead Meme Coin Rally as Traders Rotate Back Into High-Beta Crypto",
+    excerpt: "PEPE and BONK outperform major crypto assets with a 14% surge. Discover the key breakout levels and volume trends driving this speculative rotation.",
+    body: `# PEPE and BONK Lead Meme Coin Rally as Traders Rotate Back Into High-Beta Crypto
 
-1. Core PCE forecast lowered to 2.4% for 2024 (from 2.6%)
-2. GDP growth estimate raised to 2.1% (from 1.8%)
-3. Unemployment rate projection unchanged at 4.0%
-4. Median dot plot still shows three rate cuts in 2024
+## Key Pointers
+- PEPE and BONK rallied more than 14%, outperforming Bitcoin and major crypto assets.
+- Rising volume and stronger retail participation suggest capital is rotating back into meme coins.
+- Both tokens are testing key breakout zones that could confirm a broader speculative rebound.
 
-> "The data has been encouraging," Powell said. "We want to see more good data, but we're not looking for great data."`,
-      coverImageUrl: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: true,
-      publishedAgoMs: 1000 * 60 * 60 * 2,
-      authorKey: "editor",
-      categorySlug: "macro",
-    },
-    {
-      slug: "ethereum-layer-2-scaling-milestone",
-      title: "Ethereum Layer 2s Hit $40B TVL as Scaling Solutions Mature",
-      excerpt: "Combined total value locked across Ethereum L2 networks has surpassed $40 billion, driven by Arbitrum, Optimism, and Base leading the charge in DeFi adoption.",
-      body: `# Ethereum Layer 2s Hit $40B TVL
+## Introduction
 
-The Ethereum scaling ecosystem reached a significant milestone as combined TVL across Layer 2 networks surpassed $40 billion for the first time.
+Meme coins are beginning to move before the market has fully agreed that risk appetite is back. PEPE and BONK surged more than 14%, turning a modest crypto rebound into a test of whether speculative capital is returning to the highest-beta corner of the market.
 
-## L2 Landscape
+## Market Context
 
-The top networks by TVL:
+The recent price surge functions primarily as a classic rotation trade. As Bitcoin stabilizes inside a predictable consolidation range, capital is moving down the risk curve in search of outsized short-term returns. Retail and momentum traders are moving aggressively back into established speculative vehicles. Within this landscape, BONK is capitalizing heavily on broader Solana-linked ecosystem momentum, while PEPE continues to solidify its status as the structural liquidity benchmark for Ethereum-based meme coins.
 
-- **Arbitrum**: $15.2B (+12% MoM)
-- **Optimism**: $8.7B (+18% MoM)
-- **Base**: $7.1B (+45% MoM)
-- **zkSync Era**: $3.8B (+22% MoM)
-- **Starknet**: $2.1B (+35% MoM)
+## Analysis
 
-## Growth Drivers
+On-chain metrics back up this shift, highlighted by a sudden spike in 24-hour trading volume and a corresponding resurgence in social volume for both tokens. As Bitcoin dominance shows signs of a localized topping pattern, the total meme coin market cap is expanding rapidly. This capital flow is tightly correlated with heightened Solana ecosystem transaction activity and robust pool liquidity within the ETH meme coin sectors, confirming that the move is backed by active capital deployment rather than thin-order-book volatility.
 
-Several factors are contributing to the L2 boom:
+## Technical Analysis
 
-1. **EIP-4844 (Proto-Danksharding)**: Transaction costs on L2s have dropped 90%+ since the Dencun upgrade
-2. **DeFi Migration**: Major protocols are deploying on L2s, bringing liquidity with them
-3. **User Experience**: Improved bridging and wallet support have lowered friction
-4. **Incentive Programs**: Networks like Arbitrum and Optimism continue to distribute grants
+From a charting perspective, both assets are navigating pivotal technical thresholds. BONK's immediate overhead resistance sits near $0.0000055–$0.0000058. A clean breakout above this zone opens the door to $0.0000073, with an extended target at $0.0000080. For PEPE, resistance is currently concentrated around the $0.0000032–$0.0000034 corridor, where a successful breakout targets $0.0000041. The bullish thesis is completely invalidated if both assets fail to clear these immediate resistance zones and subsequently lose their recent higher lows.
 
-## Impact on Ethereum
+## Market Takeaway
 
-The growth of L2s is having a profound effect on the Ethereum ecosystem:
+The overlooked variable is not the percentage move. It is whether liquidity continues to rotate into higher-beta tokens after the first breakout attempt.`,
+    coverImageUrl: "",
+    status: "PUBLISHED",
+    isFeatured: false,
+    isBreaking: false,
+    publishedAgoMs: 5 * HOUR,
+    authorKey: "author1",
+    categorySlug: "crypto",
+  },
 
-- Gas fees on L1 have stabilized at lower levels
-- Ethereum's value proposition as a settlement layer is strengthening
-- New applications that weren't viable on L1 are emerging on L2s
+  {
+    slug: "xrp-rare-buy-signal-mvrv-historic-undervaluation",
+    title: "XRP Flashes Rare Buy Signal as MVRV Data Points to Historic Undervaluation",
+    excerpt: "XRP reclaims $1.13 as Santiment MVRV data flags a historic undervaluation zone, aligning with a rare technical SuperTrend buy signal.",
+    body: `# XRP Flashes Rare Buy Signal as MVRV Data Points to Historic Undervaluation
 
-> "We're entering the era of abundant blockspace," noted a leading DeFi researcher.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1622630998477-20aa696ecb05?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: true,
-      publishedAgoMs: 1000 * 60 * 60 * 4,
-      authorKey: "admin",
-      categorySlug: "crypto",
-    },
-    {
-      slug: "dollar-weakens-on-dovish-fed",
-      title: "Dollar Index Falls to 3-Month Low on Dovish Fed Expectations",
-      excerpt: "The U.S. dollar dropped against all G10 currencies as traders price in a more aggressive rate-cutting cycle from the Federal Reserve in 2024.",
-      body: `# Dollar Index Falls to 3-Month Low
+## Key Pointers
+- XRP gained more than 3% and reclaimed the $1.13 area.
+- Santiment data shows 30-day MVRV near -45% and 365-day MVRV near -47%.
+- A fresh SuperTrend buy signal has raised expectations of a relief rally.
 
-The DXY dollar index slid 0.8% to 103.2 on Thursday, its lowest level since January, as markets increasingly bet on Federal Reserve rate cuts.
+## Introduction
 
-## Currency Moves
+XRP's latest rebound is not just another market-wide bounce. On-chain valuation data and technical signals are lining up at the same time, giving traders a cleaner reason to ask whether the recent sell-off has reached exhaustion.
 
-Major pairs saw significant moves:
+## Market Context
 
-- **EUR/USD**: Rose to 1.0920, highest since February
-- **GBP/USD**: Advanced to 1.2780, up 0.6%
-- **USD/JPY**: Dropped to 148.50 as rate differential narrows
-- **AUD/USD**: Climbed to 0.6620 on risk-on sentiment
-
-## Positioning Data
+The underlying narrative for XRP presents a striking contradiction. While general retail sentiment remains deeply depressed following weeks of negative headlines, core on-chain metrics reveal a setup that historically precedes major trend reversals. Specifically, the Market Value to Realized Value (MVRV) ratio highlights that holders are sitting on unusually severe, deep unrealized losses. In historical crypto market cycles, this exact alignment of pervasive bearish sentiment and extreme asset undervaluation occurs near macro capitulation zones.
 
-CFTC data shows that speculative positioning in the dollar has shifted:
+## Analysis
 
-- Net long positions have been cut by 40% over the past month
-- Leveraged funds are now net short EUR/USD for the first time since September
-- Carry trade flows are rotating out of dollar-funded positions
+Data from Santiment underscores this historic dislocation, with the 30-day MVRV hovering near -45% and the macro 365-day MVRV sitting at -47%. These metrics reveal that nearly all cohorts of buyers are underwater, significantly reducing immediate sell pressure. Concurrently, exchange flows show a slowdown in deposits, while whale holdings have begun to stabilize or subtly accumulate. This on-chain stabilization, combined with steady XRP Ledger transaction activity and a modest rise in derivatives open interest, suggests a firming market floor.
 
-## Outlook
+## Technical Analysis
 
-Most major banks have revised their dollar forecasts lower for the rest of 2024, with the consensus pointing to further weakness as the Fed begins its easing cycle.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      publishedAgoMs: 1000 * 60 * 60 * 6,
-      authorKey: "author1",
-      categorySlug: "forex",
-    },
-    {
-      slug: "nvidia-earnings-beat-ai-demand",
-      title: "Nvidia Smashes Earnings Estimates as AI Chip Demand Outpaces Supply",
-      excerpt: "Nvidia reported quarterly revenue of $22.1 billion, crushing Wall Street estimates by 15%, as demand for AI training hardware continues to accelerate across industries.",
-      body: `# Nvidia Smashes Earnings Estimates
+XRP's current recovery zone has successfully established a foothold around $1.13. Key structural support is now locked between $1.10 and $1.12. Immediate overhead resistance rests at $1.18–$1.20. A clean daily close above this level could rapidly fuel a breakout targeting $1.28 and potentially extending to $1.35. Conversely, a breakdown and loss of the crucial $1.10 horizontal support invalidates the ongoing bullish structure.
 
-Nvidia reported fiscal Q4 results that exceeded even the most bullish expectations, with data center revenue more than tripling year-over-year.
+## Market Takeaway
 
-## Headline Numbers
+The relief-rally thesis survives only if XRP holds reclaimed support and turns undervaluation data into actual demand.`,
+    coverImageUrl: "",
+    status: "PUBLISHED",
+    isFeatured: true,
+    isBreaking: false,
+    publishedAgoMs: 7 * HOUR,
+    authorKey: "admin",
+    categorySlug: "analysis",
+  },
 
-- **Revenue**: $22.1B vs. $20.4B expected (+265% YoY)
-- **EPS**: $5.16 vs. $4.60 expected
-- **Data Center**: $18.4B (+409% YoY)
-- **Gross Margin**: 76.7%, up from 66.1% a year ago
-
-## Key Highlights
-
-CEO Jensen Huang called the quarter a "tipping point" for generative AI:
-
-1. Every major cloud provider is expanding Nvidia GPU capacity
-2. Enterprise adoption is accelerating beyond hyperscalers
-3. The new Blackwell architecture is seeing "incredible" pre-order demand
-4. Sovereign AI initiatives are driving demand from national governments
-
-## Stock Reaction
+  {
+    slug: "gram-price-targets-2-binance-campaign-derivatives-rally",
+    title: "Gram Price Targets $2 as Binance Campaign Fuels Derivatives-Led Rally",
+    excerpt: "Gram (GRAM) rallies 9% following its rebrand from Toncoin, propelled by a 51% surge in derivatives volume and new Binance trading campaigns.",
+    body: `# Gram Price Targets $2 as Binance Campaign Fuels Derivatives-Led Rally
 
-Shares surged 12% in after-hours trading, adding roughly $250 billion in market capitalization and pushing Nvidia's valuation above $2 trillion.
+## Key Pointers
+- Gram surged nearly 9% after Binance launched a campaign following its rebrand from Toncoin.
+- Derivatives volume jumped nearly 51%, while Open Interest rose more than 18%.
+- GRAM remains inside an ascending channel, with traders watching the $2 level.
 
-## Analyst Takes
+## Introduction
 
-Wall Street analysts raised their price targets:
+Gram's rally is being driven by more than a simple rebrand headline. Binance support has restored liquidity, derivatives traders are adding exposure, and price action is now pressing against a short-term breakout zone.
 
-- Morgan Stanley: $850 → $1,000
-- Goldman Sachs: $800 → $950
-- JPMorgan: $750 → $900
+## Market Context
 
-> "Nvidia is not just a chip company anymore — it's the infrastructure backbone of the AI revolution," noted a senior tech analyst.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: true,
-      publishedAgoMs: 1000 * 60 * 60 * 8,
-      authorKey: "editor",
-      categorySlug: "stocks",
-    },
-    {
-      slug: "defi-total-value-locked-rebounds",
-      title: "DeFi TVL Rebounds to $120B as Yield Farming Renaissance Begins",
-      excerpt: "Decentralized finance protocols have seen a resurgence in activity, with total value locked climbing back above $120 billion as new yield opportunities emerge.",
-      body: `# DeFi TVL Rebounds to $120B
+The primary catalyst behind the asset's near 9% surge is Binance's aggressive reopening of trading services and the rollout of an associated promotional campaign following the high-profile TON-to-GRAM brand transition. From an institutional perspective, the restoration of high-tier liquidity post-rebrand is a vital milestone. Rebrands frequently suffer from a post-announcement lull, but direct exchange backing has successfully sustained the initial momentum, transforming the token into a highly active vehicle for both spot and derivatives traders.
 
-The decentralized finance ecosystem is experiencing a renaissance, with TVL surging past $120 billion as innovative yield strategies attract capital back to on-chain protocols.
+## Analysis
 
-## Top Protocols
+CoinGlass data highlights the sheer velocity of this derivatives-led expansion, showing a 51% explosion in derivatives trading volume alongside an 18% increase in Open Interest (OI). Funding rates have ticked slightly positive, reflecting a growing appetite from aggressive buyers without entering dangerously overleveraged territory just yet. This derivatives activity, coupled with strong spot purchasing volume on Binance, demonstrates a balanced long/short positioning where buyers are successfully absorbing overhead supply.
 
-Leading the charge:
+## Technical Analysis
 
-- **Lido**: $32.5B (liquid staking)
-- **Aave**: $14.2B (lending)
-- **MakerDAO**: $10.8B (stablecoin)
-- **Uniswap**: $6.5B (DEX)
-- **Eigen Layer**: $5.2B (restaking)
+GRAM's price action is well-defined, moving consistently within the boundaries of a structural ascending channel. Immediate resistance is established at $1.85–$1.90. Clearing this zone positions GRAM for a direct test of the major psychological upside target at $2.00. Strong horizontal and dynamic channel support is situated at $1.75–$1.78. A clean daily break below the lower ascending channel support completely invalidates the ongoing bullish trend.
 
-## New Trends
+## Market Takeaway
 
-The current DeFi wave is characterized by:
+GRAM's next move depends on whether derivatives demand can hold after the Binance-campaign impulse fades.`,
+    coverImageUrl: "",
+    status: "PUBLISHED",
+    isFeatured: false,
+    isBreaking: false,
+    publishedAgoMs: 10 * HOUR,
+    authorKey: "editor",
+    categorySlug: "crypto",
+  },
 
-1. **Restaking**: EigenLayer and similar protocols offer yields on already-staked assets
-2. **Real World Assets**: Tokenized treasuries and private credit are bridging TradFi and DeFi
-3. **Intent-Based Trading**: New DEX designs that optimize execution for traders
-4. **Points Programs**: Protocols are incentivizing early adoption with points/airdrops
+  {
+    slug: "germany-local-banks-crypto-trading-retail-demand-policy-reversal",
+    title: "Germany's Local Banks Move Into Crypto Trading as Retail Demand Forces a Policy Reversal",
+    excerpt: "Massive policy U-turn as Germany's local cooperative and savings banks build infrastructure to offer direct crypto trading to millions.",
+    body: `# Germany's Local Banks Move Into Crypto Trading as Retail Demand Forces a Policy Reversal
 
-> "DeFi 2.0 is more mature, more institutional, and more connected to real-world financial flows," observed a DeFi analyst.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      publishedAgoMs: 1000 * 60 * 60 * 10,
-      authorKey: "admin",
-      categorySlug: "crypto",
-    },
-    {
-      slug: "global-inflation-slowing-central-banks",
-      title: "Global Inflation Continues to Slow, Opening Door for Central Bank Pivots",
-      excerpt: "Inflation readings across major economies are trending lower, with the ECB, Bank of England, and Bank of Canada all signaling potential rate cuts in the coming months.",
-      body: `# Global Inflation Continues to Slow
+## Key Pointers
+- German cooperative and savings banks are rolling out crypto trading through existing bank accounts.
+- DZ Bank is supporting nearly 650 cooperative banks, while DekaBank is building a platform for 340 savings banks.
+- A survey shows 38% of Germans trust their primary bank for crypto transactions, compared with 19% who prefer crypto platforms.
 
-The global disinflationary trend is gaining momentum, with multiple central banks now preparing to ease monetary policy after the most aggressive tightening cycle in decades.
+## Introduction
 
-## Regional Snapshot
+Germany's banking sector is doing what it once warned against. After years of caution, cooperative and savings banks are preparing to offer crypto access to millions of customers through familiar banking channels.
 
-- **Eurozone**: CPI fell to 2.4% YoY, approaching the ECB's 2% target
-- **UK**: Headline CPI dropped to 3.2%, down from 4.0% in January
-- **Canada**: Inflation at 2.8%, within the BoC's target range
-- **Japan**: Core CPI at 2.8%, still above the BoJ's target
+## Market Context
 
-## Central Bank Signals
+This structural evolution represents a profound institutional turnaround within Western European TradFi adoption. Just four years ago, the country's prominent savings banks stood unified in opposition to retail digital asset products, citing "incalculable risks" and extreme volatility. Today, a dramatic shift in consumer expectations, coupled with the arrival of highly regulated, institutional-grade infrastructure, has forced an outright policy reversal. German retail investors are demanding native access to digital assets, and local banks are stepping up to retain their capital footprints.
 
-- **ECB**: President Lagarde said the bank is "data-dependent but confident"
-- **Bank of England**: Two MPC members voted for a cut in March
-- **Bank of Canada**: Governor Macklem said a June cut is "within the realm of discussion"
-- **Fed**: Signaling potential June cut pending more data
+## Analysis
 
-## Implications for Markets
+The scale of this infrastructure rollout is massive. DZ Bank is actively deploying crypto custody and execution services to support its network of nearly 650 cooperative banks. Simultaneously, DekaBank is constructing a comprehensive digital asset framework tailored for 340 regional savings banks. This shift is deeply rooted in consumer sentiment; a recent Boerse Stuttgart Digital survey indicates that 38% of Germans explicitly trust their primary retail bank to facilitate crypto transactions, whereas only 19% prefer utilizing native, offshore crypto platforms. Backed by the clear regulatory parameters of Europe's MiCA framework, this banking architecture bridges the trust gap that long isolated conservative European wealth from the broader crypto economy.
 
-The synchronized easing cycle has significant implications:
+## Market Takeaway
 
-1. Bond yields are likely to decline further
-2. Risk assets should benefit from lower rates
-3. Currency markets may see increased volatility
-4. Emerging markets could see capital inflows`,
-      coverImageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      publishedAgoMs: 1000 * 60 * 60 * 12,
-      authorKey: "author1",
-      categorySlug: "macro",
-    },
-    {
-      slug: "sec-crypto-regulation-framework",
-      title: "SEC Unveils Comprehensive Crypto Regulatory Framework",
-      excerpt: "The Securities and Exchange Commission has proposed a new regulatory framework that would provide clearer guidelines for digital asset classification and exchange registration.",
-      body: `# SEC Unveils Comprehensive Crypto Regulatory Framework
+The market implication is clear: in Europe, crypto access may increasingly shift from offshore exchange apps to regulated bank interfaces.`,
+    coverImageUrl: "",
+    status: "PUBLISHED",
+    isFeatured: false,
+    isBreaking: false,
+    publishedAgoMs: 14 * HOUR,
+    authorKey: "admin",
+    categorySlug: "macro",
+  },
 
-The SEC released a 200-page proposal on Monday outlining a comprehensive regulatory framework for digital assets, marking the most significant step toward crypto regulation in U.S. history.
+  {
+    slug: "binance-adds-circle-strategy-bstocks-collateral-tokenized-markets",
+    title: "Binance Adds Circle, Strategy and 13 bStocks as Collateral in Push Toward Tokenized Markets",
+    excerpt: "Binance adds 15 tokenized bStocks, including Nvidia, Tesla, Circle, and Strategy, as cross-margin collateral, bridging crypto and equities.",
+    body: `# Binance Adds Circle, Strategy and 13 bStocks as Collateral in Push Toward Tokenized Markets
 
-## Key Provisions
+## Key Pointers
+- Binance added 15 bStocks as collateral across Cross Margin, Portfolio Margin, and Portfolio Margin Pro.
+- Tokenized versions of Circle, Strategy, Nvidia, Tesla, SpaceX and others are now supported.
+- The move strengthens the bridge between crypto collateral markets and traditional equities.
 
-The framework introduces several notable elements:
+## Introduction
 
-1. **Token Classification**: A new test for determining whether a digital asset is a security, commodity, or utility token
-2. **Exchange Registration**: Streamlined registration process for crypto exchanges
-3. **Custody Standards**: Clear custody requirements for institutions holding digital assets
-4. **Stablecoin Rules**: New reserve and audit requirements for stablecoin issuers
+Binance is turning tokenized equities from a trading novelty into balance-sheet collateral. By allowing users to post bStocks such as Circle, Strategy and Nvidia across margin products, the exchange is pushing tokenized securities deeper into crypto market structure.
 
-## Industry Reaction
+## Market Context
 
-The crypto industry response has been cautiously optimistic:
+This development should be analyzed as a significant advancement in tokenization infrastructure rather than a routine exchange listing update. By incorporating tokenized equities directly into its primary risk engines, Binance is fundamentally altering the utility of tokenized real-world assets (RWAs). These digital representations of traditional equities are no longer static assets held purely for spot exposure; they are fully functional, yield-efficient, cross-tier collateral assets that actively interact with complex crypto-native derivative frameworks.
 
-> "This is what we've been asking for — clear rules of the road," said a leading crypto exchange CEO. "While we need to review the details, the direction is positive."
+## Analysis
 
-## Market Impact
+The expansion encompasses a full suite of 15 distinct bStocks integrated directly across Binance's Cross Margin, Portfolio Margin, and Portfolio Margin Pro Tiers. Among the most critical inclusions are the tokenized representations of high-liquidity crypto-adjacent institutions like Circle (CRCL) and Strategy (MSTR), alongside major tech behemoths like Nvidia, Tesla, and SpaceX. While specific risk haircut frameworks vary by asset tier, the broader market implication is clear: this integration heavily accelerates the expansion of the tokenized stock market. It creates a seamless bridge for large-scale market makers and retail traders to optimize capital efficiency by backing their perpetual futures or margin positions with tokenized equity instruments.
 
-- Bitcoin rose 3% on the announcement
-- Coinbase stock jumped 8%
-- Total crypto market cap increased by $50 billion
+## Market Takeaway
 
-## Timeline
+The signal is that tokenized equities are moving from narrative to market plumbing. Collateral usage is where tokenization starts to matter.`,
+    coverImageUrl: "",
+    status: "PUBLISHED",
+    isFeatured: false,
+    isBreaking: false,
+    publishedAgoMs: 18 * HOUR,
+    authorKey: "editor",
+    categorySlug: "stocks",
+  },
 
-The SEC has opened a 90-day public comment period, with final rules expected by year-end.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      publishedAgoMs: 1000 * 60 * 60 * 14,
-      authorKey: "editor",
-      categorySlug: "crypto",
-    },
-    {
-      slug: "yen-carry-trade-unwind-risks",
-      title: "Yen Carry Trade Faces Unwinding Risk as BOJ Hints at Rate Hikes",
-      excerpt: "The Bank of Japan's shifting stance on negative interest rates is creating concerns about a potential unwinding of the massive yen carry trade.",
-      body: `# Yen Carry Trade Faces Unwinding Risk
+  {
+    slug: "trump-memecoin-636m-retail-investors-lost-3-8b",
+    title: "Trump Memecoin Generated $636M as Retail Investors Lost $3.8B, Data Shows",
+    excerpt: "On-chain data reveals the stark asymmetric profits of the TRUMP memecoin: $636 million generated for insiders as retail loses billions.",
+    body: `# Trump Memecoin Generated $636M as Retail Investors Lost $3.8B, Data Shows
 
-The Bank of Japan's increasingly hawkish signals are raising alarms about the potential for a disorderly unwinding of the yen carry trade, one of the largest leveraged positions in global markets.
+## Key Pointers
+- Trump reportedly received $636 million tied to the TRUMP memecoin.
+- Nearly 1 million wallets lost a combined $3.81 billion.
+- The token is down 97% from its $75.35 peak, deepening Washington's crypto ethics debate.
 
-## The Scale of the Trade
+## Introduction
 
-- Estimated $4-5 trillion in yen-funded carry positions globally
-- Hedge funds and institutional investors have been short yen for years
-- The trade has been profitable due to Japan's ultra-low rates
+The TRUMP memecoin has become a case study in political branding, retail speculation and asymmetric crypto profits. New blockchain data suggests Trump-linked entities earned hundreds of millions while nearly one million wallets were left with deep losses.
 
-## BOJ Signals
+## Market Context
 
-Governor Ueda has indicated that conditions for ending negative rates are "gradually being fulfilled":
+Rather than being viewed as a standard cyclical draw-down for a highly volatile memecoin, the reality of the TRUMP token highlights a severe structural divergence between issuer economics and baseline retail outcomes. The asset has experienced a catastrophic 97% collapse from its historical high of $75.35. The sheer scale of the financial destruction has spilled well beyond the crypto ecosystem, directly fueling a major ethics and regulatory debate in Washington regarding the role of public officials and political campaigns promoting highly speculative digital assets.
 
-- Wage growth has hit 5.3%, the strongest in 30 years
-- Core inflation has been above 2% for 22 consecutive months
-- The output gap has turned positive
+## Analysis
 
-## Risk Scenarios
+Granular on-chain intelligence sourced from Nansen wallet tracking exposes the extreme asymmetry of the token's lifecycle. While entities directly tied to the political brand successfully generated and captured $636 million via fee allocations, early marketing provisions, and structural distributions, the retail public bore the brunt of the downside. Roughly 982,000 distinct web3 wallets suffered collective realized and unrealized losses totaling a massive $3.81 billion. This highly concentrated profit-and-loss distribution highlights a recurring vulnerability in the attention-economy token sector, drawing uncomfortable comparisons to parallel political digital asset experiments like the troubled WLFI ecosystem.
 
-A rapid yen appreciation could trigger:
+## Market Takeaway
 
-1. Forced unwinding of carry positions
-2. Volatility spillover to equity and credit markets
-3. Stress in emerging market currencies
-4. Risk-off cascading across asset classes
+The overlooked variable is issuer economics. In memecoins, who captures fees and who absorbs the drawdown often matters more than the headline market cap.`,
+    coverImageUrl: "",
+    status: "PUBLISHED",
+    isFeatured: true,
+    isBreaking: false,
+    publishedAgoMs: 22 * HOUR,
+    authorKey: "author1",
+    categorySlug: "crypto",
+  },
 
-> "The yen carry trade unwind is the single biggest risk in global markets right now," warned a macro strategist.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      publishedAgoMs: 1000 * 60 * 60 * 16,
-      authorKey: "author1",
-      categorySlug: "forex",
-    },
-    {
-      slug: "ai-stocks-bubble-or-revolution",
-      title: "AI Stocks: Bubble or Revolution? The Case for Both Sides",
-      excerpt: "As AI-related stocks continue their meteoric rise, analysts are divided on whether current valuations are justified by fundamentals or driven by speculative excess.",
-      body: `# AI Stocks: Bubble or Revolution?
+  {
+    slug: "xrp-ledger-engineer-quantum-threat-crypto-earlier-than-expected",
+    title: "XRP Ledger Engineer Warns Quantum Threat Could Hit Crypto Earlier Than Markets Expect",
+    excerpt: "XRP Ledger engineer J. Ayo Akinyele warns that rapid AI advancements could pull the quantum computing threat forward to 2028-2029.",
+    body: `# XRP Ledger Engineer Warns Quantum Threat Could Hit Crypto Earlier Than Markets Expect
 
-The AI trade has been the dominant theme in equity markets, with the "Magnificent Seven" tech stocks adding trillions in market cap. But is it justified?
+## Key Pointers
+- XRP Ledger engineer J. Ayo Akinyele warned that quantum risk may arrive sooner than expected.
+- His timeline has shifted from 2030–2035 toward 2028–2029.
+- AI progress could speed up quantum hardware development and raise blockchain security risks.
 
-## The Bull Case
+## Introduction
 
-Proponents argue this is a genuine technological revolution:
+Crypto markets tend to price hacks, regulation and liquidity shocks. They rarely price cryptographic obsolescence. That gap is what XRP Ledger engineer J. Ayo Akinyele is warning about as AI accelerates the quantum computing timeline.
 
-- AI is already generating measurable revenue and productivity gains
-- Enterprise adoption is in early innings
-- Total addressable market for AI infrastructure is estimated at $1 trillion+
-- Historical parallels to early internet suggest we're still early
+## Market Context
 
-## The Bear Case
+The primary issue highlighted here is a structural, long-tail infrastructure risk. The core narrative is not an alarmist prediction that quantum computing will instantly dismantle major public blockchains tomorrow morning. Rather, it acts as a stark technical warning that the macro timeline for quantum vulnerability is compressing rapidly. Blockchains operate on long development cycles, meaning the industry must actively deploy post-quantum cryptographic defenses well before these advanced computational systems become accessible to malicious actors.
 
-Skeptics point to concerning parallels with previous bubbles:
+## Analysis
 
-- Many AI stocks trade at 30-50x forward earnings
-- Revenue growth expectations may be overly optimistic
-- Concentration risk — the top 7 stocks represent 30% of the S&P 500
-- History shows that most early leaders in new technologies don't maintain dominance
+Historically, standard consensus placed the threat horizon out between 2030 and 2035. However, XRPL engineer J. Ayo Akinyele emphasizes that aggressive, AI-assisted quantum hardware research is drastically accelerating this curve, pulling the critical window forward to 2028–2029. This compression alters the urgency surrounding legacy signature vulnerabilities. Both Bitcoin's ECDSA and the XRP Ledger's standard cryptographic implementations rely heavily on mathematical assumptions that a sufficiently powerful quantum computer could break. As national security directives and U.S. executive orders push for immediate quantum-resistant migrations in traditional finance, the decentralized sector faces growing pressure to accelerate its own post-quantum cryptography migration plans to secure dormant wallets and active consensus keys.
 
-## The Data
+## Market Takeaway
 
-Looking at fundamentals:
+The market misunderstanding is timing. Post-quantum migration has to happen before the threat is commercially available, not after.`,
+    coverImageUrl: "",
+    status: "PUBLISHED",
+    isFeatured: false,
+    isBreaking: false,
+    publishedAgoMs: 28 * HOUR,
+    authorKey: "admin",
+    categorySlug: "analysis",
+  },
 
-| Company | P/E (Forward) | Revenue Growth | AI Revenue % |
-|---------|--------------|----------------|-------------|
-| NVDA | 35x | +265% | 85% |
-| MSFT | 32x | +18% | 15% |
-| GOOGL | 24x | +13% | 20% |
-| META | 22x | +25% | 30% |
+  {
+    slug: "xrp-australia-parliamentary-record-lawmaker-discloses-holdings",
+    title: "XRP Enters Australia's Parliamentary Record as Lawmaker Discloses Holdings",
+    excerpt: "XRP achieves fresh political normalization as an Australian Labor MP and a White House official formally disclose holdings in public records.",
+    body: `# XRP Enters Australia's Parliamentary Record as Lawmaker Discloses Holdings
 
-## Verdict
+## Key Pointers
+- Australian Labor MP Sally Sitou listed XRP as her only crypto holding.
+- A White House official also disclosed XRP holdings in a Coinbase wallet.
+- Ripple is pursuing an Australian Financial Services License under the country's Digital Assets Framework Bill.
 
-The truth likely lies somewhere in between. AI is a genuine paradigm shift, but some individual stock valuations have gotten ahead of fundamentals.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      publishedAgoMs: 1000 * 60 * 60 * 18,
-      authorKey: "editor",
-      categorySlug: "analysis",
-    },
-    {
-      slug: "emerging-markets-outlook-2024",
-      title: "Emerging Markets Set for Breakout Year as Dollar Weakens",
-      excerpt: "A weaker dollar, falling global rates, and improving fundamentals are creating ideal conditions for emerging market assets to outperform in 2024.",
-      body: `# Emerging Markets Set for Breakout Year
+## Introduction
 
-After years of underperformance, emerging market assets are poised for a significant recovery driven by macro tailwinds.
+XRP's latest legitimacy signal did not come from a price chart. It came from official financial disclosures in two governments, with an Australian lawmaker and a White House official both putting the asset on public record.
 
-## Favorable Conditions
+## Market Context
 
-Several factors are aligning:
+It is critical to analyze this development without overstating it as an outright "government endorsement" or official adoption of the token by sovereign states. The realistic framing here centers on political normalization. When a digital asset smoothly transitions from a speculative retail instrument into mandatory, sworn financial disclosure documents filed by public officials, it moves out of the regulatory fringe and directly into the formal infrastructure of public record.
 
-1. **Dollar Weakness**: A declining DXY typically boosts EM assets
-2. **Rate Cuts**: Global easing cycle benefits EM bonds and currencies
-3. **Commodity Prices**: Elevated commodities support EM exporters
-4. **Valuations**: EM equities trade at a 40% discount to developed markets
+## Analysis
 
-## Regional Picks
+The specific instances are highly geographic. In Australia, federal Labor MP Sally Sitou's official register of interests explicitly listed XRP as her singular cryptocurrency holding. Concurrently, across the Pacific, White House official Ian Kelley's formal financial filing disclosed distinct XRP holdings maintained securely inside a Coinbase wallet architecture. This cross-border political presence occurs exactly as Ripple Labs aggressively scales its corporate footprint in the Asia-Pacific region, most notably through its active pursuit of a formal Australian Financial Services License (AFSL) under the country's upcoming Digital Assets Framework Bill. This combination of grassroots political ownership and formal institutional licensing applications reinforces XRP's unique regulatory narrative.
 
-- **India**: Structural growth story with 7%+ GDP growth
-- **Brazil**: Rate cuts underway, Bovespa at all-time highs
-- **Mexico**: Nearshoring boom driving FDI and manufacturing
-- **Indonesia**: Commodity exports and demographic dividend
+## Market Takeaway
 
-## Risks to Watch
+The market implication is reputational, not immediate. XRP is increasingly appearing inside formal legal and political records, even if that stops short of government endorsement.`,
+    coverImageUrl: "",
+    status: "PUBLISHED",
+    isFeatured: false,
+    isBreaking: false,
+    publishedAgoMs: 34 * HOUR,
+    authorKey: "editor",
+    categorySlug: "crypto",
+  },
+];
 
-- Geopolitical tensions (China-Taiwan, Middle East)
-- US election uncertainty
-- China property sector contagion
-- Commodity price volatility`,
-      coverImageUrl: "https://images.unsplash.com/photo-1604594849809-dfedbc827105?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      publishedAgoMs: 1000 * 60 * 60 * 20,
-      authorKey: "author1",
-      categorySlug: "analysis",
-    },
-    {
-      slug: "crypto-regulation-will-define-next-cycle",
-      title: "Opinion: Regulatory Clarity Will Define the Next Crypto Cycle",
-      excerpt: "The industry's maturation depends less on price action and more on the regulatory frameworks being built today. Here's why that matters for every investor.",
-      body: `# Regulatory Clarity Will Define the Next Crypto Cycle
-
-The crypto industry stands at an inflection point. While much of the conversation focuses on price, the real story is the regulatory infrastructure being built worldwide.
-
-## The Shift
-
-We've moved from a period of regulatory ambiguity to one of active framework development:
-
-- The EU's MiCA regulation is now in effect
-- The US is moving toward comprehensive crypto legislation
-- Singapore and Hong Kong are competing to be Asia's crypto hub
-- The UAE has established a dedicated virtual asset regulatory authority
-
-## Why It Matters
-
-Clear regulations will:
-
-1. Unlock institutional capital currently sitting on the sidelines
-2. Reduce the risk premium on digital assets
-3. Enable new financial products (ETFs, structured products)
-4. Create a level playing field for compliant operators
-
-## The Risk
-
-The danger lies in fragmented regulation. If major jurisdictions take divergent approaches, we could see regulatory arbitrage that undermines the goal of investor protection.
-
-## My Take
-
-The next bull cycle will be built on institutional adoption, and institutional adoption requires regulatory clarity. The projects and jurisdictions that get this right will be the winners of the next decade.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1633158829585-23ba8f7c8caf?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      publishedAgoMs: 1000 * 60 * 60 * 22,
-      authorKey: "admin",
-      categorySlug: "opinion",
-    },
-    {
-      slug: "apple-record-buyback-dividend",
-      title: "Apple Announces Record $110B Buyback, Raises Dividend 4%",
-      excerpt: "Apple unveiled its largest-ever share repurchase program alongside an earnings beat, signaling confidence in its long-term AI strategy despite a decline in China sales.",
-      body: `# Apple Announces Record $110B Buyback
-
-Apple reported fiscal Q2 results that topped expectations and announced a record $110 billion share buyback program, the largest in corporate history.
-
-## Results Highlights
-
-- **Revenue**: $90.8B vs. $90.0B expected (-4% YoY)
-- **EPS**: $1.53 vs. $1.50 expected
-- **iPhone**: $45.9B (-10% YoY, China weakness)
-- **Services**: $23.9B (+14% YoY, record)
-- **Mac**: $7.5B (+4% YoY)
-
-## Capital Return
-
-- $110 billion share repurchase authorization (record)
-- Quarterly dividend raised 4% to $0.26/share
-- The company has returned over $700B to shareholders since 2012
-
-## AI Strategy
-
-CEO Tim Cook provided the most detailed AI roadmap yet:
-
-1. On-device AI processing with custom silicon
-2. Generative AI features coming to iOS 18
-3. Partnership with a major AI lab for cloud capabilities
-4. Focus on privacy-preserving AI
-
-> "We believe we have advantages that will differentiate us in AI," Cook said on the earnings call.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      publishedAgoMs: 1000 * 60 * 60 * 24,
-      authorKey: "editor",
-      categorySlug: "stocks",
-    },
-    {
-      slug: "solana-meme-coin-trading-volumes",
-      title: "Solana Meme Coin Mania Drives Record DEX Volumes",
-      excerpt: "Solana-based decentralized exchanges are processing over $3 billion in daily volume as a new wave of meme coin trading captures retail attention.",
-      body: `# Solana Meme Coin Mania Drives Record DEX Volumes
-
-Solana's DEX ecosystem is experiencing unprecedented activity as meme coin trading volumes have surged, pushing the network's decentralized exchanges to new highs.
-
-## By the Numbers
-
-- **Daily DEX Volume**: $3.2B (surpassing Ethereum for 5 consecutive days)
-- **Raydium Volume**: $1.8B daily
-- **Jupiter Aggregator**: Processing 2M+ transactions daily
-- **New Token Launches**: 500+ per day on pump.fun
-
-## The Meme Coin Phenomenon
-
-The current wave is different from previous meme coin cycles:
-
-1. **Lower barriers**: Token launch platforms make creation trivial
-2. **Social media integration**: TikTok and Twitter are driving discovery
-3. **Community-first**: Projects build communities before products
-4. **Speed**: Solana's fast finality enables rapid trading
-
-## Network Impact
-
-The surge in activity has had mixed effects on Solana:
-
-- SOL price has benefited from increased network usage
-- Transaction fees have spiked periodically
-- Some congestion issues during peak activity
-- Validator revenue has increased significantly
-
-## Risks
-
-- Most meme coins will go to zero
-- Regulatory scrutiny is increasing
-- Network congestion could worsen
-- Rug pulls remain a significant risk`,
-      coverImageUrl: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      publishedAgoMs: 1000 * 60 * 60 * 26,
-      authorKey: "admin",
-      categorySlug: "crypto",
-    },
-    {
-      slug: "gold-hits-record-high-central-bank-buying",
-      title: "Gold Hits Record High as Central Bank Buying Accelerates",
-      excerpt: "Gold prices surged to an all-time high above $2,400 per ounce, driven by unprecedented central bank purchases and growing geopolitical uncertainty.",
-      body: `# Gold Hits Record High as Central Bank Buying Accelerates
-
-Gold reached a new all-time high of $2,431 per ounce on Wednesday, extending a rally fueled by central bank diversification away from the US dollar and heightened geopolitical risks.
-
-## Key Drivers
-
-Several factors are converging to push gold higher:
-
-- **Central Bank Buying**: Global central banks purchased over 1,000 tonnes of gold in 2023, the second-highest annual total on record
-- **Geopolitical Risk**: Ongoing conflicts in the Middle East and Ukraine are boosting safe-haven demand
-- **Rate Cut Expectations**: Anticipated Fed easing reduces the opportunity cost of holding non-yielding gold
-- **De-dollarization**: BRICS nations are increasingly adding gold to reserves as a dollar alternative
-
-## Market Impact
-
-The rally has lifted gold mining stocks significantly, with the GDX ETF rising 28% year-to-date. Silver has also benefited, trading above $28 per ounce.
-
-## Outlook
-
-Analysts at major banks have raised their gold forecasts, with several targeting $2,600-$2,800 by year-end. The combination of structural central bank demand and cyclical monetary easing creates a powerful tailwind for precious metals.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1610375461246-83df859d849d?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 4,
-      authorKey: "editor",
-      categorySlug: "gold",
-    },
-    {
-      slug: "gold-vs-bitcoin-safe-haven-debate",
-      title: "Gold vs Bitcoin: The Modern Safe-Haven Debate Intensifies",
-      excerpt: "As both gold and Bitcoin reach new highs, investors are debating which asset truly serves as the ultimate store of value in an era of fiscal uncertainty.",
-      body: `# Gold vs Bitcoin: The Modern Safe-Haven Debate Intensifies
-
-The simultaneous rallies in gold and Bitcoin have reignited the debate about which asset best serves as a hedge against inflation and currency debasement.
-
-## The Case for Gold
-
-Gold advocates point to its 5,000-year track record:
-
-- **Proven Store of Value**: Gold has maintained purchasing power across millennia
-- **Central Bank Reserves**: Over 35,000 tonnes held by central banks globally
-- **Physical Scarcity**: Limited annual mine supply of approximately 3,500 tonnes
-- **Low Correlation**: Historically low correlation with equities during crises
-
-## The Case for Bitcoin
-
-Bitcoin proponents highlight its digital advantages:
-
-- **Fixed Supply**: Hard cap of 21 million coins, with halvings reducing new supply
-- **Portability**: Can be transferred globally in minutes
-- **Transparency**: Blockchain provides complete transaction history
-- **Growing Adoption**: Spot ETFs have legitimized Bitcoin as an institutional asset
-
-## Portfolio Implications
-
-Many analysts now recommend allocating to both assets, viewing them as complementary rather than competing stores of value. A combined 5-10% allocation to gold and Bitcoin has shown improved risk-adjusted returns in portfolio backtests.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1624365168968-f283d506c6b6?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 10,
-      authorKey: "author1",
-      categorySlug: "gold",
-    },
-    {
-      slug: "gold-etf-inflows-surge-2024",
-      title: "Gold ETF Inflows Hit $4.7 Billion in Q1, Reversing Three-Year Outflow Trend",
-      excerpt: "Global gold-backed ETFs recorded their strongest quarterly inflows since 2020, signaling a major shift in institutional sentiment toward the precious metal.",
-      body: `# Gold ETF Inflows Hit $4.7 Billion in Q1
-
-Global gold-backed exchange-traded funds saw net inflows of $4.7 billion in the first quarter, according to data from the World Gold Council, reversing a prolonged period of outflows that began in mid-2021.
-
-## Regional Breakdown
-
-The inflows were broad-based across geographies:
-
-- **North America**: $2.1 billion in net inflows, led by GLD and IAU
-- **Europe**: $1.8 billion, with UK and German funds leading
-- **Asia**: $600 million, driven by Chinese and Indian investors
-- **Other regions**: $200 million across Australia and South Africa
-
-## Driving Factors
-
-Several forces converged to bring investors back to gold ETFs:
-
-- **Geopolitical uncertainty** across multiple regions
-- **Inflation persistence** despite aggressive central bank tightening
-- **Dollar weakness** as the Fed signals a pivot
-- **Portfolio rebalancing** after a strong equity rally raised concentration risk
-
-## Holdings Update
-
-Total global gold ETF holdings now stand at 3,250 tonnes, valued at approximately $230 billion. While still below the 2020 peak of 3,900 tonnes, the trend has clearly reversed.
-
-## Analyst Commentary
-
-"The ETF flow data confirms what we've been seeing in the physical market — institutional investors are rebuilding their gold allocations," noted a senior strategist at a major investment bank. "We expect this trend to accelerate as rate cuts materialize."`,
-      coverImageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 6,
-      authorKey: "admin",
-      categorySlug: "gold",
-    },
-    {
-      slug: "silver-gold-ratio-signals-precious-metals-rally",
-      title: "Gold-to-Silver Ratio Drops Below 80: What It Means for Precious Metals",
-      excerpt: "The gold-to-silver ratio has fallen below 80 for the first time in two years, a level that historically precedes outperformance by silver and broader precious metals rallies.",
-      body: `# Gold-to-Silver Ratio Drops Below 80
-
-The gold-to-silver ratio — measuring how many ounces of silver it takes to buy one ounce of gold — has dropped below 80 for the first time since 2022, a development that precious metals analysts are watching closely.
-
-## Historical Context
-
-The ratio has averaged around 65 over the past 50 years:
-
-- **Above 80**: Silver is considered historically cheap relative to gold
-- **60-80**: Normal range
-- **Below 60**: Silver is expensive relative to gold
-
-When the ratio falls from elevated levels, silver has historically outperformed gold by a significant margin in the following 6-12 months.
-
-## Industrial Demand Factor
-
-Unlike gold, silver has substantial industrial applications:
-
-- **Solar panels**: Each panel uses approximately 20 grams of silver
-- **Electronics**: Growing demand from EV production and 5G infrastructure
-- **Medical devices**: Antimicrobial properties drive healthcare demand
-
-Global solar installations are projected to exceed 500 GW in 2024, requiring over 180 million ounces of silver — roughly 20% of annual mine supply.
-
-## Investment Implications
-
-Silver mining stocks have begun to outperform their gold counterparts, with the SIL ETF up 32% year-to-date versus 18% for GDX. Analysts see further upside as the industrial demand narrative combines with monetary demand.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1592473891873-4c5c45ee2a1b?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 14,
-      authorKey: "editor",
-      categorySlug: "gold",
-    },
-    {
-      slug: "china-gold-reserves-record-accumulation",
-      title: "China Adds Gold for 18th Consecutive Month as De-Dollarization Accelerates",
-      excerpt: "The People's Bank of China continued its record gold buying streak, adding 12 tonnes in March as the nation diversifies reserves away from US Treasury holdings.",
-      body: `# China Adds Gold for 18th Consecutive Month
-
-The People's Bank of China (PBOC) increased its gold reserves by 12 tonnes in March, marking the 18th consecutive month of purchases and bringing total reported holdings to 2,262 tonnes.
-
-## The De-Dollarization Strategy
-
-China's gold accumulation is part of a broader strategy to reduce dependence on the US dollar:
-
-- **Treasury Reduction**: China has reduced US Treasury holdings from $1.1 trillion in 2021 to below $800 billion
-- **Gold Share Rising**: Gold now represents approximately 4.3% of China's total reserves, up from 3.2% two years ago
-- **BRICS Coordination**: Fellow BRICS members India, Russia, and Turkey are also aggressive gold buyers
-
-## Scale of Purchases
-
-The PBOC has added over 300 tonnes to its reserves since late 2022. However, many analysts believe actual purchases are significantly higher, as China may be acquiring gold through non-reported channels such as the State Administration of Foreign Exchange (SAFE).
-
-## Market Impact
-
-Chinese demand has been a key factor supporting gold prices above $2,000:
-
-- **Physical premium**: Shanghai Gold Exchange premiums have averaged $30-50 per ounce above London spot
-- **Consumer demand**: Chinese retail gold purchases rose 28% year-over-year in Q1
-- **Central bank demand**: PBOC purchases account for roughly 15% of global mine supply
-
-## Geopolitical Implications
-
-The sustained gold accumulation reflects growing concerns about potential US financial sanctions and the weaponization of the dollar-based payment system. Analysts note that gold provides a sanctions-proof reserve asset that cannot be frozen or seized.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 18,
-      authorKey: "author1",
-      categorySlug: "gold",
-    },
-    {
-      slug: "gold-mining-costs-squeeze-margins",
-      title: "Rising Mining Costs Squeeze Gold Producers Despite Record Prices",
-      excerpt: "All-in sustaining costs for gold miners have climbed to $1,350 per ounce, eroding margins even as gold trades near record highs and raising questions about future supply growth.",
-      body: `# Rising Mining Costs Squeeze Gold Producers
-
-Despite gold prices hovering near all-time highs, the world's largest gold miners are grappling with escalating production costs that threaten to constrain future supply growth.
-
-## Cost Escalation
-
-The industry's average all-in sustaining cost (AISC) has risen sharply:
-
-- **2020**: $1,000/oz average
-- **2022**: $1,200/oz average
-- **2024**: $1,350/oz average (estimated)
-
-Key cost drivers include:
-
-- **Energy prices**: Diesel and electricity account for 15-20% of mining costs
-- **Labor shortages**: Skilled mining workers are in high demand globally
-- **Declining ore grades**: Average grades have fallen 30% over the past two decades
-- **Regulatory costs**: ESG compliance and permitting expenses continue to rise
-
-## Production Outlook
-
-Global gold mine production has plateaued at approximately 3,600 tonnes per year, with limited new discoveries and lengthy permitting timelines constraining growth.
-
-Major projects in the pipeline face significant hurdles:
-
-- Average time from discovery to production now exceeds 15 years
-- Capital costs for new mines have doubled since 2015
-- Environmental permitting has become increasingly complex
-
-## Investment Implications
-
-The cost squeeze creates a bifurcation among miners. Low-cost producers with Tier 1 assets are generating record free cash flow, while marginal producers face diminishing returns. Analysts recommend focusing on operators with AISC below $1,100/oz and strong reserve replacement pipelines.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1605792657660-596af9009e82?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 22,
-      authorKey: "admin",
-      categorySlug: "gold",
-    },
-    {
-      slug: "gold-jewelry-demand-india-wedding-season",
-      title: "Indian Gold Demand Surges 40% Ahead of Peak Wedding Season",
-      excerpt: "India's gold imports jumped to 120 tonnes in March as jewelers stock up ahead of the Akshaya Tritiya festival and the peak wedding season, supporting global prices.",
-      body: `# Indian Gold Demand Surges 40% Ahead of Peak Wedding Season
-
-India, the world's second-largest gold consumer, imported 120 tonnes of gold in March — a 40% increase from the previous year — as the nation gears up for its peak demand season.
-
-## Seasonal Demand Drivers
-
-Gold plays a central role in Indian culture and commerce:
-
-- **Akshaya Tritiya**: One of the most auspicious days for buying gold, falling in late April
-- **Wedding Season**: April through June sees millions of weddings, each traditionally involving significant gold purchases
-- **Dhanteras and Diwali**: The autumn festival season drives another wave of demand
-
-## Market Dynamics
-
-India's gold market has several unique characteristics:
-
-- **Annual consumption**: 700-800 tonnes per year, approximately 20% of global demand
-- **Import duty**: The government recently reduced import duties from 15% to 12.5%, boosting legal imports
-- **Rural demand**: Over 60% of Indian gold purchases come from rural areas, closely tied to agricultural incomes
-
-## Impact on Global Prices
-
-Indian demand has historically been a significant price driver:
-
-- Strong monsoon forecasts have boosted rural income expectations
-- The wedding count is projected to reach 12 million this season, up from 10 million last year
-- Jewelers report advance orders running 25% above last year's levels
-
-## Digital Gold Growth
-
-While physical gold remains dominant, digital gold platforms have gained traction in India, with over 100 million users now holding fractional gold through apps. This has expanded the buyer base significantly, particularly among younger consumers.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1515562141589-67f0d569b6f5?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 30,
-      authorKey: "editor",
-      categorySlug: "gold",
-    },
-    {
-      slug: "gold-price-forecast-major-banks-2024",
-      title: "Wall Street Raises Gold Targets: Major Banks See $3,000 by 2025",
-      excerpt: "Goldman Sachs, JPMorgan, and Citigroup have all raised their gold price forecasts, with the most bullish calls targeting $3,000 per ounce within the next 12 months.",
-      body: `# Wall Street Raises Gold Targets
-
-In a remarkable display of consensus, Wall Street's top investment banks have simultaneously raised their gold price forecasts, reflecting growing conviction in a structural bull market for the precious metal.
-
-## Updated Forecasts
-
-| Bank | Previous Target | New Target | Timeline |
-|------|----------------|------------|----------|
-| Goldman Sachs | $2,300 | $2,700 | Year-end 2024 |
-| JPMorgan | $2,175 | $2,600 | Q3 2024 |
-| Citigroup | $2,400 | $3,000 | Mid-2025 |
-| UBS | $2,200 | $2,500 | Year-end 2024 |
-| Bank of America | $2,400 | $2,800 | Q1 2025 |
-
-## Bull Case Arguments
-
-The banks cite converging bullish factors:
-
-- **Central bank buying** showing no signs of slowing, with 2024 on pace to match 2023's record purchases
-- **Fed rate cuts** will reduce the opportunity cost of holding gold and weaken the dollar
-- **Geopolitical risks** from ongoing conflicts and US-China tensions
-- **Fiscal concerns** over rising US government debt levels ($34 trillion and counting)
-- **Election uncertainty** with a contentious US presidential election ahead
-
-## Bear Case Risks
-
-Despite the bullish consensus, analysts note several headwinds:
-
-- A resilient US economy could delay rate cuts
-- A sudden de-escalation of geopolitical tensions would remove safe-haven premium
-- Chinese economic weakness could dampen physical demand
-- Profit-taking after a strong rally could trigger short-term pullbacks
-
-## Historical Perspective
-
-Gold has delivered a 15% annualized return since 2019, outperforming the S&P 500 on a risk-adjusted basis. The current rally bears similarities to the 2009-2011 bull run, which saw gold rise from $800 to $1,900 following the financial crisis and subsequent monetary easing.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: true,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 2,
-      authorKey: "admin",
-      categorySlug: "gold",
-    },
-
-    // ── Additional editorial content (headlines inspired by FXStreet, CoinDesk, CoinTelegraph) ──
-    {
-      slug: "btc-etf-options-launch-volatility",
-      title: "Bitcoin ETF Options Go Live, Reshaping the Volatility Landscape",
-      excerpt: "The debut of listed options on spot Bitcoin ETFs hands institutions a regulated hedging tool — and could dampen the wild price swings traders have long relied on.",
-      body: `# Bitcoin ETF Options Go Live, Reshaping the Volatility Landscape
-
-The first listed options on U.S. spot Bitcoin ETFs began trading this week, opening a new chapter for institutional risk management in digital assets.
-
-## Why It Matters
-
-- **Hedging at scale**: Asset managers can now write covered calls and buy protective puts without touching native crypto rails.
-- **Implied vol pricing**: A liquid options surface gives the market a cleaner read on forward-looking volatility.
-- **Structured products**: Expect a wave of yield notes and buffered strategies built on top of the new contracts.
-
-## The Trade-Off
-
-Deeper derivatives liquidity tends to compress realized volatility over time. For long-term allocators that is a feature; for momentum traders it may mean fewer of the violent moves that defined prior cycles.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 5,
-      authorKey: "author1",
-      categorySlug: "crypto",
-    },
-    {
-      slug: "stablecoin-supply-record-high",
-      title: "Stablecoin Supply Hits All-Time High as On-Chain Settlement Booms",
-      excerpt: "Total stablecoin market value pushed to a fresh record, with USDT and USDC dominating a settlement layer now rivaling major card networks by volume.",
-      body: `# Stablecoin Supply Hits All-Time High
-
-The aggregate supply of dollar-pegged stablecoins climbed to a record this month, underscoring how quickly tokenized cash has become core financial plumbing.
-
-## Settlement, Not Speculation
-
-Much of the growth is transactional rather than speculative:
-
-- Cross-border B2B payments are increasingly routed through stablecoin rails.
-- Treasuries backing the largest tokens now hold tens of billions in short-dated U.S. paper.
-- Emerging-market users continue to adopt dollar tokens as an inflation hedge.
-
-## Regulatory Backdrop
-
-With clearer frameworks emerging in the EU and parts of Asia, issuers are racing to secure licenses that would let them serve regulated institutions directly.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 9,
-      authorKey: "editor",
-      categorySlug: "crypto",
-    },
-    {
-      slug: "ethereum-staking-yield-compression",
-      title: "Ethereum Staking Yields Compress as Validator Queue Swells",
-      excerpt: "A surge of new validators has pushed staking rewards lower, prompting large holders to weigh restaking and liquid staking alternatives.",
-      body: `# Ethereum Staking Yields Compress
-
-Base staking yields on Ethereum have drifted toward multi-year lows as the validator set continues to expand.
-
-## The Mechanics
-
-More validators sharing a roughly fixed issuance pool means a thinner slice for each. Net real yield is increasingly driven by:
-
-- **Priority fees** during periods of network congestion
-- **MEV** captured by sophisticated operators
-- **Restaking** premiums from securing additional services
-
-## What Holders Are Doing
-
-Liquid staking tokens continue to absorb inflows from users who want yield without locking capital, while institutions explore restaking to juice returns.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1622630998477-20aa696ecb05?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 16,
-      authorKey: "author1",
-      categorySlug: "crypto",
-    },
-    {
-      slug: "dollar-index-firms-yield-divergence",
-      title: "Dollar Firms as Rate-Cut Bets Diverge Across Central Banks",
-      excerpt: "The greenback strengthened against most majors as traders priced a slower Fed easing path versus more dovish moves from the ECB and BoC.",
-      body: `# Dollar Firms on Policy Divergence
-
-The U.S. dollar index advanced this week as interest-rate expectations split across the major economies.
-
-## The Divergence Trade
-
-- **Fed**: Sticky services inflation has pushed the first cut later into the year.
-- **ECB**: Softening growth keeps Frankfurt on a clearly dovish track.
-- **BoC**: The Bank of Canada has already moved, widening the rate gap.
-
-## Levels to Watch
-
-EUR/USD slipped back toward its recent range lows, while USD/JPY pressed higher, keeping intervention chatter alive among Tokyo officials.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 7,
-      authorKey: "editor",
-      categorySlug: "forex",
-    },
-    {
-      slug: "yen-intervention-watch-usdjpy",
-      title: "Yen Slides Toward Intervention Zone as USD/JPY Tests Resistance",
-      excerpt: "Japanese officials sharpened their warnings as the yen weakened to levels that triggered direct intervention in prior episodes.",
-      body: `# Yen Slides Toward Intervention Zone
-
-The Japanese yen extended losses against the dollar, dragging USD/JPY back into territory that has historically drawn official action.
-
-## Verbal Warnings First
-
-Tokyo's playbook typically escalates from rhetoric to action:
-
-1. Officials describe moves as "rapid" and "one-sided."
-2. Rate-check operations test market liquidity.
-3. Direct intervention follows if depreciation continues.
-
-## The Carry Backdrop
-
-A wide rate differential keeps the yen a favored funding currency, leaving it vulnerable until the Bank of Japan signals a firmer normalization path.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1554260570-9140fd3b7614?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 20,
-      authorKey: "author1",
-      categorySlug: "forex",
-    },
-    {
-      slug: "sp500-record-megacap-breadth",
-      title: "S&P 500 Notches Fresh Record but Breadth Warning Lingers",
-      excerpt: "Another all-time high masked a familiar concern: gains remain concentrated in a handful of megacap names while the average stock lags.",
-      body: `# S&P 500 Notches Fresh Record
-
-The benchmark index closed at a record high, extending a rally that has been narrow but persistent.
-
-## The Breadth Problem
-
-- A small cluster of megacap technology stocks accounts for the bulk of year-to-date gains.
-- The equal-weight index continues to trail the cap-weighted version by a wide margin.
-- Market internals suggest fewer stocks are participating in each new high.
-
-## Bull Case vs. Bear Case
-
-Bulls argue earnings strength justifies leadership concentration; bears warn that narrow rallies are historically more fragile when sentiment turns.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 4,
-      authorKey: "editor",
-      categorySlug: "stocks",
-    },
-    {
-      slug: "ipo-window-reopens-tech-listings",
-      title: "IPO Window Cracks Open as Tech Names Test Investor Appetite",
-      excerpt: "A string of high-profile filings signals the primary market may finally be thawing after a prolonged drought in new listings.",
-      body: `# IPO Window Cracks Open
-
-After two lean years, the new-issue market is showing signs of life as several technology companies move toward public debuts.
-
-## What Changed
-
-- Equity volatility has cooled, giving bankers a calmer pricing environment.
-- Strong secondary-market performance has rebuilt confidence in risk appetite.
-- Late-stage private valuations have reset closer to public comparables.
-
-## The Risk
-
-A few disappointing debuts could slam the window shut again, so issuers are racing to list while sentiment holds.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 26,
-      authorKey: "author1",
-      categorySlug: "stocks",
-    },
-    {
-      slug: "global-pmi-soft-landing-signals",
-      title: "Global PMIs Point to Resilient Growth, Bolstering Soft-Landing Hopes",
-      excerpt: "Composite activity gauges across major economies held in expansion, easing fears of an imminent downturn even as price pressures linger.",
-      body: `# Global PMIs Point to Resilient Growth
-
-Purchasing managers' indices across the U.S., euro area, and parts of Asia stayed in expansionary territory, reinforcing the soft-landing narrative.
-
-## Under the Hood
-
-- **Services** continue to do the heavy lifting for activity.
-- **Manufacturing** is stabilizing after a long contraction.
-- **Input prices** remain sticky, complicating the disinflation story.
-
-## Policy Implications
-
-Resilient demand gives central banks room to be patient on rate cuts — a double-edged sword for risk assets hoping for faster easing.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1535320903710-d993d3d77d29?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 12,
-      authorKey: "editor",
-      categorySlug: "macro",
-    },
-    {
-      slug: "treasury-yields-curve-resteepening",
-      title: "Treasury Curve Resteepens as Long-End Yields Climb",
-      excerpt: "The closely watched 2s10s spread narrowed its inversion as long-dated yields rose on supply concerns and sticky inflation prints.",
-      body: `# Treasury Curve Resteepens
-
-The U.S. yield curve moved toward dis-inversion this week as the long end sold off faster than the front.
-
-## The Drivers
-
-- **Heavy issuance** of longer-dated paper is pressuring prices.
-- **Term premium** is rebuilding after years of compression.
-- **Inflation stickiness** keeps the front end anchored.
-
-## Why It Matters
-
-A resteepening driven by rising long yields ("bear steepener") tightens financial conditions and can weigh on rate-sensitive equities.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 30,
-      authorKey: "author1",
-      categorySlug: "macro",
-    },
-    {
-      slug: "central-banks-gold-buying-streak",
-      title: "Central Banks Extend Gold-Buying Streak Into Another Quarter",
-      excerpt: "Official-sector demand stayed robust as reserve managers continued to diversify away from the dollar, underpinning bullion near record highs.",
-      body: `# Central Banks Extend Gold-Buying Streak
-
-Reserve managers added meaningfully to gold holdings again last quarter, sustaining a multi-year accumulation trend.
-
-## The Diversification Theme
-
-- Emerging-market central banks are leading the charge.
-- Geopolitical risk has elevated the appeal of a neutral reserve asset.
-- Gold's share of global reserves continues to creep higher.
-
-## Price Impact
-
-Persistent official buying provides a structural floor under prices, even when speculative flows wobble.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1610375461246-83df859d849d?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 14,
-      authorKey: "editor",
-      categorySlug: "gold",
-    },
-    {
-      slug: "silver-breakout-industrial-demand",
-      title: "Silver Breaks Out as Industrial Demand Meets Safe-Haven Bid",
-      excerpt: "Silver outpaced gold this month, propelled by tight supply, solar-driven industrial demand, and a falling gold-to-silver ratio.",
-      body: `# Silver Breaks Out
-
-Silver surged to multi-year highs, outperforming gold as a rare dual-demand story took hold.
-
-## Two Engines
-
-1. **Industrial pull** — solar panels and electronics are consuming record volumes.
-2. **Monetary appeal** — investors treat it as a higher-beta precious metal.
-
-## The Ratio Trade
-
-The gold-to-silver ratio compressed sharply, a move technicians often read as a sign of broadening strength across the metals complex.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1633158829585-23ba8f7c8caf?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 22,
-      authorKey: "author1",
-      categorySlug: "gold",
-    },
-    {
-      slug: "liquidity-regime-risk-assets-analysis",
-      title: "Analysis: The Liquidity Regime That Really Drives Risk Assets",
-      excerpt: "Beyond headline rates, shifts in central-bank balance sheets and reserve balances are quietly steering the path of stocks and crypto alike.",
-      body: `# The Liquidity Regime That Really Drives Risk Assets
-
-Investors fixate on policy rates, but the plumbing of liquidity often matters more for asset prices.
-
-## The Levers
-
-- **Balance-sheet runoff** drains reserves from the system.
-- **Reverse repo** balances act as a release valve.
-- **Treasury issuance mix** shifts where cash sits.
-
-## The Takeaway
-
-When net liquidity expands, risk assets tend to grind higher regardless of the policy-rate narrative; when it contracts, even good news struggles to lift markets.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 18,
-      authorKey: "editor",
-      categorySlug: "analysis",
-    },
-    {
-      slug: "bitcoin-halving-cycle-analysis",
-      title: "Analysis: What Past Halving Cycles Do and Don't Tell Us",
-      excerpt: "Historical patterns around Bitcoin halvings are seductive, but sample size and a maturing market argue for humility in cycle forecasting.",
-      body: `# What Past Halving Cycles Do and Don't Tell Us
-
-Each Bitcoin halving spawns a wave of cycle-based price predictions. The history is intriguing — and easy to over-fit.
-
-## The Pattern
-
-Prior cycles featured a supply shock followed by a delayed, powerful rally. But:
-
-- The sample is tiny — only a handful of halvings exist.
-- ETF-driven demand is a structural change with no historical analog.
-- Macro liquidity conditions differ sharply from prior cycles.
-
-## A Sober Framework
-
-Treat the halving as one input among many, not a deterministic clock.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1640340434855-6084b1f4901c?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 28,
-      authorKey: "author1",
-      categorySlug: "analysis",
-    },
-    {
-      slug: "opinion-crypto-needs-boring-infrastructure",
-      title: "Opinion: Crypto's Next Chapter Will Be Gloriously Boring",
-      excerpt: "The industry's maturation depends less on the next narrative and more on unglamorous infrastructure: custody, compliance, and reliable rails.",
-      body: `# Crypto's Next Chapter Will Be Gloriously Boring
-
-The most important developments in digital assets are no longer the loudest ones.
-
-## The Unsexy Foundations
-
-- **Custody** that institutions can actually trust.
-- **Compliance** tooling that satisfies regulators.
-- **Settlement rails** that just work, every time.
-
-## Why Boring Wins
-
-Every durable financial technology eventually fades into the background. Crypto's success will be measured by how invisible it becomes — not how often it trends.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 34,
-      authorKey: "editor",
-      categorySlug: "opinion",
-    },
-    {
-      slug: "opinion-fed-credibility-test",
-      title: "Opinion: The Fed's Real Test Is Credibility, Not Timing",
-      excerpt: "Markets obsess over the exact month of the first cut. The more consequential question is whether the central bank can anchor expectations.",
-      body: `# The Fed's Real Test Is Credibility, Not Timing
-
-The debate over whether easing begins this meeting or next misses the larger point.
-
-## Credibility Is the Asset
-
-A central bank's most valuable possession is the market's belief that it will do what it says. That belief:
-
-- Lowers the cost of policy by moving expectations in advance.
-- Buys flexibility during genuine shocks.
-- Is slow to build and fast to lose.
-
-## The Bottom Line
-
-Getting the timing slightly wrong is survivable. Losing the anchor is not.`,
-      coverImageUrl: "https://images.unsplash.com/photo-1591033594798-33227a05780d?w=1200&h=630&fit=crop",
-      status: "PUBLISHED",
-      isFeatured: false,
-      isBreaking: false,
-      publishedAgoMs: 1000 * 60 * 60 * 40,
-      authorKey: "author1",
-      categorySlug: "opinion",
-    },
-  ];
-
-// Tag assignments by article slug. Kept here so all editorial metadata lives in
-// one place and can be swapped for a headless CMS feed later.
 export const articleTagMap: Record<string, string[]> = {
-  "bitcoin-surges-past-70k-institutional-demand": ["bitcoin"],
-  "ethereum-layer-2-scaling-milestone": ["ethereum", "defi"],
-  "fed-holds-rates-steady-signals-june-cut": ["fed", "inflation"],
-  "sec-crypto-regulation-framework": ["regulation", "bitcoin"],
-  "nvidia-earnings-beat-ai-demand": ["earnings", "ai"],
-  "defi-total-value-locked-rebounds": ["defi", "ethereum"],
-  "ai-stocks-bubble-or-revolution": ["ai", "earnings"],
-  "solana-meme-coin-trading-volumes": ["defi"],
-  "btc-etf-options-launch-volatility": ["bitcoin"],
-  "stablecoin-supply-record-high": ["regulation", "defi"],
-  "ethereum-staking-yield-compression": ["ethereum", "defi"],
-  "dollar-index-firms-yield-divergence": ["fed"],
-  "yen-intervention-watch-usdjpy": ["fed"],
-  "sp500-record-megacap-breadth": ["earnings", "ai"],
-  "ipo-window-reopens-tech-listings": ["earnings"],
-  "global-pmi-soft-landing-signals": ["inflation"],
-  "treasury-yields-curve-resteepening": ["fed", "inflation"],
-  "central-banks-gold-buying-streak": ["inflation"],
-  "silver-breakout-industrial-demand": ["inflation"],
-  "liquidity-regime-risk-assets-analysis": ["fed"],
-  "bitcoin-halving-cycle-analysis": ["bitcoin"],
-  "opinion-crypto-needs-boring-infrastructure": ["regulation"],
-  "opinion-fed-credibility-test": ["fed", "inflation"],
+  "strategy-no-longer-one-way-bitcoin-buyer-bitwise-cio": ["bitcoin"],
+  "revolut-delist-usdt-august-europe-stablecoin-rules": ["regulation", "stablecoins"],
+  "pepe-bonk-meme-coin-rally-high-beta-crypto-rotation": ["meme-coins", "ethereum"],
+  "xrp-rare-buy-signal-mvrv-historic-undervaluation": ["xrp"],
+  "gram-price-targets-2-binance-campaign-derivatives-rally": ["defi"],
+  "germany-local-banks-crypto-trading-retail-demand-policy-reversal": ["regulation"],
+  "binance-adds-circle-strategy-bstocks-collateral-tokenized-markets": ["tokenization"],
+  "trump-memecoin-636m-retail-investors-lost-3-8b": ["regulation", "meme-coins"],
+  "xrp-ledger-engineer-quantum-threat-crypto-earlier-than-expected": ["xrp", "ai"],
+  "xrp-australia-parliamentary-record-lawmaker-discloses-holdings": ["xrp", "regulation"],
 };

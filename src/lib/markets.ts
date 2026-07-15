@@ -173,47 +173,127 @@ const FX_PAIRS = [
   { base: "USD", quote: "INR", label: "USD/INR" },
 ];
 
-interface FxResponse {
-  rates: Record<string, number>;
-  base: string;
+/** Live FX majors via Yahoo's public chart endpoint (intraday, no API key). */
+export async function getFxQuotes(): Promise<MarketQuote[]> {
+  const items: YahooSymbol[] = FX_PAIRS.map((p) => ({
+    ySymbol: `${p.base}${p.quote}=X`,
+    symbol: p.label.replace("/", ""),
+    label: p.label,
+    type: "FX" as const,
+    currency: p.quote,
+  }));
+  const results = await Promise.all(items.map((i) => fetchYahooQuote(i, 30)));
+  return items.map((item, idx) =>
+    results[idx] ?? FALLBACK_FX.find((f) => f.symbol === item.symbol) ?? {
+      symbol: item.symbol,
+      label: item.label,
+      type: "FX" as const,
+      price: 0,
+      changePct24h: 0,
+      currency: item.currency,
+    }
+  );
 }
 
-export async function getFxQuotes(): Promise<MarketQuote[]> {
+/**
+ * Yahoo Finance public chart endpoint — powers non-crypto, non-FX assets
+ * (equity indices, the dollar index, and commodities) with no API key.
+ * One lightweight request per symbol; change % is computed from the prior close.
+ */
+interface YahooSymbol {
+  ySymbol: string;
+  symbol: string;
+  label: string;
+  type: MarketQuote["type"];
+  currency?: string;
+}
+
+export const YAHOO_RIBBON: YahooSymbol[] = [
+  { ySymbol: "DX-Y.NYB", symbol: "DXY", label: "Dollar Index", type: "FX" },
+  { ySymbol: "GC=F", symbol: "XAU", label: "Gold", type: "COMMODITY" },
+  { ySymbol: "SI=F", symbol: "XAG", label: "Silver", type: "COMMODITY" },
+  { ySymbol: "CL=F", symbol: "WTI", label: "Crude Oil", type: "COMMODITY" },
+  { ySymbol: "^GSPC", symbol: "SPX", label: "S&P 500", type: "STOCK" },
+  { ySymbol: "^IXIC", symbol: "IXIC", label: "Nasdaq", type: "STOCK" },
+  { ySymbol: "^DJI", symbol: "DJI", label: "Dow Jones", type: "STOCK" },
+];
+
+interface YahooMeta {
+  regularMarketPrice?: number;
+  chartPreviousClose?: number;
+  previousClose?: number;
+  currency?: string;
+}
+
+async function fetchYahooQuote(item: YahooSymbol, revalidate: number): Promise<MarketQuote | null> {
   try {
-    const today = await fetch(
-      `https://api.exchangerate.host/latest?base=USD&symbols=EUR,GBP,JPY,AUD,CAD,CHF,NZD,INR`,
-      { next: { revalidate: 120 } }
+    const res = await fetch(
+      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(item.ySymbol)}?range=5d&interval=1d`,
+      { next: { revalidate }, headers: { "User-Agent": "Mozilla/5.0" } }
     );
-    const yest = await fetch(
-      `https://api.exchangerate.host/${yesterdayISO()}?base=USD&symbols=EUR,GBP,JPY,AUD,CAD,CHF,NZD,INR`,
-      { next: { revalidate: 3600 } }
-    );
-    if (!today.ok || !yest.ok) throw new Error("fx fetch failed");
-    const t = (await today.json()) as FxResponse;
-    const y = (await yest.json()) as FxResponse;
-    if (!t.rates || !y.rates) throw new Error("fx empty");
-    return FX_PAIRS.map((p) => {
-      const tRate = p.base === "USD" ? t.rates[p.quote] : 1 / t.rates[p.base];
-      const yRate = p.base === "USD" ? y.rates[p.quote] : 1 / y.rates[p.base];
-      const change = yRate ? ((tRate - yRate) / yRate) * 100 : 0;
-      return {
-        symbol: p.label.replace("/", ""),
-        label: p.label,
-        type: "FX" as const,
-        price: tRate,
-        changePct24h: change,
-        currency: p.quote,
-      };
-    });
+    if (!res.ok) throw new Error(`yahoo ${res.status}`);
+    const json = (await res.json()) as { chart?: { result?: Array<{ meta?: YahooMeta }> } };
+    const meta = json.chart?.result?.[0]?.meta;
+    const price = meta?.regularMarketPrice;
+    const prev = meta?.chartPreviousClose ?? meta?.previousClose;
+    if (typeof price !== "number") throw new Error("yahoo no price");
+    const changePct24h = prev ? ((price - prev) / prev) * 100 : 0;
+    return {
+      symbol: item.symbol,
+      label: item.label,
+      type: item.type,
+      price,
+      changePct24h,
+      currency: meta?.currency ?? item.currency ?? "USD",
+    };
   } catch {
-    return FALLBACK_FX;
+    return null;
   }
 }
 
-function yesterdayISO(): string {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() - 1);
-  return d.toISOString().slice(0, 10);
+/** Fetch a set of Yahoo-backed quotes, falling back to static values per symbol. */
+export async function getYahooQuotes(
+  items: YahooSymbol[] = YAHOO_RIBBON,
+  revalidate = 30
+): Promise<MarketQuote[]> {
+  const results = await Promise.all(items.map((i) => fetchYahooQuote(i, revalidate)));
+  return items.map((item, idx) => results[idx] ?? FALLBACK_MACRO.find((m) => m.symbol === item.symbol) ?? {
+    symbol: item.symbol,
+    label: item.label,
+    type: item.type,
+    price: 0,
+    changePct24h: 0,
+    currency: item.currency ?? "USD",
+  });
+}
+
+/**
+ * Unified "Live Market Ribbon" feed in the exact order the newsroom wants:
+ * crypto majors → dollar index → FX majors → metals → equity indices.
+ */
+export async function getRibbonQuotes(): Promise<MarketQuote[]> {
+  const [crypto, fx, macro] = await Promise.all([
+    getCryptoSimplePrices(),
+    getFxQuotes(),
+    getYahooQuotes(YAHOO_RIBBON, 30),
+  ]);
+  const find = (arr: MarketQuote[], sym: string) => arr.find((q) => q.symbol === sym);
+  const macroBy = (sym: string) => find(macro, sym);
+  const ordered: (MarketQuote | undefined)[] = [
+    find(crypto, "BTC"),
+    find(crypto, "ETH"),
+    find(crypto, "SOL"),
+    find(crypto, "XRP"),
+    macroBy("DXY"),
+    find(fx, "EURUSD"),
+    find(fx, "GBPUSD"),
+    find(fx, "USDJPY"),
+    macroBy("XAU"),
+    macroBy("XAG"),
+    macroBy("SPX"),
+    macroBy("IXIC"),
+  ];
+  return ordered.filter((q): q is MarketQuote => Boolean(q));
 }
 
 const FALLBACK_CRYPTO: MarketQuote[] = [
@@ -227,6 +307,16 @@ const FALLBACK_CRYPTO: MarketQuote[] = [
   { symbol: "TRX", label: "TRON", type: "CRYPTO", price: 0.16, changePct24h: 0.3, currency: "USD" },
   { symbol: "AVAX", label: "Avalanche", type: "CRYPTO", price: 28.5, changePct24h: -0.8, currency: "USD" },
   { symbol: "DOT", label: "Polkadot", type: "CRYPTO", price: 6.1, changePct24h: 0.5, currency: "USD" },
+];
+
+const FALLBACK_MACRO: MarketQuote[] = [
+  { symbol: "DXY", label: "Dollar Index", type: "FX", price: 104.2, changePct24h: 0.08, currency: "USD" },
+  { symbol: "XAU", label: "Gold", type: "COMMODITY", price: 4042.2, changePct24h: 1.3, currency: "USD" },
+  { symbol: "XAG", label: "Silver", type: "COMMODITY", price: 48.6, changePct24h: 0.9, currency: "USD" },
+  { symbol: "WTI", label: "Crude Oil", type: "COMMODITY", price: 78.4, changePct24h: -0.6, currency: "USD" },
+  { symbol: "SPX", label: "S&P 500", type: "STOCK", price: 7417.06, changePct24h: 0.4, currency: "USD" },
+  { symbol: "IXIC", label: "Nasdaq", type: "STOCK", price: 24650, changePct24h: 0.6, currency: "USD" },
+  { symbol: "DJI", label: "Dow Jones", type: "STOCK", price: 44210, changePct24h: 0.2, currency: "USD" },
 ];
 
 const FALLBACK_FX: MarketQuote[] = [
