@@ -14,13 +14,9 @@ const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "The Forex Republic";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://theforexrepublic.com";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: `${SITE_NAME} — Markets, Crypto & Financial News`,
-    template: `%s | ${SITE_NAME}`,
-  },
+  title: "The Forex Republic — Live Crypto, Forex & Macro Newsroom",
   description:
-    "Live markets data, crypto and forex news, deep analysis, and macro coverage for traders and professionals.",
+    "Professional-grade market intelligence. Live data, expert analysis, and breaking news across crypto, forex, equities, and macro.",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
