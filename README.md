@@ -1,4 +1,4 @@
-# TradeWave
+# The Forex Republic
 
 A Bloomberg/CoinDesk-inspired financial news and market data platform built with Next.js 14, Tailwind CSS, Prisma, and PostgreSQL.
 
@@ -8,6 +8,7 @@ A Bloomberg/CoinDesk-inspired financial news and market data platform built with
 - **Live market data** — Real-time crypto prices from CoinGecko and forex rates from exchangerate.host
 - **Scrolling ticker tape** — Continuous market data strip across the top of every page
 - **Full CMS** — Create, edit, publish articles with rich text editor, image uploads, categories, tags
+- **AI-assisted drafting** — Paste raw sources (tweets, official releases, chart notes, reference text/URLs, key ideas) and generate a structured, house-style article draft via OpenAI, prefilled into the CMS editor for human review (always saved as DRAFT first)
 - **Admin dashboard** — Article management, user & author management, comment moderation, newsletter, audit log
 - **Economic Calendar** — 5-day view of major economic events with impact ratings
 - **User accounts** — JWT-based auth with role-based access (Admin, Editor, Author, Reader)
@@ -63,7 +64,26 @@ Open [http://localhost:3000](http://localhost:3000).
 | `DATABASE_URL` | PostgreSQL connection string | Yes |
 | `JWT_SECRET` | Random string, ≥32 chars (`openssl rand -hex 32`) | Yes |
 | `NEXT_PUBLIC_SITE_NAME` | Site name displayed in UI | Yes |
+| `OPENAI_API_KEY` | OpenAI API key for AI article drafting ([create one](https://platform.openai.com/api-keys)) | For AI drafting |
+| `OPENAI_MODEL` | Override the OpenAI model used for drafting (default `gpt-4o-mini`) | No |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob token for image uploads | Production |
+| `PUBLISH_API_KEY` | Shared secret for the `/api/publish` and `/api/publish/generate` automation endpoints | For automation |
+
+## AI-Assisted Article Drafting
+
+Editors can generate a full article draft from raw source material instead of writing from scratch:
+
+1. Set `OPENAI_API_KEY` in your environment.
+2. In the admin dashboard, go to **Articles → AI Compose** (`/admin/articles/ai`).
+3. Paste any combination of sources: key ideas/angle, tweet text, official releases, chart notes, reference article text, and reference URLs.
+4. Click **Generate draft**. The model returns a title, excerpt, markdown body (in the house structure: Key Pointers, Introduction, Market Context, Analysis, Technical Analysis, Market Takeaway), a suggested category, and suggested tags.
+5. The draft is loaded into the standard article editor for review and is saved as **DRAFT** — a human always reviews before publishing.
+
+> **Note on charts:** Live TradingView (or other) chart URLs cannot be fetched or read by the model. Describe the chart in words in the *Chart notes* field, and/or upload a chart image via the cover/media upload (Vercel Blob) and reference it in the body.
+
+### Automation endpoint
+
+`POST /api/publish/generate` (secured by the `PUBLISH_API_KEY` header `x-api-key`) accepts raw `sources` and generates + drafts (or publishes) an article in one call — useful for external automation. It defaults to `DRAFT` status; pass `"status": "PUBLISHED"` to publish immediately.
 
 ## Seeded Accounts
 

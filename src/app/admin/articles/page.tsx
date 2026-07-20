@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { formatDate, timeAgo } from "@/lib/utils";
-import { Plus, Edit, Eye } from "lucide-react";
+import { Plus, Edit, Eye, Sparkles } from "lucide-react";
 import { ArticleRowActions } from "@/components/admin/ArticleRowActions";
 
 export const metadata = { title: "Manage Articles" };
@@ -19,9 +19,14 @@ export default async function AdminArticlesPage() {
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-ink-50">Articles</h2>
-        <Link href="/admin/articles/new" className="btn-primary text-xs h-8">
-          <Plus size={14} /> New Article
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/admin/articles/ai" className="btn-ghost text-xs h-8">
+            <Sparkles size={14} /> AI Compose
+          </Link>
+          <Link href="/admin/articles/new" className="btn-primary text-xs h-8">
+            <Plus size={14} /> New Article
+          </Link>
+        </div>
       </div>
 
       <div className="card overflow-hidden">
