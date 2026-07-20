@@ -1,9 +1,13 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { json, error } from "@/lib/api";
+import { json, error, tooManyRequests } from "@/lib/api";
 import { hashPassword, setSessionCookie } from "@/lib/auth";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const limit = rateLimit(`register:${getClientIp(req)}`, 5, 60_000);
+  if (!limit.ok) return tooManyRequests(limit.retryAfterSeconds);
+
   const { email, password, name } = await req.json();
   if (!email || !password || !name) return error("All fields are required");
   if (password.length < 6) return error("Password must be at least 6 characters");

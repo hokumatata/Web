@@ -4,14 +4,16 @@ import { json, error, unauthorized } from "@/lib/api";
 import { requireRole } from "@/lib/auth";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
-const ALLOWED_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-  "image/svg+xml",
-  "image/avif",
-];
+
+// SVG intentionally excluded: SVG files can embed <script>/event handlers and
+// execute JavaScript when served inline, enabling stored XSS.
+const EXT_BY_TYPE: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/gif": "gif",
+  "image/webp": "webp",
+  "image/avif": "avif",
+};
 
 export async function POST(req: NextRequest) {
   const auth = await requireRole("AUTHOR");
@@ -20,13 +22,20 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
   if (!file) return error("No file provided");
-  if (!ALLOWED_TYPES.includes(file.type))
-    return error("Unsupported file type. Use JPEG, PNG, GIF, WebP, SVG, or AVIF.");
+
+  const ext = EXT_BY_TYPE[file.type];
+  if (!ext)
+    return error("Unsupported file type. Use JPEG, PNG, GIF, WebP, or AVIF.");
   if (file.size > MAX_SIZE) return error("File too large. Max 5 MB.");
 
-  const blob = await put(`uploads/${Date.now()}-${file.name}`, file, {
+  // Never trust the client-supplied file name in the storage path. Generate a
+  // random, extension-controlled name to avoid path/name injection.
+  const safeName = `${Date.now()}-${crypto.randomUUID()}.${ext}`;
+
+  const blob = await put(`uploads/${safeName}`, file, {
     access: "public",
+    contentType: file.type,
   });
 
-  return json({ url: blob.url, name: file.name, size: file.size, type: file.type }, 201);
+  return json({ url: blob.url, name: safeName, size: file.size, type: file.type }, 201);
 }

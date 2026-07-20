@@ -1,3 +1,5 @@
+import sanitizeHtml from "sanitize-html";
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -5,6 +7,44 @@ function escapeHtml(text: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
+
+const DANGEROUS_SCHEME = /^\s*(?:javascript|data|vbscript|file):/i;
+
+// Returns a safe URL for use in href/src, or "#" when the scheme is dangerous.
+function sanitizeUrl(url: string): string {
+  const cleaned = url.replace(/[\u0000-\u001f\u007f]/g, "").trim();
+  if (DANGEROUS_SCHEME.test(cleaned)) return "#";
+  return cleaned;
+}
+
+const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: [
+    "h1", "h2", "h3", "h4", "p", "br", "strong", "em", "del", "code", "pre",
+    "blockquote", "hr", "ul", "ol", "li", "a", "img", "figure", "figcaption",
+    "svg", "path", "polyline", "line",
+  ],
+  allowedAttributes: {
+    a: ["href", "target", "rel", "class"],
+    img: ["src", "alt", "loading", "class"],
+    figure: ["class"],
+    code: ["class"],
+    svg: [
+      "xmlns", "width", "height", "viewBox", "fill", "stroke", "stroke-width",
+      "stroke-linecap", "stroke-linejoin", "style",
+    ],
+    path: ["d"],
+    polyline: ["points"],
+    line: ["x1", "y1", "x2", "y2"],
+  },
+  // Only safe URL schemes; blocks javascript:, data:, vbscript:, etc.
+  allowedSchemes: ["http", "https", "mailto"],
+  allowedSchemesByTag: {
+    img: ["http", "https"],
+  },
+  allowProtocolRelative: false,
+  // Preserve camelCase SVG attribute names (e.g. viewBox).
+  parser: { lowerCaseAttributeNames: false },
+};
 
 export function markdownToHtml(md: string): string {
   let html = md;
@@ -25,13 +65,16 @@ export function markdownToHtml(md: string): string {
   html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
   html = html.replace(/_(.+?)_/g, "<em>$1</em>");
 
-  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<figure class="article-figure"><img src="$2" alt="$1" loading="lazy" /><figcaption>$1</figcaption></figure>');
+  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_match: string, alt: string, src: string) => {
+    return `<figure class="article-figure"><img src="${sanitizeUrl(src)}" alt="${alt}" loading="lazy" /><figcaption>${alt}</figcaption></figure>`;
+  });
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match: string, text: string, href: string) => {
-    const isExternal = /^https?:\/\//.test(href) && !href.includes(typeof window !== "undefined" ? window.location.host : "localhost");
+    const safeHref = sanitizeUrl(href);
+    const isExternal = /^https?:\/\//.test(safeHref) && !safeHref.includes(typeof window !== "undefined" ? window.location.host : "localhost");
     if (isExternal) {
-      return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="outbound-link">${text}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-left:3px;vertical-align:middle"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`;
+      return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer" class="outbound-link">${text}<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-left:3px;vertical-align:middle"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`;
     }
-    return `<a href="${href}" class="inbound-link">${text}</a>`;
+    return `<a href="${safeHref}" class="inbound-link">${text}</a>`;
   });
 
   html = html.replace(/^> (.+)$/gm, "<blockquote><p>$1</p></blockquote>");
@@ -85,7 +128,8 @@ export function markdownToHtml(md: string): string {
   if (inUl) result.push("</ul>");
   if (inOl) result.push("</ol>");
 
-  return result.join("\n").replace(/\n{3,}/g, "\n\n");
+  const rendered = result.join("\n").replace(/\n{3,}/g, "\n\n");
+  return sanitizeHtml(rendered, SANITIZE_OPTIONS);
 }
 
 export function extractFirstImage(md: string): string | null {

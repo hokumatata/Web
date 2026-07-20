@@ -18,9 +18,16 @@ async function main() {
   // ------------------------------------------------------------------
   // 2. Users — upsert with current credentials
   // ------------------------------------------------------------------
-  const adminHash = await bcrypt.hash("TFR_Admin2026!", 10);
-  const editorHash = await bcrypt.hash("TFR_Editor2026!", 10);
-  const authorHash = await bcrypt.hash("TFR_Author2026!", 10);
+  // Credentials come from the environment. Fall back to obvious dev-only
+  // placeholders locally so the seed still runs, but real/production
+  // deployments MUST set these env vars.
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "dev-admin-change-me";
+  const editorPassword = process.env.SEED_EDITOR_PASSWORD ?? "dev-editor-change-me";
+  const authorPassword = process.env.SEED_AUTHOR_PASSWORD ?? "dev-author-change-me";
+
+  const adminHash = await bcrypt.hash(adminPassword, 10);
+  const editorHash = await bcrypt.hash(editorPassword, 10);
+  const authorHash = await bcrypt.hash(authorPassword, 10);
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@theforexrepublic.com" },
@@ -157,10 +164,10 @@ async function main() {
 
   console.log("Seed completed successfully!");
   console.log(`Created ${newsArticles.length} articles, ${categories.length} categories, ${tags.length} tags`);
-  console.log("\nCredentials:");
-  console.log("  Admin:  admin@theforexrepublic.com / TFR_Admin2026!");
-  console.log("  Editor: editor@theforexrepublic.com / TFR_Editor2026!");
-  console.log("  Author: author@theforexrepublic.com / TFR_Author2026!");
+  console.log("\nSeeded accounts (passwords come from SEED_*_PASSWORD env vars):");
+  console.log("  Admin:  admin@theforexrepublic.com");
+  console.log("  Editor: editor@theforexrepublic.com");
+  console.log("  Author: author@theforexrepublic.com");
 }
 
 main()
