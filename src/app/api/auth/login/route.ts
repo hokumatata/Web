@@ -1,10 +1,14 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { json, error } from "@/lib/api";
+import { json, error, tooManyRequests } from "@/lib/api";
 import { verifyPassword, setSessionCookie } from "@/lib/auth";
 import { isRole } from "@/lib/types";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const limit = rateLimit(`login:${getClientIp(req)}`, 5, 60_000);
+  if (!limit.ok) return tooManyRequests(limit.retryAfterSeconds);
+
   const { email, password } = await req.json();
   if (!email || !password) return error("Email and password are required");
 

@@ -65,13 +65,19 @@ Open [http://localhost:3000](http://localhost:3000).
 | `NEXT_PUBLIC_SITE_NAME` | Site name displayed in UI | Yes |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob token for image uploads | Production |
 
-## Demo Accounts
+## Seeded Accounts
 
-| Role   | Email                | Password   |
-| ------ | -------------------- | ---------- |
-| Admin  | admin@tradewave.io   | admin123   |
-| Editor | editor@tradewave.io  | editor123  |
-| Author | alex@tradewave.io    | author123  |
+`npm run db:seed` creates the following accounts. Their passwords are read from
+environment variables (`SEED_ADMIN_PASSWORD`, `SEED_EDITOR_PASSWORD`,
+`SEED_AUTHOR_PASSWORD`) — set these before seeding. No default passwords are
+committed to the repo; local dev falls back to obvious `*-change-me`
+placeholders that must not be used anywhere real.
+
+| Role   | Email                          |
+| ------ | ------------------------------ |
+| Admin  | admin@theforexrepublic.com     |
+| Editor | editor@theforexrepublic.com    |
+| Author | author@theforexrepublic.com    |
 
 ## Deploying to Vercel
 
