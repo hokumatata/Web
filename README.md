@@ -69,15 +69,16 @@ Open [http://localhost:3000](http://localhost:3000).
 
 `npm run db:seed` creates the following accounts. Their passwords are read from
 environment variables (`SEED_ADMIN_PASSWORD`, `SEED_EDITOR_PASSWORD`,
-`SEED_AUTHOR_PASSWORD`) — set these before seeding. No default passwords are
-committed to the repo; local dev falls back to obvious `*-change-me`
-placeholders that must not be used anywhere real.
+`SEED_AUTHOR_PASSWORD`) — set unique strong values before seeding. Each
+password must be at least 16 characters and include uppercase and lowercase
+letters, a number, and a special character. The seed script refuses to run
+without valid password values.
 
 | Role   | Email                          |
 | ------ | ------------------------------ |
-| Admin  | admin@theforexrepublic.com     |
-| Editor | editor@theforexrepublic.com    |
-| Author | author@theforexrepublic.com    |
+| Admin  | masteruser@theforexrepublic.com |
+| Editor | editorial@theforexrepublic.com  |
+| Author | writer@theforexrepublic.com     |
 
 ## Deploying to Vercel
 

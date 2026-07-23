@@ -18,22 +18,50 @@ async function main() {
   // ------------------------------------------------------------------
   // 2. Users — upsert with current credentials
   // ------------------------------------------------------------------
-  // Credentials come from the environment. Fall back to obvious dev-only
-  // placeholders locally so the seed still runs, but real/production
-  // deployments MUST set these env vars.
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "dev-admin-change-me";
-  const editorPassword = process.env.SEED_EDITOR_PASSWORD ?? "dev-editor-change-me";
-  const authorPassword = process.env.SEED_AUTHOR_PASSWORD ?? "dev-author-change-me";
+  const getSeedPassword = (name: string) => {
+    const password = process.env[name];
+    if (!password) throw new Error(`${name} must be set before seeding`);
+    if (
+      password.length < 16 ||
+      !/[a-z]/.test(password) ||
+      !/[A-Z]/.test(password) ||
+      !/\d/.test(password) ||
+      !/[^A-Za-z0-9]/.test(password)
+    ) {
+      throw new Error(`${name} must be at least 16 characters and include upper/lowercase letters, a number, and a special character`);
+    }
+    return password;
+  };
+
+  const adminPassword = getSeedPassword("SEED_ADMIN_PASSWORD");
+  const editorPassword = getSeedPassword("SEED_EDITOR_PASSWORD");
+  const authorPassword = getSeedPassword("SEED_AUTHOR_PASSWORD");
 
   const adminHash = await bcrypt.hash(adminPassword, 10);
   const editorHash = await bcrypt.hash(editorPassword, 10);
   const authorHash = await bcrypt.hash(authorPassword, 10);
 
+  const legacyEmails = [
+    ["admin@theforexrepublic.com", "masteruser@theforexrepublic.com"],
+    ["editor@theforexrepublic.com", "editorial@theforexrepublic.com"],
+    ["author@theforexrepublic.com", "writer@theforexrepublic.com"],
+  ] as const;
+  for (const [legacyEmail, currentEmail] of legacyEmails) {
+    const legacyUser = await prisma.user.findUnique({ where: { email: legacyEmail } });
+    const currentUser = await prisma.user.findUnique({ where: { email: currentEmail } });
+    if (legacyUser && !currentUser) {
+      await prisma.user.update({
+        where: { email: legacyEmail },
+        data: { email: currentEmail },
+      });
+    }
+  }
+
   const admin = await prisma.user.upsert({
-    where: { email: "admin@theforexrepublic.com" },
+    where: { email: "masteruser@theforexrepublic.com" },
     update: { passwordHash: adminHash, name: "TFR Admin", role: "ADMIN" },
     create: {
-      email: "admin@theforexrepublic.com",
+      email: "masteruser@theforexrepublic.com",
       passwordHash: adminHash,
       name: "TFR Admin",
       role: "ADMIN",
@@ -48,10 +76,10 @@ async function main() {
   });
 
   const editor = await prisma.user.upsert({
-    where: { email: "editor@theforexrepublic.com" },
+    where: { email: "editorial@theforexrepublic.com" },
     update: { passwordHash: editorHash, name: "TFR Editor", role: "EDITOR" },
     create: {
-      email: "editor@theforexrepublic.com",
+      email: "editorial@theforexrepublic.com",
       passwordHash: editorHash,
       name: "TFR Editor",
       role: "EDITOR",
@@ -66,10 +94,10 @@ async function main() {
   });
 
   const author1 = await prisma.user.upsert({
-    where: { email: "author@theforexrepublic.com" },
+    where: { email: "writer@theforexrepublic.com" },
     update: { passwordHash: authorHash, name: "TFR Author", role: "AUTHOR" },
     create: {
-      email: "author@theforexrepublic.com",
+      email: "writer@theforexrepublic.com",
       passwordHash: authorHash,
       name: "TFR Author",
       role: "AUTHOR",
@@ -165,9 +193,9 @@ async function main() {
   console.log("Seed completed successfully!");
   console.log(`Created ${newsArticles.length} articles, ${categories.length} categories, ${tags.length} tags`);
   console.log("\nSeeded accounts (passwords come from SEED_*_PASSWORD env vars):");
-  console.log("  Admin:  admin@theforexrepublic.com");
-  console.log("  Editor: editor@theforexrepublic.com");
-  console.log("  Author: author@theforexrepublic.com");
+  console.log("  Admin:  masteruser@theforexrepublic.com");
+  console.log("  Editor: editorial@theforexrepublic.com");
+  console.log("  Author: writer@theforexrepublic.com");
 }
 
 main()

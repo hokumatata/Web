@@ -20,7 +20,7 @@ import { revalidateTag } from "next/cache";
  *   isFeatured  (optional) — boolean, default false
  *   isBreaking  (optional) — boolean, default false
  *   status      (optional) — PUBLISHED or DRAFT, default PUBLISHED
- *   authorEmail (optional) — defaults to admin@theforexrepublic.com
+ *   authorEmail (optional) — defaults to masteruser@theforexrepublic.com
  */
 export async function POST(req: NextRequest) {
   const apiKey = req.headers.get("x-api-key");
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     return error(`Category "${category}" not found. Use: crypto, forex, stocks, macro, gold, analysis, opinion`);
   }
 
-  const email = authorEmail ?? "admin@theforexrepublic.com";
+  const email = authorEmail ?? "masteruser@theforexrepublic.com";
   const author = await prisma.user.findUnique({ where: { email } });
   if (!author) {
     return error(`Author with email "${email}" not found`);
