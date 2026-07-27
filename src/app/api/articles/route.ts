@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   if (!auth.ok) return unauthorized();
 
   const body = await req.json();
-  const { title, excerpt, bodyText, categoryId, coverImageUrl, isFeatured, isBreaking, tags } = body;
+  const { title, excerpt, bodyText, categoryId, coverImageUrl, thumbnailUrl, isFeatured, isBreaking, tags } = body;
   if (!title || !excerpt || !bodyText || !categoryId) return error("Missing required fields");
 
   const slug = slugify(title) + "-" + Date.now().toString(36);
@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
       categoryId,
       authorId: auth.session.uid,
       coverImageUrl: coverImageUrl ?? null,
+      thumbnailUrl: thumbnailUrl ?? null,
       isFeatured: isFeatured ?? false,
       isBreaking: isBreaking ?? false,
       status: "DRAFT",

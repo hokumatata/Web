@@ -28,11 +28,12 @@ export default async function EditArticlePage({ params }: { params: { id: string
             body: article.body,
             categoryId: article.categoryId,
             coverImageUrl: article.coverImageUrl ?? "",
+            thumbnailUrl: article.thumbnailUrl ?? "",
             isFeatured: article.isFeatured,
             isBreaking: article.isBreaking,
             tags: article.tags.map((t) => t.tagId),
           }}
-          categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+          categories={categories.map((c) => ({ id: c.id, name: c.name, slug: c.slug }))}
           tags={tags.map((t) => ({ id: t.id, name: t.name }))}
         />
       </div>

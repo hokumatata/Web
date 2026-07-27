@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { Save } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
 import { RichEditor } from "./RichEditor";
+import { AiImageButton } from "./AiImageButton";
 
-interface Category { id: string; name: string }
+interface Category { id: string; name: string; slug?: string }
 interface Tag { id: string; name: string }
 interface ArticleData {
   id?: string;
@@ -15,6 +16,7 @@ interface ArticleData {
   body: string;
   categoryId: string;
   coverImageUrl: string;
+  thumbnailUrl: string;
   isFeatured: boolean;
   isBreaking: boolean;
   tags: string[];
@@ -37,11 +39,14 @@ export function ArticleForm({
   const [body, setBody] = useState(article?.body ?? "");
   const [categoryId, setCategoryId] = useState(article?.categoryId ?? categories[0]?.id ?? "");
   const [coverImageUrl, setCoverImageUrl] = useState(article?.coverImageUrl ?? "");
+  const [thumbnailUrl, setThumbnailUrl] = useState(article?.thumbnailUrl ?? "");
   const [isFeatured, setIsFeatured] = useState(article?.isFeatured ?? false);
   const [isBreaking, setIsBreaking] = useState(article?.isBreaking ?? false);
   const [selectedTags, setSelectedTags] = useState<string[]>(article?.tags ?? []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const selectedCategorySlug = categories.find((c) => c.id === categoryId)?.slug;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -54,6 +59,7 @@ export function ArticleForm({
       bodyText: body,
       categoryId,
       coverImageUrl: coverImageUrl || null,
+      thumbnailUrl: thumbnailUrl || null,
       isFeatured,
       isBreaking,
       tags: selectedTags,
@@ -94,7 +100,16 @@ export function ArticleForm({
 
       <RichEditor value={body} onChange={setBody} />
 
-      <ImageUpload value={coverImageUrl} onChange={setCoverImageUrl} />
+      <div>
+        <ImageUpload value={coverImageUrl} onChange={setCoverImageUrl} label="Cover Image (article hero)" />
+        <AiImageButton kind="cover" title={title} excerpt={excerpt} categorySlug={selectedCategorySlug} onGenerated={setCoverImageUrl} />
+      </div>
+
+      <div>
+        <ImageUpload value={thumbnailUrl} onChange={setThumbnailUrl} label="Thumbnail (card image)" />
+        <p className="text-2xs text-ink-500 mt-1">Shown on listing cards. Falls back to the cover image if left empty.</p>
+        <AiImageButton kind="thumbnail" title={title} excerpt={excerpt} categorySlug={selectedCategorySlug} onGenerated={setThumbnailUrl} />
+      </div>
 
       <div>
         <label className="label">Category</label>
