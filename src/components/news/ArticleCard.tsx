@@ -7,6 +7,7 @@ export interface ArticleCardData {
   title: string;
   excerpt: string;
   coverImageUrl: string | null;
+  thumbnailUrl?: string | null;
   publishedAt: Date | string | null;
   body: string;
   isBreaking?: boolean;
@@ -91,12 +92,14 @@ export function ArticleCard({ a, variant = "default" }: { a: ArticleCardData; va
     );
   }
 
+  const cardImage = a.thumbnailUrl || a.coverImageUrl;
+
   if (variant === "image-left") {
     return (
       <div className="flex gap-4 py-3 border-b border-ink-800 last:border-b-0 group">
         <Link href={`/article/${a.slug}`} className="h-20 w-28 flex-shrink-0 overflow-hidden bg-ink-800 rounded-md">
-          {a.coverImageUrl && (
-            <img src={a.coverImageUrl} alt={a.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          {cardImage && (
+            <img src={cardImage} alt={a.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
           )}
         </Link>
         <div className="min-w-0 flex-1">
@@ -116,9 +119,9 @@ export function ArticleCard({ a, variant = "default" }: { a: ArticleCardData; va
   return (
     <article className="card-hover h-full flex flex-col group">
       <Link href={`/article/${a.slug}`} className="block aspect-[16/10] w-full overflow-hidden bg-ink-800 relative">
-        {a.coverImageUrl && (
+        {cardImage && (
           <img
-            src={a.coverImageUrl}
+            src={cardImage}
             alt={a.title}
             className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
           />

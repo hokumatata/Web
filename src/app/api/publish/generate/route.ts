@@ -17,10 +17,11 @@ export const runtime = "nodejs";
  *   sources     (required) — { tweets, releases, chartNotes, referenceText, referenceUrls, keyIdeas, categoryHint }
  *   category    (optional) — override the AI-suggested category slug
  *   coverImage  (optional) — cover image URL
+ *   thumbnail   (optional) — card thumbnail URL (falls back to cover on cards)
  *   isFeatured  (optional) — boolean, default false
  *   isBreaking  (optional) — boolean, default false
  *   status      (optional) — PUBLISHED or DRAFT, default DRAFT (AI drafts default to review)
- *   authorEmail (optional) — defaults to admin@theforexrepublic.com
+ *   authorEmail (optional) — defaults to masteruser@theforexrepublic.com
  */
 export async function POST(req: NextRequest) {
   const apiKey = req.headers.get("x-api-key");
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
     sources?: ArticleSources;
     category?: string;
     coverImage?: string;
+    thumbnail?: string;
     isFeatured?: boolean;
     isBreaking?: boolean;
     status?: string;
@@ -73,7 +75,7 @@ export async function POST(req: NextRequest) {
     return error(`Category "${categorySlug}" not found. Use: crypto, forex, stocks, macro, gold, analysis, opinion`);
   }
 
-  const email = payload.authorEmail ?? "admin@theforexrepublic.com";
+  const email = payload.authorEmail ?? "masteruser@theforexrepublic.com";
   const author = await prisma.user.findUnique({ where: { email } });
   if (!author) {
     return error(`Author with email "${email}" not found`);
@@ -89,6 +91,7 @@ export async function POST(req: NextRequest) {
       excerpt: draft.excerpt,
       body: draft.body,
       coverImageUrl: payload.coverImage ?? "",
+      thumbnailUrl: payload.thumbnail ?? null,
       categoryId: cat.id,
       authorId: author.id,
       isFeatured: payload.isFeatured ?? false,

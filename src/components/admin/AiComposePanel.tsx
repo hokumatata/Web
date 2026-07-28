@@ -21,6 +21,7 @@ interface PrefilledArticle {
   body: string;
   categoryId: string;
   coverImageUrl: string;
+  thumbnailUrl: string;
   isFeatured: boolean;
   isBreaking: boolean;
   tags: string[];
@@ -81,6 +82,7 @@ export function AiComposePanel({
       body: draft.body,
       categoryId: matchedCategory?.id ?? "",
       coverImageUrl: "",
+      thumbnailUrl: "",
       isFeatured: false,
       isBreaking: false,
       tags: matchedTagIds,
@@ -146,7 +148,7 @@ export function AiComposePanel({
         </div>
         <ArticleForm
           article={prefilled}
-          categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+          categories={categories.map((c) => ({ id: c.id, name: c.name, slug: c.slug }))}
           tags={tags.map((t) => ({ id: t.id, name: t.name }))}
         />
       </div>

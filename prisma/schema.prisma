@@ -58,6 +58,7 @@ model Article {
   excerpt       String
   body          String
   coverImageUrl String?
+  thumbnailUrl  String?
   status        String        @default("DRAFT")
   isFeatured    Boolean       @default(false)
   isBreaking    Boolean       @default(false)

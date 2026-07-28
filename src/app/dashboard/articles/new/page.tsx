@@ -20,7 +20,7 @@ export default async function AuthorNewArticlePage() {
       <h2 className="text-xl font-bold text-ink-50 mb-6">Write Article</h2>
       <div className="card p-6">
         <ArticleForm
-          categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+          categories={categories.map((c) => ({ id: c.id, name: c.name, slug: c.slug }))}
           tags={tags.map((t) => ({ id: t.id, name: t.name }))}
           redirectTo="/dashboard/articles"
         />

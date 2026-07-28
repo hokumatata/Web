@@ -31,7 +31,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 
   const body = await req.json();
-  const { title, excerpt, bodyText, categoryId, coverImageUrl, isFeatured, isBreaking, status, tags } = body;
+  const { title, excerpt, bodyText, categoryId, coverImageUrl, thumbnailUrl, isFeatured, isBreaking, status, tags } = body;
 
   const updated = await prisma.article.update({
     where: { id: params.id },
@@ -41,6 +41,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       ...(bodyText !== undefined ? { body: bodyText } : {}),
       ...(categoryId !== undefined ? { categoryId } : {}),
       ...(coverImageUrl !== undefined ? { coverImageUrl } : {}),
+      ...(thumbnailUrl !== undefined ? { thumbnailUrl } : {}),
       ...(isFeatured !== undefined ? { isFeatured } : {}),
       ...(isBreaking !== undefined ? { isBreaking } : {}),
       ...(status !== undefined ? { status } : {}),

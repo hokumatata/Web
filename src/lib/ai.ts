@@ -171,3 +171,70 @@ export async function generateArticleDraft(
 
   return result.data;
 }
+
+export interface GeneratedImage {
+  /** Raw image bytes to persist (e.g. to Vercel Blob). */
+  buffer: Buffer;
+  contentType: string;
+}
+
+/**
+ * Generate a single editorial image (cover or card thumbnail) from a short
+ * prompt. Uses the cheapest configured image model at low quality to keep spend
+ * minimal — image generation is opt-in per article, never automatic.
+ *
+ * Defaults: model `gpt-image-1` at `quality: "low"`, 1024x1024. Override with
+ * OPENAI_IMAGE_MODEL / OPENAI_IMAGE_QUALITY / OPENAI_IMAGE_SIZE.
+ */
+export async function generateArticleImage(prompt: string): Promise<GeneratedImage> {
+  const trimmed = prompt.trim();
+  if (!trimmed) throw new Error("An image prompt is required");
+
+  const openai = getClient();
+  const model = process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1";
+  const size = (process.env.OPENAI_IMAGE_SIZE ?? "1024x1024") as
+    | "1024x1024"
+    | "1024x1536"
+    | "1536x1024";
+  const quality = (process.env.OPENAI_IMAGE_QUALITY ?? "low") as
+    | "low"
+    | "medium"
+    | "high";
+
+  const response = await openai.images.generate({
+    model,
+    prompt: trimmed,
+    n: 1,
+    size,
+    // `quality` is only honored by gpt-image-* models; harmless otherwise.
+    ...(model.startsWith("gpt-image") ? { quality } : {}),
+  });
+
+  const b64 = response.data?.[0]?.b64_json;
+  if (!b64) {
+    throw new Error("OpenAI returned no image data");
+  }
+
+  return { buffer: Buffer.from(b64, "base64"), contentType: "image/png" };
+}
+
+/**
+ * Build a concise, house-style image prompt from an article's core fields.
+ * Kept short on purpose — image cost is per-image, not per-token.
+ */
+export function buildImagePrompt(input: {
+  title: string;
+  excerpt?: string;
+  categorySlug?: string;
+  kind?: "cover" | "thumbnail";
+}): string {
+  const { title, excerpt, categorySlug, kind = "cover" } = input;
+  const topic = [title, excerpt].filter(Boolean).join(". ");
+  const subject = categorySlug ? `${categorySlug} financial markets` : "financial markets";
+  return [
+    `Professional editorial ${kind} image for a financial news article about ${subject}.`,
+    `Topic: ${topic}.`,
+    "Clean, modern, Bloomberg/CoinDesk-style photojournalistic or abstract data-driven visual.",
+    "No text, no words, no logos, no watermarks. Muted professional color palette.",
+  ].join(" ");
+}

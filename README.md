@@ -66,6 +66,9 @@ Open [http://localhost:3000](http://localhost:3000).
 | `NEXT_PUBLIC_SITE_NAME` | Site name displayed in UI | Yes |
 | `OPENAI_API_KEY` | OpenAI API key for AI article drafting ([create one](https://platform.openai.com/api-keys)) | For AI drafting |
 | `OPENAI_MODEL` | Override the OpenAI model used for drafting (default `gpt-4o-mini`) | No |
+| `OPENAI_IMAGE_MODEL` | Override the OpenAI image model for cover/thumbnail generation (default `gpt-image-1`) | No |
+| `OPENAI_IMAGE_QUALITY` | Image quality: `low` (default), `medium`, `high` — kept low to minimize cost | No |
+| `OPENAI_IMAGE_SIZE` | Generated image size (default `1024x1024`) | No |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob token for image uploads | Production |
 | `PUBLISH_API_KEY` | Shared secret for the `/api/publish` and `/api/publish/generate` automation endpoints | For automation |
 
@@ -80,6 +83,15 @@ Editors can generate a full article draft from raw source material instead of wr
 5. The draft is loaded into the standard article editor for review and is saved as **DRAFT** — a human always reviews before publishing.
 
 > **Note on charts:** Live TradingView (or other) chart URLs cannot be fetched or read by the model. Describe the chart in words in the *Chart notes* field, and/or upload a chart image via the cover/media upload (Vercel Blob) and reference it in the body.
+
+### Images & thumbnails
+
+Articles have two separate images:
+
+- **Cover image** — the large hero shown at the top of the article page.
+- **Thumbnail** — the smaller image shown on listing/section cards. If left empty, cards fall back to the cover image.
+
+Both can be uploaded (drag-and-drop or URL, stored in Vercel Blob) or **generated with AI**. In the article editor, click **Generate cover with AI** / **Generate thumbnail with AI** to create an image from the article's title/excerpt/category via `POST /api/ai/image`. Image generation is **opt-in per article** and uses the cheapest configured OpenAI image model (`gpt-image-1` at `low` quality by default) to avoid overspending.
 
 ### Automation endpoint
 
