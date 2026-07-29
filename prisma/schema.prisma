@@ -171,3 +171,16 @@ model AuditLog {
 
   @@index([createdAt])
 }
+
+// Dedup + audit trail for the scheduled feed-drafting automation. One row per
+// source feed item we've already turned into a draft, so re-runs skip it.
+model SourceItem {
+  id        String   @id @default(cuid())
+  link      String   @unique
+  title     String
+  source    String
+  articleId String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
