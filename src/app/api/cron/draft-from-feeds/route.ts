@@ -2,13 +2,22 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { json, error, unauthorized } from "@/lib/api";
 import { slugify } from "@/lib/utils";
-import { generateArticleDraft, CATEGORY_SLUGS, type ArticleSources } from "@/lib/ai";
+import {
+  generateArticleDraft,
+  generateArticleImage,
+  buildImagePrompt,
+  CATEGORY_SLUGS,
+  type ArticleSources,
+} from "@/lib/ai";
 import { getConfiguredFeeds, fetchFeedItems, type FeedItem } from "@/lib/sources";
+import { put } from "@vercel/blob";
 import { revalidateTag } from "next/cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+// Image generation adds time per draft; allow the longer window (Vercel caps
+// this to the project's plan limit — up to 300s on Pro).
+export const maxDuration = 300;
 
 /**
  * Scheduled article drafting from public news feeds (Vercel Cron).
@@ -18,9 +27,14 @@ export const maxDuration = 60;
  * before, and drafts ONE original house-style article per item via OpenAI.
  * Everything is saved as DRAFT for human review — this never auto-publishes.
  *
+ * Each draft also gets an AI-generated cover image (uploaded to Vercel Blob),
+ * unless SOURCE_GENERATE_IMAGES is set to "false". Image generation is
+ * best-effort: if it fails (e.g. missing BLOB_READ_WRITE_TOKEN), the article is
+ * still saved as a DRAFT with an empty cover for a human to fill in.
+ *
  * Cost guardrails:
  * - At most SOURCE_DRAFTS_PER_RUN drafts per run (default 3), one cheap
- *   gpt-4o-mini call each; no image generation.
+ *   gpt-4o-mini call each plus one low-quality cover image.
  * - Remaining new items are recorded as "seen" (no draft) so we don't build a
  *   perpetual backlog or reprocess them.
  *
@@ -48,6 +62,35 @@ function authorize(req: NextRequest): boolean {
   return false;
 }
 
+/**
+ * Best-effort AI cover image: generate + upload to Vercel Blob, returning the
+ * public URL. Returns "" (empty cover) on any failure or when disabled, so a
+ * single image error never blocks the draft.
+ */
+async function generateCoverImage(
+  title: string,
+  excerpt: string,
+  categorySlug: string
+): Promise<string> {
+  if (process.env.SOURCE_GENERATE_IMAGES === "false") return "";
+  try {
+    const prompt = buildImagePrompt({ title, excerpt, categorySlug, kind: "cover" });
+    const image = await generateArticleImage(prompt);
+    const safeName = `${Date.now()}-${crypto.randomUUID()}.png`;
+    const blob = await put(`ai-images/${safeName}`, image.buffer, {
+      access: "public",
+      contentType: image.contentType,
+    });
+    return blob.url;
+  } catch (e) {
+    console.error(
+      "[draft-from-feeds] cover image generation failed:",
+      e instanceof Error ? e.message : e
+    );
+    return "";
+  }
+}
+
 async function draftFromItem(item: FeedItem, authorId: string): Promise<string | null> {
   const sources: ArticleSources = {
     keyIdeas: item.title,
@@ -70,13 +113,15 @@ async function draftFromItem(item: FeedItem, authorId: string): Promise<string |
   const attribution = `\n\n---\n*Inspired by reporting from ${item.source}. [Read the original source](${item.link}).*`;
   const articleSlug = slugify(draft.title) + "-" + Date.now().toString(36);
 
+  const coverImageUrl = await generateCoverImage(draft.title, draft.excerpt, slug);
+
   const article = await prisma.article.create({
     data: {
       slug: articleSlug,
       title: draft.title,
       excerpt: draft.excerpt,
       body: draft.body + attribution,
-      coverImageUrl: "",
+      coverImageUrl,
       thumbnailUrl: null,
       categoryId: cat.id,
       authorId,
