@@ -106,7 +106,7 @@ Both can be uploaded (drag-and-drop or URL, stored in Vercel Blob) or **generate
 
 ### Scheduled drafting from news feeds
 
-`GET /api/cron/draft-from-feeds` runs on a schedule (Vercel Cron, see `vercel.json` — every 6 hours by default) and drafts original, in-depth, house-style articles inspired by public news feeds. It reads only the **public RSS/Atom headlines and short summaries** of the configured publications — never their full article text — and uses them as *signals* to write original pieces with attribution. Each draft also gets an **AI-generated cover image** (uploaded to Vercel Blob); set `SOURCE_GENERATE_IMAGES=false` to disable.
+`GET /api/cron/draft-from-feeds` runs on a schedule (Vercel Cron, see `vercel.json` — daily) and drafts original, in-depth, house-style articles inspired by public news feeds. It reads only the **public RSS/Atom headlines and short summaries** of the configured publications — never their full article text — and uses them as *signals* to write original pieces with attribution. Each draft also gets an **AI-generated cover image** (uploaded to Vercel Blob); set `SOURCE_GENERATE_IMAGES=false` to disable.
 
 **Source availability:** CoinGape and Yahoo Finance expose server-fetchable feeds. **FXStreet** sits behind a Cloudflare bot challenge (returns 403 to servers) and **Bloomberg** has no free feed and is paywalled, so neither can be fetched automatically — the forex slot defaults to **ForexLive** instead. For FXStreet/Bloomberg specifically, paste the occasional headline/blurb via **AI Compose** or `/api/publish/generate`.
 
@@ -114,7 +114,8 @@ Both can be uploaded (drag-and-drop or URL, stored in Vercel Blob) or **generate
 - Cost is bounded: at most `SOURCE_DRAFTS_PER_RUN` drafts per run (one cheap `gpt-4o-mini` call plus one low-quality cover image each). Remaining new items are recorded as seen so they aren't reprocessed.
 - Cover images need `OPENAI_API_KEY` and `BLOB_READ_WRITE_TOKEN` set. Image generation is best-effort — if it fails, the article is still saved as a DRAFT with an empty cover. Set `SOURCE_GENERATE_IMAGES=false` to turn it off.
 - Dedup is tracked in the `SourceItem` table (keyed by source link).
-- Set `CRON_SECRET` in the environment; Vercel Cron sends it as `Authorization: Bearer <CRON_SECRET>`. You can trigger a run manually with the `x-api-key: <PUBLISH_API_KEY>` header. Adjust the cadence by editing the `schedule` in `vercel.json` (default `0 */6 * * *`, every 6 hours). Note: sub-daily cron schedules and the longer image-generation runtime require a Vercel **Pro** plan.
+- Set `CRON_SECRET` in the environment; Vercel Cron sends it as `Authorization: Bearer <CRON_SECRET>`. You can trigger a run manually with the `x-api-key: <PUBLISH_API_KEY>` header. Adjust the Vercel cadence by editing the `schedule` in `vercel.json`. Note: Vercel **Hobby** only allows one cron run per day.
+- **Running more often than daily (free):** Vercel Hobby caps cron at daily, so `.github/workflows/journalist-cron.yml` runs a GitHub Actions schedule every 6 hours that calls the endpoint with the `x-api-key` header. Add repo secrets `SITE_URL` (your deployed base URL) and `PUBLISH_API_KEY` (matching the Vercel env var). Scheduled workflows run only from the default branch and can be delayed a few minutes; you can also trigger it manually from the Actions tab. On Hobby the serverless function is capped at ~60s, so with image generation you may want `SOURCE_DRAFTS_PER_RUN=1` or `2` to ensure each run finishes.
 
 ## Seeded Accounts
 
