@@ -73,6 +73,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `PUBLISH_API_KEY` | Shared secret for the `/api/publish` and `/api/publish/generate` automation endpoints | For automation |
 | `CRON_SECRET` | Secret Vercel Cron sends as `Authorization: Bearer …` to the scheduled feed-drafting job | For scheduled drafting |
 | `SOURCE_DRAFTS_PER_RUN` | Max drafts created per scheduled run (default `3`, capped at `10`) | No |
+| `SOURCE_GENERATE_IMAGES` | Set to `false` to disable AI cover images on scheduled drafts (default on) | No |
 | `SOURCE_AUTHOR_EMAIL` | Author the scheduled drafts are attributed to (default `masteruser@theforexrepublic.com`) | No |
 | `SOURCE_RSS_FEEDS` | Override source feeds, comma-separated `Name\|url` (default CoinGape, ForexLive, Yahoo Finance) | No |
 
@@ -105,14 +106,15 @@ Both can be uploaded (drag-and-drop or URL, stored in Vercel Blob) or **generate
 
 ### Scheduled drafting from news feeds
 
-`GET /api/cron/draft-from-feeds` runs on a schedule (Vercel Cron, see `vercel.json` — daily by default) and drafts original, house-style articles inspired by public news feeds. It reads only the **public RSS/Atom headlines and short summaries** of the configured publications — never their full article text — and uses them as *signals* to write original pieces with attribution.
+`GET /api/cron/draft-from-feeds` runs on a schedule (Vercel Cron, see `vercel.json` — every 6 hours by default) and drafts original, in-depth, house-style articles inspired by public news feeds. It reads only the **public RSS/Atom headlines and short summaries** of the configured publications — never their full article text — and uses them as *signals* to write original pieces with attribution. Each draft also gets an **AI-generated cover image** (uploaded to Vercel Blob); set `SOURCE_GENERATE_IMAGES=false` to disable.
 
 **Source availability:** CoinGape and Yahoo Finance expose server-fetchable feeds. **FXStreet** sits behind a Cloudflare bot challenge (returns 403 to servers) and **Bloomberg** has no free feed and is paywalled, so neither can be fetched automatically — the forex slot defaults to **ForexLive** instead. For FXStreet/Bloomberg specifically, paste the occasional headline/blurb via **AI Compose** or `/api/publish/generate`.
 
 - Every result is saved as **DRAFT** — a human always reviews and publishes.
-- Cost is bounded: at most `SOURCE_DRAFTS_PER_RUN` drafts per run (one cheap `gpt-4o-mini` call each, no images). Remaining new items are recorded as seen so they aren't reprocessed.
+- Cost is bounded: at most `SOURCE_DRAFTS_PER_RUN` drafts per run (one cheap `gpt-4o-mini` call plus one low-quality cover image each). Remaining new items are recorded as seen so they aren't reprocessed.
+- Cover images need `OPENAI_API_KEY` and `BLOB_READ_WRITE_TOKEN` set. Image generation is best-effort — if it fails, the article is still saved as a DRAFT with an empty cover. Set `SOURCE_GENERATE_IMAGES=false` to turn it off.
 - Dedup is tracked in the `SourceItem` table (keyed by source link).
-- Set `CRON_SECRET` in the environment; Vercel Cron sends it as `Authorization: Bearer <CRON_SECRET>`. You can trigger a run manually with the `x-api-key: <PUBLISH_API_KEY>` header. Adjust the cadence by editing the `schedule` in `vercel.json`.
+- Set `CRON_SECRET` in the environment; Vercel Cron sends it as `Authorization: Bearer <CRON_SECRET>`. You can trigger a run manually with the `x-api-key: <PUBLISH_API_KEY>` header. Adjust the cadence by editing the `schedule` in `vercel.json` (default `0 */6 * * *`, every 6 hours). Note: sub-daily cron schedules and the longer image-generation runtime require a Vercel **Pro** plan.
 
 ## Seeded Accounts
 
