@@ -97,6 +97,8 @@ Articles have two separate images:
 
 Both can be uploaded (drag-and-drop or URL, stored in Vercel Blob) or **generated with AI**. In the article editor, click **Generate cover with AI** / **Generate thumbnail with AI** to create an image from the article's title/excerpt/category via `POST /api/ai/image`. Image generation is **opt-in per article** and uses the cheapest configured OpenAI image model (`gpt-image-1` at `low` quality by default) to avoid overspending.
 
+> **Required env vars:** AI image generation needs `OPENAI_API_KEY` (optionally overridden by `OPENAI_IMAGE_MODEL`, `OPENAI_IMAGE_QUALITY`, and `OPENAI_IMAGE_SIZE`), and storing the resulting image in production needs `BLOB_READ_WRITE_TOKEN` (Vercel Blob). If either is missing, the "Generate … with AI" action fails — set both in your Vercel project's environment. See the [environment variables](#environment-variables) table for details.
+
 ### Automation endpoint
 
 `POST /api/publish/generate` (secured by the `PUBLISH_API_KEY` header `x-api-key`) accepts raw `sources` and generates + drafts (or publishes) an article in one call — useful for external automation. It defaults to `DRAFT` status; pass `"status": "PUBLISHED"` to publish immediately.

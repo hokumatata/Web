@@ -201,7 +201,7 @@ export function RichEditor({ value, onChange }: RichEditorProps) {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           required
-          className="input min-h-[400px] font-mono text-sm rounded-t-none resize-y"
+          className="input min-h-[400px] font-mono text-sm rounded-t-none rounded-b-sm resize-y"
           placeholder="Write your article using markdown...
 
 **Bold text**, *italic text*, ~~strikethrough~~
