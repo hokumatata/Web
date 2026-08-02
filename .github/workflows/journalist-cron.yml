@@ -1,0 +1,53 @@
+name: Journalist agent (feed drafting)
+
+# Free 4x/day scheduler for The Forex Republic's digital-journalist agent.
+# GitHub Actions cron (UTC) triggers the deployed endpoint every 6 hours;
+# the endpoint drafts DRAFT-only articles from public feeds for human review.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   SITE_URL        e.g. https://your-app.vercel.app  (no trailing slash)
+#   PUBLISH_API_KEY same value as the PUBLISH_API_KEY env var in Vercel
+#
+# Note: GitHub's scheduled runs can be delayed by a few minutes under load,
+# and only run from the default branch. You can also trigger it manually via
+# the "Run workflow" button (workflow_dispatch).
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: journalist-cron
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger feed drafting
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          PUBLISH_API_KEY: ${{ secrets.PUBLISH_API_KEY }}
+        run: |
+          if [ -z "$SITE_URL" ] || [ -z "$PUBLISH_API_KEY" ]; then
+            echo "::error::SITE_URL and PUBLISH_API_KEY repository secrets must be set."
+            exit 1
+          fi
+          url="${SITE_URL%/}/api/cron/draft-from-feeds"
+          echo "POST $url"
+          code=$(curl -sS -o response.json -w "%{http_code}" \
+            --max-time 300 \
+            -X POST \
+            -H "x-api-key: $PUBLISH_API_KEY" \
+            "$url")
+          echo "HTTP $code"
+          cat response.json || true
+          echo
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "::error::Feed drafting endpoint returned HTTP $code"
+            exit 1
+          fi
