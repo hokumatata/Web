@@ -5,6 +5,10 @@ import { requireRole } from "@/lib/auth";
 import { generateArticleImage, buildImagePrompt } from "@/lib/ai";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+// Image generation can take well over the 10s default; give it room (Vercel
+// caps this to the project's plan limit — up to 60s on Hobby, 300s on Pro).
+export const maxDuration = 300;
 
 /**
  * POST /api/ai/image
