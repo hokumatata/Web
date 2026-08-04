@@ -8,6 +8,12 @@ name: Journalist agent (feed drafting)
 #   SITE_URL        e.g. https://your-app.vercel.app  (no trailing slash)
 #   PUBLISH_API_KEY same value as the PUBLISH_API_KEY env var in Vercel
 #
+# Optional secret (needed only if Vercel Deployment Protection is enabled):
+#   VERCEL_AUTOMATION_BYPASS_SECRET  from Vercel -> Settings -> Deployment
+#     Protection -> "Protection Bypass for Automation". When set, it is sent
+#     as the x-vercel-protection-bypass header so this server-to-server call
+#     isn't redirected to Vercel's login page.
+#
 # Note: GitHub's scheduled runs can be delayed by a few minutes under load,
 # and only run from the default branch. You can also trigger it manually via
 # the "Run workflow" button (workflow_dispatch).
@@ -32,6 +38,7 @@ jobs:
         env:
           SITE_URL: ${{ secrets.SITE_URL }}
           PUBLISH_API_KEY: ${{ secrets.PUBLISH_API_KEY }}
+          VERCEL_BYPASS: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
           if [ -z "$SITE_URL" ] || [ -z "$PUBLISH_API_KEY" ]; then
             echo "::error::SITE_URL and PUBLISH_API_KEY repository secrets must be set."
@@ -39,10 +46,15 @@ jobs:
           fi
           url="${SITE_URL%/}/api/cron/draft-from-feeds"
           echo "POST $url"
+          bypass_args=()
+          if [ -n "$VERCEL_BYPASS" ]; then
+            bypass_args=(-H "x-vercel-protection-bypass: $VERCEL_BYPASS")
+          fi
           code=$(curl -sS -o response.json -w "%{http_code}" \
             --max-time 300 \
             -X POST \
             -H "x-api-key: $PUBLISH_API_KEY" \
+            "${bypass_args[@]}" \
             "$url")
           echo "HTTP $code"
           cat response.json || true
