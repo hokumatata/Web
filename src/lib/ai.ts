@@ -174,6 +174,83 @@ export async function generateArticleDraft(
   return result.data;
 }
 
+/**
+ * Automated editorial due-diligence result for a generated draft. This is an
+ * assist for the human reviewer — never an auto-publish gate. A low score or
+ * any flags simply surface prominently in the review queue.
+ */
+export interface DueDiligenceResult {
+  /** 0-100: how well-supported and publication-ready the draft looks. */
+  score: number;
+  /** Overall verdict the reviewer should weigh. */
+  verdict: "pass" | "review" | "flag";
+  /** Specific issues found (unsupported claims, tone, fabrication risk, ...). */
+  flags: string[];
+  /** One or two sentence human-readable summary. */
+  notes: string;
+}
+
+const dueDiligenceSchema = z.object({
+  score: z.number().min(0).max(100).catch(50),
+  verdict: z.enum(["pass", "review", "flag"]).catch("review"),
+  flags: z.array(z.string().min(1)).max(12).catch([]),
+  notes: z.string().catch(""),
+});
+
+const DUE_DILIGENCE_SYSTEM_PROMPT = `You are a rigorous editorial fact-checker and standards editor for "The Forex Republic", a financial news publication. You are given (a) the original SOURCE material an article was drafted from and (b) the DRAFT article. Your job is to assess whether the draft is well-supported by the source, free of fabricated specifics, appropriately hedged, and ready for a human editor's final approval.
+
+Check specifically for:
+- Fabrication: any specific figure, price, percentage, date, statistic, or direct quote in the draft that is NOT present in or directly supported by the source material.
+- Overreach: claims stated as fact that should be hedged, price predictions stated as certainty, or financial advice.
+- Attribution: whether claims that need a source are attributed.
+- Tone/quality: hype, filler, or missing sections of the required house structure.
+
+Return ONLY a single JSON object (no markdown fences, no commentary) with exactly these keys:
+- "score": number 0-100. How well-supported and publication-ready the draft is. 85+ = clean, 60-84 = minor issues, below 60 = significant issues.
+- "verdict": one of "pass" (clean, minor or no issues), "review" (some issues a human should check), "flag" (serious issues like likely fabrication).
+- "flags": array of short specific strings, one per issue found (empty array if none). Quote or name the specific problematic claim where possible.
+- "notes": one or two sentences summarizing your assessment for the reviewer.
+
+Be strict about fabricated numbers and quotes, but do not penalize clearly-hedged analysis or general market context that a knowledgeable editor would add.`;
+
+/**
+ * Run an automated due-diligence pass on a generated draft, comparing it to the
+ * source material it was drafted from. Returns a structured assessment for the
+ * human review queue. This never blocks or auto-publishes anything.
+ */
+export async function runDueDiligence(
+  draft: ArticleDraft,
+  sources: ArticleSources
+): Promise<DueDiligenceResult> {
+  const openai = getClient();
+  const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+
+  const sourceBlock = buildUserPrompt(sources);
+  const userContent = `SOURCE MATERIAL the article was drafted from:\n\n${sourceBlock}\n\n---\n\nDRAFT ARTICLE to assess:\n\nTITLE: ${draft.title}\n\nEXCERPT: ${draft.excerpt}\n\nBODY:\n${draft.body}\n\nReturn only the JSON object described in the system instructions.`;
+
+  const completion = await openai.chat.completions.create({
+    model,
+    temperature: 0,
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: DUE_DILIGENCE_SYSTEM_PROMPT },
+      { role: "user", content: userContent },
+    ],
+  });
+
+  const content = completion.choices[0]?.message?.content;
+  if (!content) throw new Error("OpenAI returned an empty due-diligence response");
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    throw new Error("OpenAI returned invalid due-diligence JSON");
+  }
+
+  return dueDiligenceSchema.parse(parsed);
+}
+
 export interface GeneratedImage {
   /** Raw image bytes to persist (e.g. to Vercel Blob). */
   buffer: Buffer;

@@ -1,13 +1,14 @@
 import { prisma } from "@/lib/db";
-import { FileText, Users, MessageSquare, Mail, Eye, TrendingUp } from "lucide-react";
+import { FileText, Users, MessageSquare, Mail, Eye, ClipboardCheck } from "lucide-react";
 
 export const metadata = { title: "Admin Dashboard" };
 
 export default async function AdminDashboard() {
-  const [articles, published, drafts, users, comments, pending, subscribers, totalViews] = await Promise.all([
+  const [articles, published, drafts, inReview, users, comments, pending, subscribers, totalViews] = await Promise.all([
     prisma.article.count(),
     prisma.article.count({ where: { status: "PUBLISHED" } }),
     prisma.article.count({ where: { status: "DRAFT" } }),
+    prisma.article.count({ where: { status: "REVIEW" } }),
     prisma.user.count(),
     prisma.comment.count(),
     prisma.comment.count({ where: { status: "PENDING" } }),
@@ -17,6 +18,7 @@ export default async function AdminDashboard() {
 
   const stats = [
     { label: "Total Articles", value: articles, sub: `${published} published, ${drafts} drafts`, icon: FileText, color: "text-accent" },
+    { label: "Awaiting Review", value: inReview, sub: inReview > 0 ? "agent drafts to approve" : undefined, icon: ClipboardCheck, color: "text-bloomberg-gold" },
     { label: "Total Users", value: users, icon: Users, color: "text-bloomberg-blue" },
     { label: "Comments", value: comments, sub: pending > 0 ? `${pending} pending` : undefined, icon: MessageSquare, color: "text-up" },
     { label: "Subscribers", value: subscribers, icon: Mail, color: "text-bloomberg-gold" },

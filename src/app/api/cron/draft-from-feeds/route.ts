@@ -6,9 +6,12 @@ import {
   generateArticleDraft,
   generateArticleImage,
   buildImagePrompt,
+  runDueDiligence,
   CATEGORY_SLUGS,
   type ArticleSources,
+  type DueDiligenceResult,
 } from "@/lib/ai";
+import { notifyReviewQueue } from "@/lib/notify";
 import { getConfiguredFeeds, fetchFeedItems, type FeedItem } from "@/lib/sources";
 import { put } from "@vercel/blob";
 import { revalidateTag } from "next/cache";
@@ -91,7 +94,13 @@ async function generateCoverImage(
   }
 }
 
-async function draftFromItem(item: FeedItem, authorId: string): Promise<string | null> {
+interface DraftedArticle {
+  id: string;
+  title: string;
+  dueDiligence: DueDiligenceResult | null;
+}
+
+async function draftFromItem(item: FeedItem, authorId: string): Promise<DraftedArticle | null> {
   const sources: ArticleSources = {
     keyIdeas: item.title,
     referenceText: item.summary,
@@ -110,6 +119,18 @@ async function draftFromItem(item: FeedItem, authorId: string): Promise<string |
     (await prisma.category.findUnique({ where: { slug: "analysis" } }));
   if (!cat) return null;
 
+  // Automated due-diligence (best-effort): assess the draft against its source
+  // so the human reviewer sees a score + flags. Never blocks the draft.
+  let dueDiligence: DueDiligenceResult | null = null;
+  try {
+    dueDiligence = await runDueDiligence(draft, sources);
+  } catch (e) {
+    console.error(
+      "[draft-from-feeds] due diligence failed:",
+      e instanceof Error ? e.message : e
+    );
+  }
+
   const attribution = `\n\n---\n*Inspired by reporting from ${item.source}. [Read the original source](${item.link}).*`;
   const articleSlug = slugify(draft.title) + "-" + Date.now().toString(36);
 
@@ -125,7 +146,9 @@ async function draftFromItem(item: FeedItem, authorId: string): Promise<string |
       thumbnailUrl: null,
       categoryId: cat.id,
       authorId,
-      status: "DRAFT",
+      // Agent output awaits explicit human approval — it never auto-publishes.
+      status: "REVIEW",
+      dueDiligence: dueDiligence ? JSON.stringify(dueDiligence) : null,
       publishedAt: null,
     },
   });
@@ -139,7 +162,7 @@ async function draftFromItem(item: FeedItem, authorId: string): Promise<string |
     }
   }
 
-  return article.id;
+  return { id: article.id, title: draft.title, dueDiligence };
 }
 
 async function run(req: NextRequest) {
@@ -168,20 +191,30 @@ async function run(req: NextRequest) {
   const toDraft = fresh.slice(0, perRun);
   const toSkip = fresh.slice(perRun);
 
-  const drafted: { title: string; source: string; articleId: string }[] = [];
+  const drafted: {
+    title: string;
+    source: string;
+    articleId: string;
+    dueDiligence: DueDiligenceResult | null;
+  }[] = [];
   const failed: { title: string; source: string; reason: string }[] = [];
 
   for (const item of toDraft) {
     try {
-      const articleId = await draftFromItem(item, author.id);
-      if (!articleId) {
+      const result = await draftFromItem(item, author.id);
+      if (!result) {
         failed.push({ title: item.title, source: item.source, reason: "no category" });
         continue;
       }
       await prisma.sourceItem.create({
-        data: { link: item.link, title: item.title, source: item.source, articleId },
+        data: { link: item.link, title: item.title, source: item.source, articleId: result.id },
       });
-      drafted.push({ title: item.title, source: item.source, articleId });
+      drafted.push({
+        title: item.title,
+        source: item.source,
+        articleId: result.id,
+        dueDiligence: result.dueDiligence,
+      });
     } catch (e) {
       const reason = e instanceof Error ? e.message : "draft failed";
       failed.push({ title: item.title, source: item.source, reason });
@@ -198,7 +231,18 @@ async function run(req: NextRequest) {
       .catch(() => {});
   }
 
-  if (drafted.length > 0) revalidateTag("articles");
+  if (drafted.length > 0) {
+    revalidateTag("articles");
+    // Best-effort: ping the reviewer that new drafts are waiting for approval.
+    await notifyReviewQueue(
+      drafted.map((d) => ({
+        title: d.title,
+        source: d.source,
+        score: d.dueDiligence?.score ?? null,
+        verdict: d.dueDiligence?.verdict ?? null,
+      }))
+    ).catch(() => {});
+  }
 
   return json({
     ok: true,

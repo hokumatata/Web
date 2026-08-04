@@ -1,13 +1,15 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { roleAtLeast } from "@/lib/types";
 import { LogoutButton } from "@/components/auth/LogoutButton";
-import { LayoutDashboard, FileText, Tags, MessageSquare, Users, Mail, Activity, Settings, UserPlus } from "lucide-react";
+import { LayoutDashboard, FileText, Tags, MessageSquare, Users, Mail, Activity, Settings, UserPlus, ClipboardCheck } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/articles", label: "Articles", icon: FileText },
+  { href: "/admin/articles/review", label: "Review Queue", icon: ClipboardCheck },
   { href: "/admin/authors", label: "Authors", icon: UserPlus },
   { href: "/admin/categories", label: "Categories", icon: Tags },
   { href: "/admin/tags", label: "Tags", icon: Tags },
@@ -21,6 +23,8 @@ const NAV = [
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   if (!session || !roleAtLeast(session.role, "EDITOR")) redirect("/login");
+
+  const reviewCount = await prisma.article.count({ where: { status: "REVIEW" } });
 
   return (
     <div className="container-tw py-6">
@@ -43,6 +47,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 >
                   <n.icon size={14} className="text-ink-400" />
                   {n.label}
+                  {n.href === "/admin/articles/review" && reviewCount > 0 && (
+                    <span className="ml-auto badge-down text-2xs px-1.5 py-0.5">{reviewCount}</span>
+                  )}
                 </Link>
               </li>
             ))}
