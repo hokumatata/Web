@@ -50,7 +50,9 @@ jobs:
           if [ -n "$VERCEL_BYPASS" ]; then
             bypass_args=(-H "x-vercel-protection-bypass: $VERCEL_BYPASS")
           fi
-          code=$(curl -sS -o response.json -w "%{http_code}" \
+          # -L follows redirects (a 308 preserves the POST method + body), which
+          # handles host/trailing-slash canonicalization on the way to the API.
+          code=$(curl -sSL -o response.json -w "%{http_code}" \
             --max-time 300 \
             -X POST \
             -H "x-api-key: $PUBLISH_API_KEY" \
@@ -61,5 +63,11 @@ jobs:
           echo
           if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
             echo "::error::Feed drafting endpoint returned HTTP $code"
+            exit 1
+          fi
+          # Guard against a redirect landing on a login/HTML page (a 200 that
+          # isn't our API). The endpoint always returns JSON with an "ok" field.
+          if ! grep -q '"ok"' response.json; then
+            echo "::error::Endpoint did not return the expected JSON (likely a login/protection page). If Vercel Deployment Protection is on, set the VERCEL_AUTOMATION_BYPASS_SECRET repo secret."
             exit 1
           fi
