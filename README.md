@@ -76,6 +76,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `SOURCE_GENERATE_IMAGES` | Set to `false` to disable AI cover images on scheduled drafts (default on) | No |
 | `SOURCE_AUTHOR_EMAIL` | Author the scheduled drafts are attributed to (default `masteruser@theforexrepublic.com`) | No |
 | `SOURCE_RSS_FEEDS` | Override source feeds, comma-separated `Name\|url` (default CoinGape, ForexLive, Yahoo Finance) | No |
+| `SLACK_WEBHOOK_URL` | Optional Slack Incoming Webhook to notify reviewers when new agent drafts await review | No |
 
 ## AI-Assisted Article Drafting
 
@@ -108,11 +109,13 @@ Both can be uploaded (drag-and-drop or URL, stored in Vercel Blob) or **generate
 
 `GET /api/cron/draft-from-feeds` runs on a schedule (Vercel Cron, see `vercel.json` — daily) and drafts original, in-depth, house-style articles inspired by public news feeds. It reads only the **public RSS/Atom headlines and short summaries** of the configured publications — never their full article text — and uses them as *signals* to write original pieces with attribution. Each draft also gets an **AI-generated cover image** (uploaded to Vercel Blob); set `SOURCE_GENERATE_IMAGES=false` to disable.
 
+**Due diligence + approval workflow:** every generated article is saved with status **`REVIEW`** (not `DRAFT`/`PUBLISHED`) and runs through an automated due-diligence pass that compares the draft against its source material — checking for fabricated figures/quotes, unhedged claims, and missing attribution — and stores a score (0–100), a verdict (`pass`/`review`/`flag`), and specific flags. These land in **Admin → Review Queue**, where a human sees the due-diligence assessment alongside the draft and clicks **Approve & publish**, **Keep as draft** (to edit first), or **Reject**. Nothing is ever auto-published. Set an optional `SLACK_WEBHOOK_URL` to get pinged when new drafts await review.
+
 **Source availability:** CoinGape and Yahoo Finance expose server-fetchable feeds. **FXStreet** sits behind a Cloudflare bot challenge (returns 403 to servers) and **Bloomberg** has no free feed and is paywalled, so neither can be fetched automatically — the forex slot defaults to **ForexLive** instead. For FXStreet/Bloomberg specifically, paste the occasional headline/blurb via **AI Compose** or `/api/publish/generate`.
 
-- Every result is saved as **DRAFT** — a human always reviews and publishes.
-- Cost is bounded: at most `SOURCE_DRAFTS_PER_RUN` drafts per run (one cheap `gpt-4o-mini` call plus one low-quality cover image each). Remaining new items are recorded as seen so they aren't reprocessed.
-- Cover images need `OPENAI_API_KEY` and `BLOB_READ_WRITE_TOKEN` set. Image generation is best-effort — if it fails, the article is still saved as a DRAFT with an empty cover. Set `SOURCE_GENERATE_IMAGES=false` to turn it off.
+- Every result is saved as **`REVIEW`** and awaits explicit human approval in the Review Queue — nothing is ever auto-published.
+- Cost is bounded: at most `SOURCE_DRAFTS_PER_RUN` drafts per run (a cheap `gpt-4o-mini` draft call, a due-diligence call, and one low-quality cover image each). Remaining new items are recorded as seen so they aren't reprocessed.
+- Cover images need `OPENAI_API_KEY` and `BLOB_READ_WRITE_TOKEN` set. Image generation is best-effort — if it fails, the article is still saved for review with an empty cover. Set `SOURCE_GENERATE_IMAGES=false` to turn it off.
 - Dedup is tracked in the `SourceItem` table (keyed by source link).
 - Set `CRON_SECRET` in the environment; Vercel Cron sends it as `Authorization: Bearer <CRON_SECRET>`. You can trigger a run manually with the `x-api-key: <PUBLISH_API_KEY>` header. Adjust the Vercel cadence by editing the `schedule` in `vercel.json`. Note: Vercel **Hobby** only allows one cron run per day.
 - **Running more often than daily (free):** Vercel Hobby caps cron at daily, so `.github/workflows/journalist-cron.yml` runs a GitHub Actions schedule every 6 hours that calls the endpoint with the `x-api-key` header. Add repo secrets `SITE_URL` (your deployed base URL) and `PUBLISH_API_KEY` (matching the Vercel env var). If **Vercel Deployment Protection** is enabled, the endpoint redirects server-to-server calls to a login page (HTTP 302) — enable Vercel → Settings → Deployment Protection → **Protection Bypass for Automation** and add its secret as the repo secret `VERCEL_AUTOMATION_BYPASS_SECRET` (the workflow forwards it as `x-vercel-protection-bypass`), or turn protection off for Production. Scheduled workflows run only from the default branch and can be delayed a few minutes; you can also trigger it manually from the Actions tab. On Hobby the serverless function is capped at ~60s, so with image generation you may want `SOURCE_DRAFTS_PER_RUN=1` or `2` to ensure each run finishes.

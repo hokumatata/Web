@@ -60,6 +60,9 @@ model Article {
   coverImageUrl String?
   thumbnailUrl  String?
   status        String        @default("DRAFT")
+  // JSON blob of the automated due-diligence result (score/verdict/flags/notes)
+  // for agent-generated drafts awaiting human review. Null for hand-written ones.
+  dueDiligence  String?
   isFeatured    Boolean       @default(false)
   isBreaking    Boolean       @default(false)
   publishedAt   DateTime?

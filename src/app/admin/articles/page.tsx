@@ -51,8 +51,8 @@ export default async function AdminArticlesPage() {
                 <td className="px-4 py-3 text-ink-300 hidden md:table-cell">{a.category.name}</td>
                 <td className="px-4 py-3 text-ink-300 hidden lg:table-cell">{a.author.name}</td>
                 <td className="px-4 py-3">
-                  <span className={a.status === "PUBLISHED" ? "badge-up" : a.status === "DRAFT" ? "badge" : "badge-down"}>
-                    {a.status}
+                  <span className={a.status === "PUBLISHED" ? "badge-up" : a.status === "REVIEW" ? "badge-down" : "badge"}>
+                    {a.status === "REVIEW" ? "IN REVIEW" : a.status}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-right font-mono text-ink-300 tabular">{a.views}</td>
