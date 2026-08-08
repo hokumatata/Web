@@ -1,5 +1,10 @@
 import OpenAI from "openai";
 import { z } from "zod";
+import {
+  buildSystemPrompt,
+  findStyleViolations,
+  type StoryType,
+} from "@/lib/house-style";
 
 /**
  * OpenAI-backed article drafting for The Forex Republic.
@@ -8,9 +13,13 @@ import { z } from "zod";
  * reference article text/URLs, and key ideas) and produces a structured,
  * house-style article draft ready to prefill the CMS form.
  *
+ * The editorial rules themselves live in src/lib/house-style.ts, which selects a
+ * different outline per story type. This module only handles the OpenAI plumbing
+ * and output validation.
+ *
  * NOTE: Live chart URLs (e.g. TradingView) cannot be fetched or "read" by the
- * model. Provide chart context as a textual description in `chartNotes`, or
- * upload a chart image separately via /api/upload and reference it in the body.
+ * model. Real price levels are computed in src/lib/technicals.ts and passed in
+ * via `technicalBlock`; anything else must be described in `chartNotes`.
  */
 
 export const CATEGORY_SLUGS = [
@@ -40,6 +49,31 @@ export interface ArticleSources {
   keyIdeas?: string;
   /** Optional hint about the desired category */
   categoryHint?: string;
+  /**
+   * Which kind of story this is. Selects the outline, and decides whether a
+   * technical section is permitted at all. Defaults to "general".
+   */
+  storyType?: StoryType;
+  /**
+   * Pre-rendered block of technical levels computed from real market data (see
+   * formatTechnicalBlock in src/lib/technicals.ts). When present, the model may
+   * cite these numbers and no others in the technical section.
+   */
+  technicalBlock?: string;
+  /**
+   * Several outlets' reports on the SAME story, to be synthesised into one
+   * original piece rather than paraphrased individually.
+   */
+  reports?: SourceReport[];
+}
+
+/** One outlet's coverage of a story, used as raw material for synthesis. */
+export interface SourceReport {
+  outlet: string;
+  headline: string;
+  summary: string;
+  url: string;
+  publishedAt?: Date | null;
 }
 
 export interface ArticleDraft {
@@ -58,52 +92,31 @@ const draftSchema = z.object({
   tags: z.array(z.string().min(1)).max(8).catch([]),
 });
 
-const SYSTEM_PROMPT = `You are the senior markets editor for "The Forex Republic", a Bloomberg/CoinDesk-inspired financial news publication covering crypto, forex, stocks, macro, gold, and market analysis.
-
-You turn raw source material into an in-depth, publication-ready article draft. Write in a professional, precise, neutral-but-confident house voice for traders and finance professionals. Be thorough and analytical: develop each section with substance, specific detail, and clear reasoning rather than generic filler. Aim for a well-developed piece of roughly 700-1100 words with multiple paragraphs per major section. Avoid hype, financial advice, price predictions stated as fact, and padding.
-
-Precision rules: every specific fact, figure, quote, date, or event you state MUST be grounded in the provided sources — attribute claims to their sources ("according to", "said") and never invent quotes, figures, or events that are not present in the sources. You MAY add depth through analysis, market context, mechanism, and well-reasoned interpretation that a knowledgeable markets editor would provide, but keep it clearly analytical and hedged (e.g. "this suggests", "traders may watch") rather than fabricating hard data. If the sources are thin, go deeper on context and interpretation rather than inventing specifics.
-
-You must return ONLY a single JSON object (no markdown fences, no commentary) with exactly these keys:
-- "title": string. A sharp, specific, SEO-aware headline. Do NOT include a leading "#".
-- "excerpt": string. One or two sentences (max ~300 chars) summarizing the article.
-- "body": string. The full article in GitHub-flavored Markdown following the EXACT house structure below.
-- "categorySlug": string. One of: crypto, forex, stocks, macro, gold, analysis, opinion. Pick the single best fit.
-- "tags": array of 3-6 short lowercase tag strings (e.g. "bitcoin", "federal reserve", "eurusd").
-
-The "body" markdown MUST follow this house structure and heading order:
-
-# <Title> (H1, same as the title field)
-
-## Key Pointers
-- 4 to 6 concise, specific bullet points capturing the most important takeaways.
-
-## Introduction
-2-3 paragraphs framing the story precisely — what happened, who is involved, and why it matters now.
-
-## Market Context
-Multiple paragraphs of background and the broader setup: relevant history, the assets/markets affected, positioning, and how this fits the current macro/market backdrop.
-
-## Analysis
-The core, in-depth section. Interpret the implications, mechanisms, second-order effects, risks, and what it means for different types of traders. Develop the reasoning across several paragraphs.
-
-## Technical Analysis
-Price structure, support/resistance, levels, correlations. Base this ONLY on the chart notes / descriptions provided. If no chart information is given, say the technical picture is limited to the described levels and avoid fabricating specific numbers.
-
-## Market Takeaway
-A short, forward-looking closing section with the net conclusion.
-
-Rules:
-- Use only the information provided in the sources. Do not fabricate data. If sources are thin, keep sections shorter rather than inventing content.
-- Keep the markdown clean: real newlines between sections, "## " headings, "- " bullets.
-- The title field and the H1 in body must match.`;
-
 function buildUserPrompt(sources: ArticleSources): string {
   const parts: string[] = [];
   const add = (label: string, value?: string) => {
     const v = value?.trim();
     if (v) parts.push(`### ${label}\n${v}`);
   };
+
+  // Multi-outlet reports come first: they are the substance of the piece, and
+  // the synthesis instruction is what stops the model tracking one source.
+  if (sources.reports && sources.reports.length > 0) {
+    const reports = sources.reports
+      .map((r, i) => {
+        const when = r.publishedAt ? ` (${r.publishedAt.toISOString().slice(0, 16).replace("T", " ")} UTC)` : "";
+        return `[Report ${i + 1}] ${r.outlet}${when}\nHeadline: ${r.headline}\nSummary: ${r.summary || "(no summary provided)"}`;
+      })
+      .join("\n\n");
+
+    const synthesis =
+      sources.reports.length > 1
+        ? `These ${sources.reports.length} reports from ${new Set(sources.reports.map((r) => r.outlet)).size} outlets cover the SAME story. Write ONE original article that synthesises them: establish what they agree on, note where they differ or add detail the others lack, and build a fuller picture than any single report gives. Do not follow the structure or phrasing of any one report, and do not write a summary of "what outlets are saying" — write the story itself.`
+        : `Write an original article on this story. Do not mirror the source's structure or phrasing.`;
+
+    parts.push(`### Source reports\n${synthesis}\n\n${reports}`);
+  }
+
   add("Editor's key ideas / angle", sources.keyIdeas);
   add("Tweet / social post text", sources.tweets);
   add("Official releases / statements", sources.releases);
@@ -112,11 +125,15 @@ function buildUserPrompt(sources: ArticleSources): string {
   add("Reference URLs (attribution hints only, not fetched)", sources.referenceUrls);
   add("Category hint", sources.categoryHint);
 
+  if (sources.technicalBlock?.trim()) {
+    parts.push(sources.technicalBlock.trim());
+  }
+
   if (parts.length === 0) {
     parts.push("(No sources were provided. Ask for sources — but still return valid JSON with a placeholder draft explaining that sources are required.)");
   }
 
-  return `Draft a "The Forex Republic" article from the following raw sources.\n\n${parts.join(
+  return `Write a "The Forex Republic" article from the following material.\n\n${parts.join(
     "\n\n"
   )}\n\nReturn only the JSON object described in the system instructions.`;
 }
@@ -146,10 +163,15 @@ export async function generateArticleDraft(
 
   const completion = await openai.chat.completions.create({
     model,
-    temperature: 0.5,
+    // Higher than the old 0.5: uniform phrasing is the main "robotic" tell, and
+    // fabrication is constrained by the prompt and the due-diligence pass rather
+    // than by keeping the sampler cold.
+    temperature: 0.8,
+    presence_penalty: 0.3,
+    frequency_penalty: 0.35,
     response_format: { type: "json_object" },
     messages: [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: buildSystemPrompt(sources.storyType ?? "general") },
       { role: "user", content: buildUserPrompt(sources) },
     ],
   });
@@ -171,7 +193,60 @@ export async function generateArticleDraft(
     throw new Error("OpenAI response did not match the expected draft shape");
   }
 
-  return result.data;
+  return expandIfThin(result.data, sources, model);
+}
+
+/**
+ * If the first pass came back as a stub, ask once for a deeper version.
+ *
+ * Smaller models reliably under-write when the source material is a one-line
+ * feed blurb, and no amount of prompt emphasis fixes it in a single pass. One
+ * conditional follow-up call is cheap (it only fires on short drafts) and is
+ * framed as "develop the analysis", not "make it longer", so the model adds
+ * reasoning rather than padding.
+ */
+async function expandIfThin(
+  draft: ArticleDraft,
+  sources: ArticleSources,
+  model: string
+): Promise<ArticleDraft> {
+  const tooShort = findStyleViolations(draft.body).some((v) => v.startsWith("Too short"));
+  if (!tooShort) return draft;
+
+  const openai = getClient();
+  try {
+    const completion = await openai.chat.completions.create({
+      model,
+      temperature: 0.8,
+      presence_penalty: 0.3,
+      frequency_penalty: 0.35,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: buildSystemPrompt(sources.storyType ?? "general") },
+        { role: "user", content: buildUserPrompt(sources) },
+        { role: "assistant", content: JSON.stringify(draft) },
+        {
+          role: "user",
+          content: `This draft is too short and under-developed: it does not meet the structural requirements (opening of 2-3 paragraphs, then 3-4 "## " sections, each of at least 3 paragraphs of at least 3 sentences).
+
+Rewrite it in full, keeping the reporting and every existing fact exactly as it is, and develop the analysis to meet those requirements. Add depth ONLY through: the mechanism behind the move, second-order effects and the channels they travel through, the counter-case, how this compares with the recent run of prints and where we are in the policy cycle, and what specifically would change the picture.
+
+Do not add a single figure, price, date, quote or named institution that is not already in the source material. Do not repeat points you have already made. Return the same JSON shape.`,
+        },
+      ],
+    });
+
+    const content = completion.choices[0]?.message?.content;
+    if (!content) return draft;
+    const expanded = draftSchema.safeParse(JSON.parse(content));
+    if (!expanded.success) return draft;
+
+    // Only accept the rewrite if it is actually more developed.
+    return expanded.data.body.length > draft.body.length ? expanded.data : draft;
+  } catch {
+    // The first draft is still usable; a human reviews it either way.
+    return draft;
+  }
 }
 
 /**
@@ -188,6 +263,8 @@ export interface DueDiligenceResult {
   flags: string[];
   /** One or two sentence human-readable summary. */
   notes: string;
+  /** Deterministic house-style breaches found locally (banned phrases etc.). */
+  styleViolations?: string[];
 }
 
 const dueDiligenceSchema = z.object({
@@ -228,6 +305,12 @@ export async function runDueDiligence(
   const sourceBlock = buildUserPrompt(sources);
   const userContent = `SOURCE MATERIAL the article was drafted from:\n\n${sourceBlock}\n\n---\n\nDRAFT ARTICLE to assess:\n\nTITLE: ${draft.title}\n\nEXCERPT: ${draft.excerpt}\n\nBODY:\n${draft.body}\n\nReturn only the JSON object described in the system instructions.`;
 
+  // Local, free checks run regardless of what the model reports.
+  const styleViolations = findStyleViolations(draft.body);
+  const echoedHeadline = sources.reports?.some(
+    (r) => headlineSimilarity(r.headline, draft.title) > 0.7
+  );
+
   const completion = await openai.chat.completions.create({
     model,
     temperature: 0,
@@ -248,7 +331,41 @@ export async function runDueDiligence(
     throw new Error("OpenAI returned invalid due-diligence JSON");
   }
 
-  return dueDiligenceSchema.parse(parsed);
+  const result = dueDiligenceSchema.parse(parsed);
+
+  const extraFlags = [...styleViolations];
+  if (echoedHeadline) {
+    extraFlags.push("Headline closely mirrors a source headline — needs reframing");
+  }
+
+  return {
+    ...result,
+    // Style breaches are objective, so they lower the score deterministically
+    // instead of relying on the model to notice them.
+    score: Math.max(0, result.score - Math.min(30, extraFlags.length * 8)),
+    flags: [...result.flags, ...extraFlags],
+    styleViolations,
+  };
+}
+
+/** Word-overlap ratio between two headlines, used to catch source echoing. */
+function headlineSimilarity(a: string, b: string): number {
+  const norm = (s: string) =>
+    new Set(
+      s
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .split(/\s+/)
+        .filter((w) => w.length > 3)
+    );
+  const sa = norm(a);
+  const sb = norm(b);
+  if (sa.size === 0 || sb.size === 0) return 0;
+  let shared = 0;
+  sa.forEach((w) => {
+    if (sb.has(w)) shared++;
+  });
+  return shared / Math.min(sa.size, sb.size);
 }
 
 export interface GeneratedImage {

@@ -27,17 +27,39 @@ export interface FeedItem {
 }
 
 /**
- * Public RSS/Atom feeds usable by a server-side fetch.
+ * Public RSS/Atom feeds usable by a server-side fetch. Every URL here was
+ * verified to return a parseable feed to a server-side request.
+ *
+ * The mix is deliberate. Two kinds of source matter beyond plain headlines:
+ *  - **Analyst commentary** (ActionForex republishes bank research notes) gives
+ *    the writer institutional views to cite, which is what separates a
+ *    professional markets piece from a paraphrased headline.
+ *  - **Primary sources** (Fed/ECB/BoE press releases) are authoritative and
+ *    carry no attribution debt to another publication.
+ *
+ * Breadth also matters for clustering: several outlets covering one event lets
+ * src/lib/cluster.ts merge them into a single synthesised story, so more feeds
+ * means better articles rather than more articles.
  *
  * Note: FXStreet and Bloomberg are intentionally absent — FXStreet's feed is
- * behind a Cloudflare bot challenge (403 to servers) and Bloomberg has no free
- * feed and is paywalled. ForexLive is used for the forex slot instead; override
- * with SOURCE_RSS_FEEDS if you have access to other feeds.
+ * behind a Cloudflare bot challenge (403 to servers, re-verified) and Bloomberg
+ * has no free feed. Override the whole set with SOURCE_RSS_FEEDS.
  */
 export const DEFAULT_FEEDS: Feed[] = [
-  { source: "CoinGape", url: "https://coingape.com/feed/" },
+  // Analyst / desk commentary
+  { source: "ActionForex", url: "https://www.actionforex.com/feed/" },
   { source: "ForexLive", url: "https://www.forexlive.com/feed/" },
+  // Markets news
+  { source: "Investing.com", url: "https://www.investing.com/rss/news_25.rss" },
+  { source: "CNBC Markets", url: "https://www.cnbc.com/id/100003114/device/rss/rss.html" },
   { source: "Yahoo Finance", url: "https://finance.yahoo.com/news/rssindex" },
+  // Crypto
+  { source: "CoinGape", url: "https://coingape.com/feed/" },
+  { source: "Cointelegraph", url: "https://cointelegraph.com/rss" },
+  // Primary sources — central bank press releases
+  { source: "Federal Reserve", url: "https://www.federalreserve.gov/feeds/press_all.xml" },
+  { source: "ECB", url: "https://www.ecb.europa.eu/rss/press.html" },
+  { source: "Bank of England", url: "https://www.bankofengland.co.uk/rss/news" },
 ];
 
 export function getConfiguredFeeds(): Feed[] {
