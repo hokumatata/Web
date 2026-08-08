@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { timeAgo } from "@/lib/utils";
-import { Eye, Edit, ShieldCheck, AlertTriangle, Search } from "lucide-react";
+import { Eye, Edit, ShieldCheck, AlertTriangle, Search, Link as LinkIcon } from "lucide-react";
 import { ReviewActions } from "@/components/admin/ReviewActions";
 import type { DueDiligenceResult } from "@/lib/ai";
 
@@ -44,6 +44,21 @@ export default async function ReviewQueuePage() {
     },
   });
 
+  // Source links are editor-only: the published article credits outlets by name
+  // in the prose rather than sending readers to a rival's page, so the reviewer
+  // needs them here to check the copy against what was actually reported.
+  const sourceItems = await prisma.sourceItem.findMany({
+    where: { articleId: { in: articles.map((a) => a.id) } },
+    orderBy: { createdAt: "asc" },
+  });
+  const sourcesByArticle = new Map<string, typeof sourceItems>();
+  for (const item of sourceItems) {
+    if (!item.articleId) continue;
+    const list = sourcesByArticle.get(item.articleId);
+    if (list) list.push(item);
+    else sourcesByArticle.set(item.articleId, [item]);
+  }
+
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-2">
@@ -64,6 +79,7 @@ export default async function ReviewQueuePage() {
           {articles.map((a) => {
             const dd = parseDueDiligence(a.dueDiligence);
             const v = verdictStyle(dd?.verdict);
+            const sources = sourcesByArticle.get(a.id) ?? [];
             return (
               <div key={a.id} className="card p-5">
                 <div className="flex items-start justify-between gap-4 mb-3">
@@ -108,6 +124,29 @@ export default async function ReviewQueuePage() {
                   <p className="text-2xs text-ink-500 mb-3">
                     Automated due-diligence unavailable for this draft — review manually.
                   </p>
+                )}
+
+                {sources.length > 0 && (
+                  <div className="rounded-md bg-ink-900 border border-ink-700 p-3 mb-3">
+                    <div className="text-2xs uppercase tracking-wider text-ink-400 mb-1">
+                      Sources synthesised ({sources.length})
+                    </div>
+                    <ul className="space-y-1">
+                      {sources.map((s) => (
+                        <li key={s.id} className="text-2xs text-ink-300 flex gap-1.5">
+                          <LinkIcon size={12} className="mt-0.5 flex-shrink-0 text-ink-500" />
+                          <a
+                            href={s.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-ink-50 truncate"
+                          >
+                            <span className="text-ink-500">{s.source}:</span> {s.title}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
 
                 <div className="flex items-center justify-between gap-2 flex-wrap">
