@@ -10,7 +10,7 @@ A Bloomberg/CoinDesk-inspired financial news and market data platform built with
 - **Full CMS** — Create, edit, publish articles with rich text editor, image uploads, categories, tags
 - **AI-assisted drafting** — Paste raw sources (tweets, official releases, chart notes, reference text/URLs, key ideas) and generate a structured, house-style article draft via OpenAI, prefilled into the CMS editor for human review (always saved as DRAFT first)
 - **Admin dashboard** — Article management, user & author management, comment moderation, newsletter, audit log
-- **Economic Calendar** — 5-day view of major economic events with impact ratings
+- **Economic Calendar** — the coming week's macro releases with impact ratings, consensus forecasts and previous readings, from a live feed
 - **User accounts** — JWT-based auth with role-based access (Admin, Editor, Author, Reader)
 - **User dashboard** — Saved articles, watchlist, preferences
 - **Search** — Full-text search across articles
@@ -125,6 +125,19 @@ Both can be uploaded (drag-and-drop or URL, stored in Vercel Blob) or **generate
 **Attribution.** Published articles credit outlets **by name in the prose and in a footer credit line**, with no outbound link to the source article. Source URLs are kept for the editor: the Review Queue lists every item that fed each story, linked, and they stay in the `SourceItem` table as an audit trail.
 
 **Source availability:** all ten default feeds were verified server-fetchable. **FXStreet** sits behind a Cloudflare bot challenge (returns 403 to servers) and **Bloomberg** has no free feed and is paywalled, so neither can be fetched automatically. For those, paste the occasional headline/blurb via **AI Compose** or `/api/publish/generate`.
+
+### Economic calendar data
+
+`src/lib/econ-calendar.ts` reads the **ForexFactory public weekly calendar feed** (no API key) and exposes it as typed events: release time, affected currency, expected-volatility rating, consensus forecast and previous reading. The page renders every time in **UTC** and revalidates hourly.
+
+Two constraints are deliberate and load-bearing:
+
+- **No figure is ever invented.** The feed does not carry the *actual* print for any event, so `actual` is always `null` and the column shows `—`. It is never inferred, estimated or back-filled. (This replaced a set of hardcoded weekday templates that shipped fabricated prints such as "Non-Farm Payrolls actual 206K" on rotation.)
+- **Coverage is one week**, which is all the feed exposes; there is no next-week endpoint. Whenever the feed rolls over to a week that excludes today, the page opens on *This Week* rather than an empty *Today*.
+
+The feed rate-limits (HTTP 429) under frequent polling, so a failed refresh serves the last good copy and flags it in the footnote instead of blanking the page. `upcomingHighImpact()` is the hook for forward-looking coverage: a scheduled release with a published consensus and previous reading is enough to write a preview from without waiting for an outlet.
+
+Check it with `npx tsx scripts/calendar-dry-run.ts`, which prints the week's events, per-day and per-impact counts, the writeable previews in the next 36h, and asserts that no event carries an actual.
 
 **Dry runs.** `npx tsx scripts/newsroom-dry-run.ts` fetches the live feeds and prints per-feed counts, cluster counts, the scored queue with story types and the rejected tail — no model calls, no writes. `npx tsx scripts/newsroom-sample.ts [n]` goes further and actually writes sample articles across story types (needs `OPENAI_API_KEY`), reporting word count, headings, style violations, unverified price levels and the due-diligence verdict for each. Use both after changing prompts or scoring.
 
