@@ -4,13 +4,16 @@
  * Usage: npx tsx scripts/calendar-dry-run.ts
  */
 import { fetchEconCalendar, upcomingHighImpact } from "../src/lib/econ-calendar";
+import { loadCalendarTimeline } from "../src/lib/econ-calendar-store";
 
 async function main() {
   const calendar = await fetchEconCalendar();
+  const feedDown = calendar.days.length === 0;
 
-  if (calendar.days.length === 0) {
-    console.error("FEED UNAVAILABLE — the page would render its unavailable state.");
-    process.exit(1);
+  if (feedDown) {
+    // Expected under rate limiting (HTTP 429). The archive should carry the
+    // page, so keep going and report the timeline rather than bailing.
+    console.warn("FEED UNAVAILABLE — checking whether the archive covers for it.");
   }
 
   const all = calendar.days.flatMap((d) => d.events);
@@ -41,6 +44,23 @@ async function main() {
       `${ev.at.slice(0, 16).replace("T", " ")}Z ${ev.currency.padEnd(6)} ${ev.event} ` +
         `| cons ${ev.consensus ?? "—"} | prev ${ev.previous ?? "—"}`
     );
+  }
+
+  console.log("\n=== TIMELINE (archive + live) ===");
+  try {
+    const timeline = await loadCalendarTimeline();
+    const today = new Date().toISOString().slice(0, 10);
+    const past = timeline.days.filter((d) => d.date < today);
+    const future = timeline.days.filter((d) => d.date > today);
+    console.log(
+      `past days: ${past.length} | today: ${
+        timeline.days.some((d) => d.date === today) ? "present" : "absent"
+      } | upcoming days: ${future.length} | ` +
+        `oldest: ${timeline.days[0]?.date ?? "—"}`
+    );
+  } catch (e) {
+    console.log(`archive unavailable (${e instanceof Error ? e.message : e})`);
+    console.log("the page falls back to the live week only");
   }
 
   const upcoming = upcomingHighImpact(calendar, 36);
