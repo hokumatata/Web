@@ -75,7 +75,12 @@ Open [http://localhost:3000](http://localhost:3000).
 | `SOURCE_DRAFTS_PER_RUN` | Max drafts created per scheduled run (default `3`, capped at `10`) | No |
 | `SOURCE_GENERATE_IMAGES` | Set to `false` to disable AI cover images on scheduled drafts (default on) | No |
 | `SOURCE_AUTHOR_EMAIL` | Author the scheduled drafts are attributed to (default `masteruser@theforexrepublic.com`) | No |
-| `SOURCE_RSS_FEEDS` | Override source feeds, comma-separated `Name\|url` (default CoinGape, ForexLive, Yahoo Finance) | No |
+| `SOURCE_RSS_FEEDS` | Override source feeds, comma-separated `Name\|url` or `Name\|url\|beat` (default: see `src/lib/sources.ts`) | No |
+| `BREAKING_AUTOPUBLISH` | Allow the breaking wire to publish confirmed briefs live (default `true`; `false` files them to review) | No |
+| `BREAKING_PER_RUN` | Max briefs per breaking run (default `2`, capped at `5`) | No |
+| `BREAKING_MAX_AGE_MINUTES` | How recent an item must be to count as breaking (default `90`) | No |
+| `BREAKING_MIN_SCORE` | Newsworthiness needed to publish unreviewed (default `70`) | No |
+| `BREAKING_DD_MIN_SCORE` | Due-diligence score needed to publish unreviewed (default `80`) | No |
 | `SLACK_WEBHOOK_URL` | Optional Slack Incoming Webhook to notify reviewers when new agent drafts await review | No |
 
 ## AI-Assisted Article Drafting
@@ -137,11 +142,23 @@ Two constraints are deliberate and load-bearing:
 - **No figure is ever invented.** The feed does not carry the *actual* print for any event, so `actual` is always `null` and the column shows `—`. It is never inferred, estimated or back-filled. (This replaced a set of hardcoded weekday templates that shipped fabricated prints such as "Non-Farm Payrolls actual 206K" on rotation.)
 - **The feed only exposes the current week.** `lastweek`, `nextweek` and the month variants all 404, so history cannot come from the feed. Instead every sync upserts the week into the `EconomicEvent` table (`src/lib/econ-calendar-store.ts`) and the timeline reads its past section from that archive — so history is shallow at first and deepens by a week each week. `HISTORY_DAYS` (default 30) caps how far back the timeline renders.
 
-The archive is written by `syncEconCalendar()`, which the 6-hourly drafting cron calls on every run (reported as `calendarSync` in its response); run it by hand with `npx tsx scripts/calendar-sync.ts`. Reads degrade gracefully in both directions: if the database is unreachable the page falls back to the live feed, and if the feed is unreachable (it returns HTTP 429 under frequent polling) the archive carries the page and the footnote says so.
+The archive is written by `syncEconCalendar()`, which the 3-hourly drafting cron calls on every run (reported as `calendarSync` in its response); run it by hand with `npx tsx scripts/calendar-sync.ts`. Reads degrade gracefully in both directions: if the database is unreachable the page falls back to the live feed, and if the feed is unreachable (it returns HTTP 429 under frequent polling) the archive carries the page and the footnote says so.
 
 `upcomingHighImpact()` is the hook for forward-looking coverage: a scheduled release with a published consensus and previous reading is enough to write a preview from without waiting for an outlet.
 
 Check it with `npx tsx scripts/calendar-dry-run.ts`, which prints the week's events, per-day and per-impact counts, the archive/live timeline split, the writeable previews in the next 36h, and asserts that no event carries an actual.
+
+### Coverage
+
+The feed set spans every desk, not just forex: forex (ActionForex, ForexLive, FX Empire), crypto (Cointelegraph, Decrypt, The Block, CoinGape), commodities and gold (Investing.com Commodities, OilPrice), equities (CNBC, MarketWatch, Seeking Alpha, Yahoo Finance) and macro, including **primary** releases straight from the Fed, ECB, BoE, BoJ, RBA, Bank of Canada, BLS and BEA. Each feed declares its beat, clusters inherit the dominant one, and `selectDiverseQueue()` caps how many stories one beat may take from a single run — so a busy macro morning cannot crowd crypto and equities off the front page. A first-party item also scores higher than a secondary report of the same event, and is what lets the breaking wire treat it as self-confirming.
+
+### Breaking wire
+
+`/api/cron/breaking` (hourly, `.github/workflows/breaking-cron.yml`) is the **only** path that publishes without a human. It exists because a rate decision or a CPI print is a fact rather than an interpretation, and its value to a reader decays in minutes.
+
+A story reaches the model only if `src/lib/breaking.ts` clears every gate: it is a data release or central-bank decision; timestamped inside `BREAKING_MAX_AGE_MINUTES`; worded as something that has happened, not a preview, forecast or scenario; carrying a figure or an explicit policy decision; and either first-party or corroborated by two independent outlets. The brief it writes is 130–220 words with no technical analysis and no interpretation, and must then pass due diligence at `BREAKING_DD_MIN_SCORE`, contain no figure absent from the source material, and still look like a brief. **Any failure files it as `REVIEW`** — the gates fail closed, never open. Published briefs are flagged `isBreaking`, carry a standing "developing" note, and are expected to be expanded by an editor; the confirmation and hold reasons are recorded on the row so "why was this live before an editor saw it?" is always answerable. Consensus and prior figures come from the archived calendar entry, never from the model.
+
+Check the gates with `npx tsx scripts/breaking-dry-run.ts`: a fixture suite of publishable cases and near-misses (previews, uncorroborated single outlets, stale and undated items, scenario pieces), then a live pass over the feeds showing what would have gone out.
 
 **Dry runs.** `npx tsx scripts/newsroom-dry-run.ts` fetches the live feeds and prints per-feed counts, cluster counts, the scored queue with story types and the rejected tail — no model calls, no writes. `npx tsx scripts/newsroom-sample.ts [n]` goes further and actually writes sample articles across story types (needs `OPENAI_API_KEY`), reporting word count, headings, style violations, unverified price levels and the due-diligence verdict for each. Use both after changing prompts or scoring.
 
@@ -150,7 +167,7 @@ Check it with `npx tsx scripts/calendar-dry-run.ts`, which prints the week's eve
 - Cover images need `OPENAI_API_KEY` and `BLOB_READ_WRITE_TOKEN` set. Image generation is best-effort — if it fails, the article is still saved for review with an empty cover. Set `SOURCE_GENERATE_IMAGES=false` to turn it off.
 - Dedup is tracked in the `SourceItem` table (keyed by source link).
 - Set `CRON_SECRET` in the environment; Vercel Cron sends it as `Authorization: Bearer <CRON_SECRET>`. You can trigger a run manually with the `x-api-key: <PUBLISH_API_KEY>` header. Adjust the Vercel cadence by editing the `schedule` in `vercel.json`. Note: Vercel **Hobby** only allows one cron run per day.
-- **Running more often than daily (free):** Vercel Hobby caps cron at daily, so `.github/workflows/journalist-cron.yml` runs a GitHub Actions schedule every 6 hours that calls the endpoint with the `x-api-key` header. Add repo secrets `SITE_URL` (your deployed base URL) and `PUBLISH_API_KEY` (matching the Vercel env var). If **Vercel Deployment Protection** is enabled, the endpoint redirects server-to-server calls to a login page (HTTP 302) — enable Vercel → Settings → Deployment Protection → **Protection Bypass for Automation** and add its secret as the repo secret `VERCEL_AUTOMATION_BYPASS_SECRET` (the workflow forwards it as `x-vercel-protection-bypass`), or turn protection off for Production. Scheduled workflows run only from the default branch and can be delayed a few minutes; you can also trigger it manually from the Actions tab. On Hobby the serverless function is capped at ~60s, so with image generation you may want `SOURCE_DRAFTS_PER_RUN=1` or `2` to ensure each run finishes.
+- **Running more often than daily (free):** Vercel Hobby caps cron at daily, so `.github/workflows/journalist-cron.yml` runs a GitHub Actions schedule every 3 hours that calls the endpoint with the `x-api-key` header. Add repo secrets `SITE_URL` (your deployed base URL) and `PUBLISH_API_KEY` (matching the Vercel env var). If **Vercel Deployment Protection** is enabled, the endpoint redirects server-to-server calls to a login page (HTTP 302) — enable Vercel → Settings → Deployment Protection → **Protection Bypass for Automation** and add its secret as the repo secret `VERCEL_AUTOMATION_BYPASS_SECRET` (the workflow forwards it as `x-vercel-protection-bypass`), or turn protection off for Production. Scheduled workflows run only from the default branch and can be delayed a few minutes; you can also trigger it manually from the Actions tab. On Hobby the serverless function is capped at ~60s, so with image generation you may want `SOURCE_DRAFTS_PER_RUN=1` or `2` to ensure each run finishes.
 
 ## Seeded Accounts
 

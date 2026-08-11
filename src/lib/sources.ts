@@ -8,14 +8,28 @@
  * source material to write an ORIGINAL, house-style piece with attribution.
  * Everything the automation produces is saved as DRAFT for human review.
  *
- * Feeds are configurable via the SOURCE_RSS_FEEDS env var:
- *   SOURCE_RSS_FEEDS="CoinGape|https://coingape.com/feed/,FXStreet|https://www.fxstreet.com/rss/news"
- * When unset, DEFAULT_FEEDS below are used.
+ * Feeds are configurable via the SOURCE_RSS_FEEDS env var, as a comma-separated
+ * list of `Source|url` or `Source|url|beat` entries:
+ *   SOURCE_RSS_FEEDS="CoinGape|https://coingape.com/feed/|crypto,Kitco|https://…|commodities"
+ * When unset, DEFAULT_FEEDS below are used. Overrides cannot declare a feed
+ * primary: first-party status is a property of the publisher, not of config.
  */
+
+/** Coverage area, used to spread each run's output across the site. */
+export const BEATS = ["forex", "crypto", "commodities", "equities", "macro"] as const;
+
+export type Beat = (typeof BEATS)[number];
 
 export interface Feed {
   source: string;
   url: string;
+  /** Which beat this feed mostly serves. Defaults to "macro" when unset. */
+  beat?: Beat;
+  /**
+   * The publisher IS the newsmaker (a central bank, a statistical agency), so
+   * its items are first-party statements rather than second-hand reporting.
+   */
+  primary?: boolean;
 }
 
 export interface FeedItem {
@@ -24,6 +38,9 @@ export interface FeedItem {
   link: string;
   summary: string;
   publishedAt: Date | null;
+  beat: Beat;
+  /** True when the publisher is the newsmaker — see Feed.primary. */
+  primary: boolean;
 }
 
 /**
@@ -47,20 +64,51 @@ export interface FeedItem {
  */
 export const DEFAULT_FEEDS: Feed[] = [
   // Analyst / desk commentary
-  { source: "ActionForex", url: "https://www.actionforex.com/feed/" },
-  { source: "ForexLive", url: "https://www.forexlive.com/feed/" },
-  // Markets news
-  { source: "Investing.com", url: "https://www.investing.com/rss/news_25.rss" },
-  { source: "CNBC Markets", url: "https://www.cnbc.com/id/100003114/device/rss/rss.html" },
-  { source: "Yahoo Finance", url: "https://finance.yahoo.com/news/rssindex" },
+  { source: "ActionForex", url: "https://www.actionforex.com/feed/", beat: "forex" },
+  { source: "ForexLive", url: "https://www.forexlive.com/feed/", beat: "forex" },
+  { source: "FX Empire", url: "https://www.fxempire.com/api/v1/en/articles/rss/news", beat: "forex" },
+  { source: "Investing.com Forex", url: "https://www.investing.com/rss/news_1.rss", beat: "forex" },
+  // Commodities — gold, silver, oil
+  { source: "Investing.com Commodities", url: "https://www.investing.com/rss/news_11.rss", beat: "commodities" },
+  { source: "OilPrice", url: "https://oilprice.com/rss/main", beat: "commodities" },
+  // Equities
+  { source: "Investing.com Stocks", url: "https://www.investing.com/rss/news_25.rss", beat: "equities" },
+  { source: "CNBC Markets", url: "https://www.cnbc.com/id/100003114/device/rss/rss.html", beat: "equities" },
+  { source: "MarketWatch", url: "https://feeds.content.dowjones.io/public/rss/mw_topstories", beat: "equities" },
+  { source: "Seeking Alpha", url: "https://seekingalpha.com/market_currents.xml", beat: "equities" },
+  { source: "Yahoo Finance", url: "https://finance.yahoo.com/news/rssindex", beat: "equities" },
   // Crypto
-  { source: "CoinGape", url: "https://coingape.com/feed/" },
-  { source: "Cointelegraph", url: "https://cointelegraph.com/rss" },
-  // Primary sources — central bank press releases
-  { source: "Federal Reserve", url: "https://www.federalreserve.gov/feeds/press_all.xml" },
-  { source: "ECB", url: "https://www.ecb.europa.eu/rss/press.html" },
-  { source: "Bank of England", url: "https://www.bankofengland.co.uk/rss/news" },
+  { source: "CoinGape", url: "https://coingape.com/feed/", beat: "crypto" },
+  { source: "Cointelegraph", url: "https://cointelegraph.com/rss", beat: "crypto" },
+  { source: "Decrypt", url: "https://decrypt.co/feed", beat: "crypto" },
+  { source: "The Block", url: "https://www.theblock.co/rss.xml", beat: "crypto" },
+  // Macro news
+  { source: "Investing.com Economy", url: "https://www.investing.com/rss/news_14.rss", beat: "macro" },
+  { source: "CNBC Economy", url: "https://www.cnbc.com/id/20910258/device/rss/rss.html", beat: "macro" },
+  // Primary sources — central banks and statistical agencies
+  { source: "Federal Reserve", url: "https://www.federalreserve.gov/feeds/press_all.xml", beat: "macro", primary: true },
+  { source: "ECB", url: "https://www.ecb.europa.eu/rss/press.html", beat: "macro", primary: true },
+  { source: "Bank of England", url: "https://www.bankofengland.co.uk/rss/news", beat: "macro", primary: true },
+  { source: "Bank of Japan", url: "https://www.boj.or.jp/en/rss/whatsnew.xml", beat: "macro", primary: true },
+  { source: "RBA", url: "https://www.rba.gov.au/rss/rss-cb-media-releases.xml", beat: "macro", primary: true },
+  { source: "Bank of Canada", url: "https://www.bankofcanada.ca/content_type/press-releases/feed/", beat: "macro", primary: true },
+  { source: "BLS", url: "https://www.bls.gov/feed/bls_latest.rss", beat: "macro", primary: true },
+  { source: "BEA", url: "https://apps.bea.gov/rss/rss.xml", beat: "macro", primary: true },
 ];
+
+/** Outlets whose items are first-party statements rather than reporting. */
+const PRIMARY_SOURCES = new Set(
+  DEFAULT_FEEDS.filter((f) => f.primary).map((f) => f.source.toLowerCase())
+);
+
+/**
+ * True when an item comes straight from the institution that made the news —
+ * a central bank statement or a statistical agency release. Such an item is
+ * self-confirming: there is no more authoritative account of it to wait for.
+ */
+export function isPrimarySource(source: string): boolean {
+  return PRIMARY_SOURCES.has(source.toLowerCase());
+}
 
 export function getConfiguredFeeds(): Feed[] {
   const raw = process.env.SOURCE_RSS_FEEDS?.trim();
@@ -70,11 +118,15 @@ export function getConfiguredFeeds(): Feed[] {
     .split(",")
     .map((entry) => entry.trim())
     .filter(Boolean)
-    .map((entry) => {
-      const [source, url] = entry.split("|").map((s) => s.trim());
-      return { source, url };
+    .map((entry): Feed => {
+      const [source, url, beat] = entry.split("|").map((s) => s.trim());
+      return {
+        source,
+        url,
+        beat: BEATS.includes(beat as Beat) ? (beat as Beat) : undefined,
+      };
     })
-    .filter((f): f is Feed => Boolean(f.source && f.url && /^https?:\/\//.test(f.url)));
+    .filter((f) => Boolean(f.source && f.url && /^https?:\/\//.test(f.url)));
 
   return feeds.length > 0 ? feeds : DEFAULT_FEEDS;
 }
@@ -128,14 +180,21 @@ function extractLink(block: string): string {
 }
 
 function parseDate(block: string): Date | null {
-  const raw = firstMatch(block, "pubDate") ?? firstMatch(block, "published") ?? firstMatch(block, "updated");
+  // dc:date covers RSS 1.0/RDF feeds (the RBA and Bank of Canada publish those);
+  // without it their items arrive undated and get judged on other signals only,
+  // which matters because the breaking lane refuses to touch an undated item.
+  const raw =
+    firstMatch(block, "pubDate") ??
+    firstMatch(block, "published") ??
+    firstMatch(block, "dc:date") ??
+    firstMatch(block, "updated");
   if (!raw) return null;
   const d = new Date(clean(raw));
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-/** Parse an RSS 2.0 or Atom feed document into normalized items. */
-export function parseFeed(xml: string, source: string): FeedItem[] {
+/** Parse an RSS 2.0, RSS 1.0 or Atom feed document into normalized items. */
+export function parseFeed(xml: string, feed: Feed): FeedItem[] {
   const blocks = xml.match(/<item[\s>][\s\S]*?<\/item>/gi) ?? xml.match(/<entry[\s>][\s\S]*?<\/entry>/gi) ?? [];
   const items: FeedItem[] = [];
 
@@ -146,7 +205,15 @@ export function parseFeed(xml: string, source: string): FeedItem[] {
       firstMatch(block, "description") ?? firstMatch(block, "summary") ?? firstMatch(block, "content")
     );
     if (!title || !link) continue;
-    items.push({ source, title, link, summary, publishedAt: parseDate(block) });
+    items.push({
+      source: feed.source,
+      title,
+      link,
+      summary,
+      publishedAt: parseDate(block),
+      beat: feed.beat ?? "macro",
+      primary: feed.primary === true,
+    });
   }
 
   return items;
@@ -165,7 +232,7 @@ export async function fetchFeedItems(feed: Feed, timeoutMs = 10_000): Promise<Fe
     clearTimeout(timer);
     if (!res.ok) return [];
     const xml = await res.text();
-    return parseFeed(xml, feed.source);
+    return parseFeed(xml, feed);
   } catch {
     return [];
   }

@@ -32,14 +32,28 @@ export function AiImageButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, excerpt, categorySlug, kind }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Failed to generate image");
+      // A crashed route replies with an HTML error page, and parsing that as
+      // JSON throws — which used to surface as a misleading "Network error"
+      // whatever the real cause was.
+      const raw = await res.text();
+      let data: { url?: string; error?: string } = {};
+      try {
+        data = JSON.parse(raw) as typeof data;
+      } catch {
+        setError(
+          res.ok
+            ? "The server returned an unexpected response."
+            : `Image generation failed (HTTP ${res.status}). Check the server logs.`
+        );
+        return;
+      }
+      if (!res.ok || !data.url) {
+        setError(data.error || `Failed to generate image (HTTP ${res.status})`);
         return;
       }
       onGenerated(data.url);
     } catch {
-      setError("Network error");
+      setError("Could not reach the server. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
