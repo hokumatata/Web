@@ -1,8 +1,11 @@
 name: Journalist agent (feed drafting)
 
-# Free 4x/day scheduler for The Forex Republic's digital-journalist agent.
-# GitHub Actions cron (UTC) triggers the deployed endpoint every 6 hours;
-# the endpoint drafts DRAFT-only articles from public feeds for human review.
+# Free scheduler for The Forex Republic's digital-journalist agent.
+# GitHub Actions cron (UTC) triggers the deployed endpoint every 3 hours
+# (8 runs/day); the endpoint drafts REVIEW-only articles from public feeds
+# across every beat (forex, crypto, commodities, equities, macro) for human
+# review. Nothing here publishes: see breaking-cron.yml for the narrow
+# confirmed-event lane.
 #
 # Required repository secrets (Settings -> Secrets and variables -> Actions):
 #   SITE_URL        e.g. https://your-app.vercel.app  (no trailing slash)
@@ -20,7 +23,7 @@ name: Journalist agent (feed drafting)
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 */3 * * *"
   workflow_dispatch:
 
 permissions:

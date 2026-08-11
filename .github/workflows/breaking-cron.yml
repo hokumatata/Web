@@ -1,0 +1,70 @@
+name: Journalist agent (breaking wire)
+
+# Fast lane for confirmed events only: a rate decision that has been taken, a
+# macro print that has been released. Runs hourly so a confirmed release is on
+# the site within the hour rather than waiting for the 3-hourly analytical run.
+#
+# The endpoint itself decides what may go live. It publishes only when every
+# gate passes (settled language, a concrete figure, first-party or two-outlet
+# confirmation, due diligence) and otherwise files the piece to the review
+# queue. Set BREAKING_AUTOPUBLISH=false in Vercel to force review-only.
+#
+# Required repository secrets (shared with journalist-cron.yml):
+#   SITE_URL        e.g. https://your-app.vercel.app  (no trailing slash)
+#   PUBLISH_API_KEY same value as the PUBLISH_API_KEY env var in Vercel
+# Optional:
+#   VERCEL_AUTOMATION_BYPASS_SECRET  see journalist-cron.yml
+#
+# Cost: hourly = ~24 billed minutes/day. Together with the 3-hourly drafting
+# run this stays inside the free Actions allowance; widen the cron to
+# "0 */2 * * *" if you want more headroom.
+
+on:
+  schedule:
+    - cron: "30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: breaking-cron
+  cancel-in-progress: false
+
+jobs:
+  breaking:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger breaking wire
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+          PUBLISH_API_KEY: ${{ secrets.PUBLISH_API_KEY }}
+          VERCEL_BYPASS: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: |
+          if [ -z "$SITE_URL" ] || [ -z "$PUBLISH_API_KEY" ]; then
+            echo "::error::SITE_URL and PUBLISH_API_KEY repository secrets must be set."
+            exit 1
+          fi
+          url="${SITE_URL%/}/api/cron/breaking"
+          echo "POST $url"
+          bypass_args=()
+          if [ -n "$VERCEL_BYPASS" ]; then
+            bypass_args=(-H "x-vercel-protection-bypass: $VERCEL_BYPASS")
+          fi
+          code=$(curl -sSL -o response.json -w "%{http_code}" \
+            --max-time 300 \
+            -X POST \
+            -H "x-api-key: $PUBLISH_API_KEY" \
+            "${bypass_args[@]}" \
+            "$url")
+          echo "HTTP $code"
+          cat response.json || true
+          echo
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "::error::Breaking endpoint returned HTTP $code"
+            exit 1
+          fi
+          if ! grep -q '"ok"' response.json; then
+            echo "::error::Endpoint did not return the expected JSON (likely a login/protection page). If Vercel Deployment Protection is on, set the VERCEL_AUTOMATION_BYPASS_SECRET repo secret."
+            exit 1
+          fi

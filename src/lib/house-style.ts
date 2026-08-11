@@ -217,6 +217,98 @@ OUTPUT FORMAT — return ONLY a single JSON object, no markdown fences, no comme
 }
 
 /**
+ * The wire brief: a short, purely factual note on an event that has just
+ * happened, written to go live in minutes and be expanded by an editor later.
+ *
+ * The instructions here are close to the inverse of the voice contract above.
+ * A full piece earns its length through analysis; a brief must not attempt any,
+ * because analysis is the part that needs an editor before a reader sees it.
+ * What it may contain is the fact, its stated comparison, and the immediate
+ * market reaction if a source reports one — nothing else.
+ */
+const BREAKING_CONTRACT = `You are the wire desk at "The Forex Republic", filing a BREAKING brief on an event that has just happened. It goes live within minutes and an editor expands it into a full piece afterwards. Your job is speed and accuracy, not analysis.
+
+HARD RULES:
+- Report ONLY what the source material states. No interpretation, no forecast, no scenario, no positioning view, no advice. If you are tempted to explain what it means for the dollar, stop: that is the editor's follow-up, not this brief.
+- Every figure, level, name and date must appear in the source material. You may not compute, infer, round or recall one. If the consensus or prior figure is not supplied, do not mention a comparison at all.
+- No technical analysis, no support/resistance, no chart talk of any kind.
+- Attribute inline the way a wire does: "the Reserve Bank of Australia said", "according to the Bureau of Labor Statistics".
+- Write in the past tense about what happened. State it plainly. Do not hedge a fact.
+
+LENGTH AND SHAPE — a brief, not an article:
+- 130 to 220 words total. Three or four short paragraphs. No headings, no bullet lists, no subheads.
+- Paragraph 1: the fact. What was decided or published, the figure, and who announced it.
+- Paragraph 2: the stated comparison — versus consensus and versus the prior reading, ONLY if those are in the source material.
+- Paragraph 3: any immediate market reaction the sources report, or the single most consequential line from the statement. If neither is available, state what the release schedule says comes next and stop.
+
+HEADLINE:
+- Lead with the fact and the figure. Present tense, wire style: "RBA holds cash rate at 4.35%", "US core CPI rises 0.3% in July".
+- No question marks, no colons-plus-teaser, no "what it means". Under about 85 characters.
+
+BANNED PHRASES — never use any of these, or close variants:
+${BANNED_PHRASES.map((p) => `"${p}"`).join(", ")}.`;
+
+/**
+ * System prompt for a breaking brief. Separate from buildSystemPrompt because
+ * the two have contradictory length and analysis requirements, and reconciling
+ * them in one prompt is how you get a 900-word "brief".
+ */
+export function buildBreakingSystemPrompt(): string {
+  return `${BREAKING_CONTRACT}
+
+---
+
+OUTPUT FORMAT — return ONLY a single JSON object, no markdown fences, no commentary:
+- "title": string. The headline, following the headline rules above. No leading "#".
+- "excerpt": string. One sentence, max ~200 characters, stating the fact.
+- "body": string. The brief in GitHub-flavored Markdown. Start with "# " and the exact title, then the paragraphs separated by blank lines. No "## " headings.
+- "categorySlug": string. One of: crypto, forex, stocks, macro, gold, analysis, opinion.
+- "tags": array of 3 to 5 short lowercase tags.`;
+}
+
+/** Word bounds for a brief. Outside these it is not a brief and must not auto-publish. */
+const BRIEF_MIN_WORDS = 110;
+const BRIEF_MAX_WORDS = 300;
+
+/**
+ * Style checks for a breaking brief. Deliberately not findStyleViolations: that
+ * one demands 550+ words and three sections, which a brief must never have.
+ */
+export function findBreakingViolations(body: string): string[] {
+  const violations: string[] = [];
+  const lower = body.toLowerCase();
+
+  for (const phrase of BANNED_PHRASES) {
+    if (lower.includes(phrase)) violations.push(`Banned phrase: "${phrase}"`);
+  }
+
+  if (/^#{2,}\s+/m.test(body)) {
+    violations.push("Brief contains section headings — it should be plain paragraphs");
+  }
+
+  // Chart talk in a brief means the model ignored the no-analysis rule, and any
+  // level it names cannot have come from the sources.
+  if (/\b(support|resistance|moving average|\bema\b|\bsma\b|\brsi\b|fibonacci|trend ?line)\b/i.test(body)) {
+    violations.push("Brief contains technical analysis, which is not permitted");
+  }
+
+  const words = countWords(body);
+  if (words < BRIEF_MIN_WORDS) violations.push(`Brief too short: ${words} words`);
+  if (words > BRIEF_MAX_WORDS) violations.push(`Not a brief: ${words} words (max ${BRIEF_MAX_WORDS})`);
+
+  return violations;
+}
+
+/** Words of actual copy, excluding headings and markdown punctuation. */
+function countWords(body: string): number {
+  return body
+    .replace(/^#{1,6}\s+.*$/gm, "")
+    .replace(/[#*_>`-]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean).length;
+}
+
+/**
  * Cheap post-generation check for the banned phrases and label headings the
  * prompt forbids. Used to surface style regressions to the human reviewer
  * rather than to block publication.

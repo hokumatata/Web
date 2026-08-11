@@ -26,6 +26,9 @@ const TERMINALS = [
   { href: "/heatmap", label: "Heatmap" },
 ];
 
+/** How long a breaking story keeps the header's live indicator lit. */
+const BREAKING_WINDOW_HOURS = 12;
+
 export async function TopHeader({
   session,
   siteName,
@@ -33,8 +36,14 @@ export async function TopHeader({
   session: SessionPayload | null;
   siteName: string;
 }) {
+  // Windowed rather than a lifetime count: the breaking lane files several
+  // flagged briefs a day, and a bar that pulses "Breaking News" permanently
+  // tells the reader nothing.
+  const since = new Date(Date.now() - BREAKING_WINDOW_HOURS * 3_600_000);
   const breakingCount = await prisma.article
-    .count({ where: { status: "PUBLISHED", isBreaking: true } })
+    .count({
+      where: { status: "PUBLISHED", isBreaking: true, publishedAt: { gte: since } },
+    })
     .catch(() => 0);
 
   return (

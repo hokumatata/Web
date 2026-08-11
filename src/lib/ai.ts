@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { z } from "zod";
 import {
+  buildBreakingSystemPrompt,
   buildSystemPrompt,
   findStyleViolations,
   type StoryType,
@@ -366,6 +367,73 @@ function headlineSimilarity(a: string, b: string): number {
     if (sb.has(w)) shared++;
   });
   return shared / Math.min(sa.size, sb.size);
+}
+
+/**
+ * Write a short breaking brief on an event that has already happened.
+ *
+ * Two deliberate differences from generateArticleDraft: temperature is low,
+ * because there is no room for voice in 150 words of fact, and there is no
+ * expand-if-thin retry — short is the point, not a defect.
+ */
+export async function generateBreakingBrief(
+  sources: ArticleSources
+): Promise<ArticleDraft> {
+  const openai = getClient();
+  const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+
+  const completion = await openai.chat.completions.create({
+    model,
+    temperature: 0.2,
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: buildBreakingSystemPrompt() },
+      { role: "user", content: buildUserPrompt(sources) },
+    ],
+  });
+
+  const content = completion.choices[0]?.message?.content;
+  if (!content) throw new Error("OpenAI returned an empty response");
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    throw new Error("OpenAI returned invalid JSON");
+  }
+
+  const result = draftSchema.safeParse(parsed);
+  if (!result.success) {
+    throw new Error("OpenAI response did not match the expected draft shape");
+  }
+  return result.data;
+}
+
+/**
+ * Numbers in the copy that do not appear anywhere in the source material.
+ *
+ * This is the auto-publish lane's last line of defence, and it is arithmetic
+ * rather than a model opinion: every numeric token in the brief is looked for in
+ * the sources, and anything unaccounted for sends the piece to the review queue
+ * instead of the front page. It is intentionally literal — a figure the model
+ * rounded or recomputed will not match, which is the desired outcome.
+ */
+export function findUnsourcedFigures(body: string, sourceText: string): string[] {
+  // Digits with optional decimals, ignoring markdown and currency punctuation.
+  const inSources = new Set(sourceText.match(/\d+(?:[.,]\d+)*/g) ?? []);
+  const unsourced = new Set<string>();
+
+  for (const token of body.match(/\d+(?:[.,]\d+)*/g) ?? []) {
+    if (inSources.has(token)) continue;
+    // A bare small integer is prose ("three of the nine members"), a year, or a
+    // count the sources spelled out in words. Only flag figures precise enough
+    // to be a market number.
+    const numeric = Number(token.replace(/,/g, ""));
+    if (!token.includes(".") && Number.isInteger(numeric) && numeric < 100) continue;
+    unsourced.add(token);
+  }
+
+  return Array.from(unsourced).map((t) => `Figure "${t}" does not appear in the source material`);
 }
 
 export interface GeneratedImage {

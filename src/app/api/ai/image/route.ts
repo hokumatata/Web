@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { put } from "@vercel/blob";
 import { json, error, unauthorized, forbidden } from "@/lib/api";
 import { requireRole } from "@/lib/auth";
-import { generateArticleImage, buildImagePrompt } from "@/lib/ai";
+import { buildImagePrompt } from "@/lib/ai";
+import { blobStorageProblem, generateAndStoreImage } from "@/lib/cover-image";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -60,22 +60,24 @@ export async function POST(req: NextRequest) {
     return error("Provide a prompt or a title to generate an image from");
   }
 
-  let image;
+  // Configuration problems are the common case here and are the caller's to
+  // fix, so they come back as 4xx with the fix in the message rather than as an
+  // opaque 500 the editor reads as "Network error".
+  const storageProblem = blobStorageProblem();
+  if (storageProblem) return error(storageProblem, 503);
+
+  let url: string;
   try {
-    image = await generateArticleImage(prompt);
+    url = await generateAndStoreImage(prompt);
   } catch (e) {
     const message = e instanceof Error ? e.message : "Failed to generate image";
     if (message.includes("OPENAI_API_KEY")) {
       return error("OpenAI is not configured. Set OPENAI_API_KEY.", 500);
     }
+    // Storage messages already explain themselves; don't bury them in a prefix.
+    if (/blob|storage|upload/i.test(message)) return error(message, 502);
     return error(`Image generation failed: ${message}`, 502);
   }
 
-  const safeName = `${Date.now()}-${crypto.randomUUID()}.png`;
-  const blob = await put(`ai-images/${safeName}`, image.buffer, {
-    access: "public",
-    contentType: image.contentType,
-  });
-
-  return json({ url: blob.url }, 201);
+  return json({ url }, 201);
 }

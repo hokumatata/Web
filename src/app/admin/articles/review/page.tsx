@@ -151,7 +151,13 @@ export default async function ReviewQueuePage() {
 
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-1">
-                    <Link href={`/article/${a.slug}`} className="btn-ghost h-8 px-2 text-xs" title="Preview">
+                    {/* Not /article/[slug]: that route serves PUBLISHED rows
+                        only, so previewing a draft there 404s. */}
+                    <Link
+                      href={`/admin/articles/${a.id}/preview`}
+                      className="btn-ghost h-8 px-2 text-xs"
+                      title="Preview"
+                    >
                       <Eye size={13} /> Preview
                     </Link>
                     <Link

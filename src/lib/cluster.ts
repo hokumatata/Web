@@ -10,7 +10,7 @@
  * triangulates them, rather than several near-duplicates of individual stories.
  */
 
-import type { FeedItem } from "@/lib/sources";
+import type { Beat, FeedItem } from "@/lib/sources";
 import type { StoryType } from "@/lib/house-style";
 
 const STOPWORDS = new Set([
@@ -63,6 +63,10 @@ export interface StoryCluster {
   instrumentSlug?: string;
   /** Short explanation of the score, surfaced to the human reviewer. */
   scoreReason: string;
+  /** Dominant beat across the cluster's items, used to spread coverage. */
+  beat: Beat;
+  /** True when at least one item is a first-party statement or release. */
+  hasPrimarySource: boolean;
 }
 
 /**
@@ -159,10 +163,22 @@ export function detectStoryType(headline: string): StoryType {
 
   // Central-bank framing outranks topic keywords: a policymaker talking about
   // inflation is a central-bank story, not a data release.
+  // Full institution names matter as much as the acronyms: official feeds write
+  // "Reserve Bank of Australia", never "RBA", and a decision that fell through
+  // to "general" was ineligible for the breaking wire.
+  // "Bank of America" is a lender with an equity research desk, not a rate setter.
+  const isCommercialBank = /^\s*(the\s+)?bank of (america|montreal|nova scotia)\b/.test(t);
   const isCentralBank =
-    /^\s*(the\s+)?(fed|fomc|ecb|boe|boj|snb|rba|pboc|bank of [a-z]+)('s)?\b/.test(t) ||
+    (!isCommercialBank &&
+      /^\s*(the\s+)?(fed|federal reserve|fomc|ecb|european central bank|boe|boj|snb|rba|rbnz|pboc|riksbank|norges bank|reserve bank of [a-z]+|(bank|banco) of [a-z]+|central bank of [a-z]+)('s)?\b/.test(
+        t
+      )) ||
     /\b(powell|lagarde|bailey|ueda|barkin|waller|bostic|williams|kashkari|schnabel|villeroy)\b/.test(t) ||
-    /\b(rate decision|interest rate decision|policy (meeting|decision|statement)|monetary policy|minutes|bank rate|rate (cut|hike)s?|dot plot)\b/.test(t);
+    /\b(rate decision|interest rate decision|policy (meeting|decision|statement)|monetary policy|minutes|cash rate|bank rate|rate (cut|hike)s?|dot plot)\b/.test(t) ||
+    // "keeps rates unchanged", "raised its benchmark rate by 25bps".
+    /\b(holds?|held|keeps?|kept|leaves?|left|raises?|raised|hikes?|hiked|cuts?|lowers?|lowered|trims?|trimmed|maintains?|maintained)\b[^.]{0,40}\b(rates?|policy)\b/.test(
+      t
+    );
   if (isCentralBank) return "central-bank";
 
   const isDataTopic =
@@ -287,6 +303,14 @@ export function scoreCluster(items: FeedItem[], now = new Date()): StoryCluster 
     }
   }
 
+  // A first-party statement is the strongest signal we have: the newsmaker is
+  // the publisher, so there is nothing to corroborate.
+  const hasPrimarySource = items.some((i) => i.primary);
+  if (hasPrimarySource) {
+    score += 12;
+    reasons.push("primary source");
+  }
+
   const storyType = detectStoryType(items[0]?.title ?? "");
   // Prefer the headline's instrument, falling back to the body for e.g. a wrap
   // that names the pair only in the summary.
@@ -299,7 +323,58 @@ export function scoreCluster(items: FeedItem[], now = new Date()): StoryCluster 
     storyType,
     instrumentSlug,
     scoreReason: reasons.join(", ") || "baseline",
+    beat: dominantBeat(items),
+    hasPrimarySource,
   };
+}
+
+/** Most common beat among a cluster's items, ties broken by the newest item. */
+function dominantBeat(items: FeedItem[]): Beat {
+  const counts = new Map<Beat, number>();
+  for (const i of items) counts.set(i.beat, (counts.get(i.beat) ?? 0) + 1);
+  let best: Beat = items[0]?.beat ?? "macro";
+  let bestCount = 0;
+  counts.forEach((count, beat) => {
+    if (count > bestCount) {
+      bestCount = count;
+      best = beat;
+    }
+  });
+  return best;
+}
+
+/**
+ * Pick this run's stories, best-first but spread across beats.
+ *
+ * Taking the top N by score alone reliably produces three macro stories on a
+ * Fed day and nothing on crypto, gold or equities — the front page then looks
+ * like a single-subject newsletter. So each beat gets at most `perBeat` slots
+ * on the first pass, and any unfilled budget is handed back to the best
+ * remaining stories regardless of beat.
+ */
+export function selectDiverseQueue(
+  queue: StoryCluster[],
+  limit: number,
+  perBeat = Math.max(1, Math.ceil(limit / 2))
+): StoryCluster[] {
+  const picked: StoryCluster[] = [];
+  const used = new Map<Beat, number>();
+
+  for (const cluster of queue) {
+    if (picked.length >= limit) break;
+    const count = used.get(cluster.beat) ?? 0;
+    if (count >= perBeat) continue;
+    used.set(cluster.beat, count + 1);
+    picked.push(cluster);
+  }
+
+  // Backfill: better to run a second strong macro story than to file nothing.
+  for (const cluster of queue) {
+    if (picked.length >= limit) break;
+    if (!picked.includes(cluster)) picked.push(cluster);
+  }
+
+  return picked;
 }
 
 /**

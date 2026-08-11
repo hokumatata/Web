@@ -4,15 +4,13 @@ import { json, error, unauthorized } from "@/lib/api";
 import { slugify } from "@/lib/utils";
 import {
   generateArticleDraft,
-  generateArticleImage,
-  buildImagePrompt,
   runDueDiligence,
   CATEGORY_SLUGS,
   type ArticleSources,
   type DueDiligenceResult,
 } from "@/lib/ai";
 import { allowsTechnicals } from "@/lib/house-style";
-import { buildStoryQueue, type StoryCluster } from "@/lib/cluster";
+import { buildStoryQueue, selectDiverseQueue, type StoryCluster } from "@/lib/cluster";
 import {
   computeTechnicals,
   findInstrument,
@@ -20,9 +18,9 @@ import {
   findUnsupportedLevels,
 } from "@/lib/technicals";
 import { notifyReviewQueue } from "@/lib/notify";
-import { getConfiguredFeeds, fetchFeedItems } from "@/lib/sources";
+import { getConfiguredFeeds, fetchFeedItems, type Beat } from "@/lib/sources";
 import { syncEconCalendar } from "@/lib/econ-calendar-store";
-import { put } from "@vercel/blob";
+import { generateCoverBestEffort } from "@/lib/cover-image";
 import { revalidateTag } from "next/cache";
 
 export const runtime = "nodejs";
@@ -59,21 +57,29 @@ export const maxDuration = 300;
  * may instead pass `x-api-key: <PUBLISH_API_KEY>`.
  */
 
-// Nudge the model toward a sensible category based on the source publication.
-const CATEGORY_HINT_BY_SOURCE: Record<string, string> = {
-  coingape: "crypto",
-  cointelegraph: "crypto",
-  forexlive: "forex",
-  actionforex: "forex",
-  fxstreet: "forex",
-  "yahoo finance": "stocks",
-  "cnbc markets": "stocks",
-  "investing.com": "macro",
-  "federal reserve": "macro",
-  ecb: "macro",
-  "bank of england": "macro",
-  bloomberg: "macro",
+/**
+ * Nudge the model toward a sensible category from the cluster's beat, which is
+ * a property of the feed rather than of the outlet's name — adding a feed no
+ * longer means remembering to add a mapping for it.
+ */
+const CATEGORY_HINT_BY_BEAT: Record<Beat, string> = {
+  forex: "forex",
+  crypto: "crypto",
+  equities: "stocks",
+  macro: "macro",
+  // Metals belong in "gold"; energy and the rest read as macro.
+  commodities: "macro",
 };
+
+function categoryHint(cluster: StoryCluster): string {
+  if (
+    cluster.beat === "commodities" &&
+    (cluster.instrumentSlug === "xauusd" || cluster.instrumentSlug === "xagusd")
+  ) {
+    return "gold";
+  }
+  return CATEGORY_HINT_BY_BEAT[cluster.beat];
+}
 
 function authorize(req: NextRequest): boolean {
   const cronSecret = process.env.CRON_SECRET;
@@ -86,35 +92,6 @@ function authorize(req: NextRequest): boolean {
   return false;
 }
 
-/**
- * Best-effort AI cover image: generate + upload to Vercel Blob, returning the
- * public URL. Returns "" (empty cover) on any failure or when disabled, so a
- * single image error never blocks the draft.
- */
-async function generateCoverImage(
-  title: string,
-  excerpt: string,
-  categorySlug: string
-): Promise<string> {
-  if (process.env.SOURCE_GENERATE_IMAGES === "false") return "";
-  try {
-    const prompt = buildImagePrompt({ title, excerpt, categorySlug, kind: "cover" });
-    const image = await generateArticleImage(prompt);
-    const safeName = `${Date.now()}-${crypto.randomUUID()}.png`;
-    const blob = await put(`ai-images/${safeName}`, image.buffer, {
-      access: "public",
-      contentType: image.contentType,
-    });
-    return blob.url;
-  } catch (e) {
-    console.error(
-      "[draft-from-feeds] cover image generation failed:",
-      e instanceof Error ? e.message : e
-    );
-    return "";
-  }
-}
-
 interface DraftedArticle {
   id: string;
   title: string;
@@ -125,8 +102,6 @@ async function draftFromCluster(
   cluster: StoryCluster,
   authorId: string
 ): Promise<DraftedArticle | null> {
-  const primary = cluster.items[0];
-
   // Chart-led stories need real levels before we write a word.
   let technicalBlock: string | undefined;
   let storyType = cluster.storyType;
@@ -160,7 +135,7 @@ async function draftFromCluster(
       url: i.link,
       publishedAt: i.publishedAt,
     })),
-    categoryHint: CATEGORY_HINT_BY_SOURCE[primary.source.toLowerCase()],
+    categoryHint: categoryHint(cluster),
   };
 
   const draft = await generateArticleDraft(sources);
@@ -204,7 +179,12 @@ async function draftFromCluster(
   const attribution = buildAttribution(cluster);
   const articleSlug = slugify(draft.title) + "-" + Date.now().toString(36);
 
-  const coverImageUrl = await generateCoverImage(draft.title, draft.excerpt, slug);
+  const coverImageUrl = await generateCoverBestEffort(
+    draft.title,
+    draft.excerpt,
+    slug,
+    "draft-from-feeds"
+  );
 
   const article = await prisma.article.create({
     data: {
@@ -282,7 +262,9 @@ async function run(req: NextRequest) {
   // Cluster + score locally (free), then write only the best stories.
   const minScore = Math.max(0, Math.min(100, Number(process.env.SOURCE_MIN_SCORE ?? 45)));
   const queue = buildStoryQueue(fresh, minScore);
-  const toDraft = queue.slice(0, perRun);
+  // Spread the run across beats so a Fed day doesn't crowd crypto, gold and
+  // equities off the site entirely.
+  const toDraft = selectDiverseQueue(queue, perRun);
 
   // Retire only what the gate rejected. A story that cleared the gate but did
   // not fit this run's budget stays eligible, so the next run picks up the best
@@ -297,6 +279,7 @@ async function run(req: NextRequest) {
     source: string;
     articleId: string;
     storyType: string;
+    beat: Beat;
     score: number;
     outlets: number;
     dueDiligence: DueDiligenceResult | null;
@@ -333,6 +316,7 @@ async function run(req: NextRequest) {
         source: cluster.sources.join(", "),
         articleId: result.id,
         storyType: cluster.storyType,
+        beat: cluster.beat,
         score: cluster.score,
         outlets: cluster.sources.length,
         dueDiligence: result.dueDiligence,
