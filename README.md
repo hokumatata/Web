@@ -10,7 +10,7 @@ A Bloomberg/CoinDesk-inspired financial news and market data platform built with
 - **Full CMS** — Create, edit, publish articles with rich text editor, image uploads, categories, tags
 - **AI-assisted drafting** — Paste raw sources (tweets, official releases, chart notes, reference text/URLs, key ideas) and generate a structured, house-style article draft via OpenAI, prefilled into the CMS editor for human review (always saved as DRAFT first)
 - **Admin dashboard** — Article management, user & author management, comment moderation, newsletter, audit log
-- **Economic Calendar** — the coming week's macro releases with impact ratings, consensus forecasts and previous readings, from a live feed
+- **Economic Calendar** — one continuous timeline of macro releases (recent history above, today highlighted, upcoming below) with impact ratings, consensus forecasts and previous readings, from a live feed
 - **User accounts** — JWT-based auth with role-based access (Admin, Editor, Author, Reader)
 - **User dashboard** — Saved articles, watchlist, preferences
 - **Search** — Full-text search across articles
@@ -128,16 +128,20 @@ Both can be uploaded (drag-and-drop or URL, stored in Vercel Blob) or **generate
 
 ### Economic calendar data
 
-`src/lib/econ-calendar.ts` reads the **ForexFactory public weekly calendar feed** (no API key) and exposes it as typed events: release time, affected currency, expected-volatility rating, consensus forecast and previous reading. The page renders every time in **UTC** and revalidates hourly.
+`src/lib/econ-calendar.ts` reads the **ForexFactory public weekly calendar feed** (no API key) and exposes it as typed events: release time, affected currency, expected-volatility rating, consensus forecast and previous reading. All times render in **UTC** and the page revalidates hourly.
+
+The page is a **single continuous timeline** — no day tabs. Recent history sits above a `Coming up` divider, today is highlighted and scrolled to on load, and everything scheduled ahead follows below. Past rows are de-emphasised.
 
 Two constraints are deliberate and load-bearing:
 
 - **No figure is ever invented.** The feed does not carry the *actual* print for any event, so `actual` is always `null` and the column shows `—`. It is never inferred, estimated or back-filled. (This replaced a set of hardcoded weekday templates that shipped fabricated prints such as "Non-Farm Payrolls actual 206K" on rotation.)
-- **Coverage is one week**, which is all the feed exposes; there is no next-week endpoint. Whenever the feed rolls over to a week that excludes today, the page opens on *This Week* rather than an empty *Today*.
+- **The feed only exposes the current week.** `lastweek`, `nextweek` and the month variants all 404, so history cannot come from the feed. Instead every sync upserts the week into the `EconomicEvent` table (`src/lib/econ-calendar-store.ts`) and the timeline reads its past section from that archive — so history is shallow at first and deepens by a week each week. `HISTORY_DAYS` (default 30) caps how far back the timeline renders.
 
-The feed rate-limits (HTTP 429) under frequent polling, so a failed refresh serves the last good copy and flags it in the footnote instead of blanking the page. `upcomingHighImpact()` is the hook for forward-looking coverage: a scheduled release with a published consensus and previous reading is enough to write a preview from without waiting for an outlet.
+The archive is written by `syncEconCalendar()`, which the 6-hourly drafting cron calls on every run (reported as `calendarSync` in its response); run it by hand with `npx tsx scripts/calendar-sync.ts`. Reads degrade gracefully in both directions: if the database is unreachable the page falls back to the live feed, and if the feed is unreachable (it returns HTTP 429 under frequent polling) the archive carries the page and the footnote says so.
 
-Check it with `npx tsx scripts/calendar-dry-run.ts`, which prints the week's events, per-day and per-impact counts, the writeable previews in the next 36h, and asserts that no event carries an actual.
+`upcomingHighImpact()` is the hook for forward-looking coverage: a scheduled release with a published consensus and previous reading is enough to write a preview from without waiting for an outlet.
+
+Check it with `npx tsx scripts/calendar-dry-run.ts`, which prints the week's events, per-day and per-impact counts, the archive/live timeline split, the writeable previews in the next 36h, and asserts that no event carries an actual.
 
 **Dry runs.** `npx tsx scripts/newsroom-dry-run.ts` fetches the live feeds and prints per-feed counts, cluster counts, the scored queue with story types and the rejected tail — no model calls, no writes. `npx tsx scripts/newsroom-sample.ts [n]` goes further and actually writes sample articles across story types (needs `OPENAI_API_KEY`), reporting word count, headings, style violations, unverified price levels and the due-diligence verdict for each. Use both after changing prompts or scoring.
 

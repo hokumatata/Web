@@ -16,7 +16,10 @@
  * "—". It is never inferred or filled in.
  *
  * Coverage is one calendar week (Sunday-Saturday), which is what the upstream
- * feed exposes; there is no next-week endpoint.
+ * feed exposes — `lastweek`, `nextweek` and month variants all 404. History is
+ * therefore accumulated locally: every sync upserts the week into the
+ * `EconomicEvent` table (see src/lib/econ-calendar-store.ts), so the archive
+ * grows a week at a time from the first sync onwards.
  */
 
 /**

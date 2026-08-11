@@ -21,6 +21,7 @@ import {
 } from "@/lib/technicals";
 import { notifyReviewQueue } from "@/lib/notify";
 import { getConfiguredFeeds, fetchFeedItems } from "@/lib/sources";
+import { syncEconCalendar } from "@/lib/econ-calendar-store";
 import { put } from "@vercel/blob";
 import { revalidateTag } from "next/cache";
 
@@ -253,6 +254,17 @@ async function run(req: NextRequest) {
   const author = await prisma.user.findUnique({ where: { email: authorEmail } });
   if (!author) return error(`Automation author "${authorEmail}" not found`, 500);
 
+  // Archive this week's economic calendar. The upstream feed only exposes the
+  // current week, so this is what builds the calendar's history over time.
+  // Best-effort: a failure here must not stop article drafting.
+  const calendarSync = await syncEconCalendar().catch((e) => {
+    console.error(
+      "[draft-from-feeds] calendar sync failed:",
+      e instanceof Error ? e.message : e
+    );
+    return { fetched: 0, written: 0 };
+  });
+
   // Gather items from all feeds, newest first.
   const feeds = getConfiguredFeeds();
   const all = (await Promise.all(feeds.map((f) => fetchFeedItems(f)))).flat();
@@ -364,6 +376,7 @@ async function run(req: NextRequest) {
     drafted,
     skippedRecorded: toSkip.length,
     failed,
+    calendarSync,
   });
 }
 

@@ -187,3 +187,26 @@ model SourceItem {
 
   @@index([createdAt])
 }
+
+// Archive of economic-calendar releases. The upstream feed only exposes the
+// current week, so each sync is persisted here to build up the history the
+// calendar timeline shows above "today".
+model EconomicEvent {
+  id        String   @id @default(cuid())
+  /// Scheduled release time, stored in UTC.
+  at        DateTime
+  /// ISO-4217 code of the affected currency, or "ALL" for global events.
+  currency  String
+  event     String
+  /// "high" | "medium" | "low" | "holiday"
+  impact    String
+  consensus String?
+  previous  String?
+  /// Released figure. The feed does not publish actuals, so this stays null
+  /// until an authoritative source is wired in. Never inferred.
+  actual    String?
+  updatedAt DateTime @updatedAt
+
+  @@unique([at, currency, event])
+  @@index([at])
+}

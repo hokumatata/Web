@@ -1,23 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Calendar, Clock, AlertTriangle, Globe, Info } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Calendar, Clock, AlertTriangle, Globe, Info, ArrowDown } from "lucide-react";
 import type { CalendarDay, EconCalendar, EconEvent, Impact } from "@/lib/econ-calendar";
-
-type DayFilter = "yesterday" | "today" | "tomorrow" | "week";
-
-const DAY_TABS: { id: DayFilter; label: string }[] = [
-  { id: "yesterday", label: "Yesterday" },
-  { id: "today", label: "Today" },
-  { id: "tomorrow", label: "Tomorrow" },
-  { id: "week", label: "This Week" },
-];
-
-const OFFSET_BY_FILTER: Record<Exclude<DayFilter, "week">, number> = {
-  yesterday: -1,
-  today: 0,
-  tomorrow: 1,
-};
 
 const FLAGS: Record<string, string> = {
   USD: "🇺🇸",
@@ -34,12 +19,6 @@ const FLAGS: Record<string, string> = {
 /** All times are rendered in UTC so the page is unambiguous and timezone-stable. */
 function utcDateKey(d: Date): string {
   return d.toISOString().slice(0, 10);
-}
-
-function shiftDays(dateKey: string, days: number): string {
-  const d = new Date(`${dateKey}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return utcDateKey(d);
 }
 
 function formatTime(iso: string): string {
@@ -109,9 +88,13 @@ function VolatilityBars({ impact }: { impact: Impact }) {
   );
 }
 
-function EventRow({ ev }: { ev: EconEvent }) {
+function EventRow({ ev, past }: { ev: EconEvent; past: boolean }) {
   return (
-    <tr className="border-b border-ink-800 last:border-b-0 hover:bg-ink-850 transition-colors">
+    <tr
+      className={`border-b border-ink-800 last:border-b-0 hover:bg-ink-850 transition-colors ${
+        past ? "opacity-60" : ""
+      }`}
+    >
       <td className="px-3 py-2.5">
         <span className="text-xs font-mono text-ink-300 tabular flex items-center gap-1.5">
           <Clock size={10} className="text-ink-500" />
@@ -161,26 +144,37 @@ function EventRow({ ev }: { ev: EconEvent }) {
   );
 }
 
-function DaySection({ day, isToday }: { day: CalendarDay; isToday: boolean }) {
+type DayPosition = "past" | "today" | "future";
+
+function DaySection({ day, position }: { day: CalendarDay; position: DayPosition }) {
   const { weekday, dateLabel } = formatDayHeading(day.date);
+  const isToday = position === "today";
 
   return (
-    <section>
+    <section
+      id={isToday ? "today" : undefined}
+      className={isToday ? "scroll-mt-24" : undefined}
+    >
       <div className="flex items-center gap-2 mb-3">
-        <Calendar size={13} className="text-accent" />
-        <h2 className="text-sm font-bold text-ink-50">
+        <Calendar
+          size={13}
+          className={isToday ? "text-accent" : "text-ink-500"}
+        />
+        <h2
+          className={`text-sm font-bold ${isToday ? "text-accent" : "text-ink-50"}`}
+        >
           {weekday}
           <span className="text-ink-400 font-medium">, {dateLabel}</span>
         </h2>
         {isToday && (
-          <span className="text-3xs font-bold uppercase tracking-wider bg-accent/15 text-accent px-1.5 py-0.5 rounded-sm">
+          <span className="text-3xs font-bold uppercase tracking-wider bg-accent text-white px-1.5 py-0.5 rounded-sm">
             Today
           </span>
         )}
         <span className="text-2xs text-ink-500 ml-1">{day.events.length} events</span>
       </div>
 
-      <div className="card overflow-hidden">
+      <div className={`card overflow-hidden ${isToday ? "ring-1 ring-accent/40" : ""}`}>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px]">
             <thead>
@@ -210,7 +204,11 @@ function DaySection({ day, isToday }: { day: CalendarDay; isToday: boolean }) {
             </thead>
             <tbody>
               {day.events.map((ev, i) => (
-                <EventRow key={`${ev.at}-${ev.event}-${i}`} ev={ev} />
+                <EventRow
+                  key={`${ev.at}-${ev.event}-${i}`}
+                  ev={ev}
+                  past={position === "past"}
+                />
               ))}
             </tbody>
           </table>
@@ -220,28 +218,54 @@ function DaySection({ day, isToday }: { day: CalendarDay; isToday: boolean }) {
   );
 }
 
-export function EconomicCalendar({ calendar }: { calendar: EconCalendar }) {
-  const today = utcDateKey(new Date());
-  // The feed covers one week, which may not include today (e.g. once it rolls
-  // over to the coming week), so don't open on a tab that has nothing in it.
-  const [dayFilter, setDayFilter] = useState<DayFilter>(() =>
-    calendar.days.some((d) => d.date === today) ? "today" : "week"
+/** Divider marking where the archive ends and the schedule ahead begins. */
+function UpcomingDivider() {
+  return (
+    <div className="flex items-center gap-3 py-1">
+      <span className="h-px flex-1 bg-ink-700" />
+      <span className="flex items-center gap-1.5 text-2xs font-bold uppercase tracking-wider text-ink-400">
+        <ArrowDown size={11} />
+        Coming up
+      </span>
+      <span className="h-px flex-1 bg-ink-700" />
+    </div>
   );
-  const [highOnly, setHighOnly] = useState(false);
+}
 
-  const visibleDays = useMemo(() => {
-    const base =
-      dayFilter === "week"
-        ? calendar.days
-        : calendar.days.filter((d) => d.date === shiftDays(today, OFFSET_BY_FILTER[dayFilter]));
-    if (!highOnly) return base;
-    return base
+export function EconomicCalendar({ calendar }: { calendar: EconCalendar }) {
+  const [highOnly, setHighOnly] = useState(false);
+  const today = utcDateKey(new Date());
+  const scrolled = useRef(false);
+
+  const days = useMemo(() => {
+    if (!highOnly) return calendar.days;
+    return calendar.days
       .map((d) => ({ ...d, events: d.events.filter((e) => e.impact === "high") }))
       .filter((d) => d.events.length > 0);
-  }, [calendar.days, dayFilter, highOnly, today]);
+  }, [calendar.days, highOnly]);
 
-  const totalEvents = visibleDays.reduce((n, d) => n + d.events.length, 0);
-  const feedUnavailable = calendar.days.length === 0;
+  const positions = useMemo(
+    () =>
+      days.map((d): DayPosition =>
+        d.date === today ? "today" : d.date < today ? "past" : "future"
+      ),
+    [days, today]
+  );
+
+  // Today is mid-list once history accumulates, so open the page there rather
+  // than at the oldest archived day.
+  useEffect(() => {
+    if (scrolled.current || days.length === 0) return;
+    scrolled.current = true;
+    const anchor = document.getElementById("today") ?? document.getElementById("upcoming");
+    anchor?.scrollIntoView({ block: "start" });
+  }, [days.length]);
+
+  const hasToday = positions.includes("today");
+  // Where the divider goes when there is no "today" section to anchor on.
+  const firstFuture = positions.indexOf("future");
+  const pastCount = positions.filter((p) => p === "past").length;
+  const futureCount = positions.filter((p) => p === "future").length;
 
   return (
     <div className="animate-fade-in">
@@ -250,30 +274,26 @@ export function EconomicCalendar({ calendar }: { calendar: EconCalendar }) {
         <h1 className="text-2xl font-bold text-ink-50 tracking-tight">Economic Calendar</h1>
       </div>
       <p className="text-sm text-ink-400 mb-6">
-        Scheduled macro releases and central bank decisions for the current week, with
-        consensus forecasts and previous readings. All times UTC.
+        Macro releases and central bank decisions on one continuous timeline — recent
+        history above, today highlighted, everything scheduled ahead below. All times UTC.
       </p>
 
-      {/* Toolbar: day tabs + impact filter */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <div className="inline-flex rounded-md border border-ink-700 bg-ink-900 p-0.5">
-          {DAY_TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setDayFilter(t.id)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-[4px] transition-colors ${
-                dayFilter === t.id
-                  ? "bg-accent text-white"
-                  : "text-ink-300 hover:text-ink-100 hover:bg-ink-850"
-              }`}
+        <div className="flex items-center gap-3 text-2xs text-ink-500">
+          <span>
+            {pastCount} past {pastCount === 1 ? "day" : "days"} · {futureCount} upcoming
+          </span>
+          {hasToday && (
+            <a
+              href="#today"
+              className="font-semibold text-accent hover:underline"
             >
-              {t.label}
-            </button>
-          ))}
+              Jump to today
+            </a>
+          )}
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Volatility legend */}
           <div className="hidden sm:flex items-center gap-3 text-2xs text-ink-400">
             <span className="flex items-center gap-1">
               <VolatilityBars impact="high" /> High
@@ -297,31 +317,42 @@ export function EconomicCalendar({ calendar }: { calendar: EconCalendar }) {
         </div>
       </div>
 
-      {feedUnavailable ? (
+      {calendar.days.length === 0 ? (
         <div className="card p-10 text-center text-sm text-ink-400">
           The calendar feed is temporarily unavailable. Please check back shortly.
         </div>
       ) : (
-        totalEvents === 0 && (
+        days.length === 0 && (
           <div className="card p-10 text-center text-sm text-ink-400">
-            No events scheduled for this selection.
+            No high-impact events in this window.
           </div>
         )
       )}
 
       <div className="space-y-6">
-        {visibleDays.map((day) => (
-          <DaySection key={day.date} day={day} isToday={day.date === today} />
+        {days.map((day, i) => (
+          <div key={day.date} className="space-y-6">
+            {/* Anchor the divider to today when present, else to the first future day. */}
+            {((hasToday && positions[i] === "today") ||
+              (!hasToday && i === firstFuture && firstFuture > 0)) && (
+              <div id="upcoming" className="scroll-mt-24">
+                <UpcomingDivider />
+              </div>
+            )}
+            <DaySection day={day} position={positions[i]} />
+          </div>
         ))}
       </div>
 
-      {!feedUnavailable && (
+      {calendar.days.length > 0 && (
         <p className="mt-6 flex items-start gap-2 text-2xs text-ink-500">
           <Info size={12} className="mt-0.5 flex-shrink-0" />
           <span>
             Schedule, consensus forecasts and previous readings via the ForexFactory public
-            calendar feed. Released figures are not carried by the feed, so the Actual column
-            shows &ldquo;—&rdquo;. Forecasts are market consensus, not our estimates.
+            calendar feed. The feed publishes one week at a time, so history builds up from
+            our own archive and deepens over time. Released figures are not carried by the
+            feed, so the Actual column shows &ldquo;—&rdquo;. Forecasts are market
+            consensus, not our estimates.
             {calendar.stale && " Showing the last successful refresh; the feed is currently unreachable."}
           </span>
         </p>
