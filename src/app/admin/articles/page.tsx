@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { formatDate, timeAgo } from "@/lib/utils";
+import { getSession } from "@/lib/auth";
+import { canPublish, isEditor } from "@/lib/types";
+import { timeAgo } from "@/lib/utils";
 import { Plus, Edit, Eye, Sparkles } from "lucide-react";
 import { ArticleRowActions } from "@/components/admin/ArticleRowActions";
 
 export const metadata = { title: "Manage Articles" };
 
 export default async function AdminArticlesPage() {
+  const session = await getSession();
+  const allowPublish = !!session && canPublish(session.role);
+  const allowDelete = allowPublish;
+  const showReviewLink = !!session && isEditor(session.role);
+
   const articles = await prisma.article.findMany({
     orderBy: { updatedAt: "desc" },
     include: {
@@ -60,7 +67,13 @@ export default async function AdminArticlesPage() {
                   <div className="flex items-center justify-end gap-1">
                     <Link href={`/article/${a.slug}`} className="btn-ghost h-7 px-2"><Eye size={13} /></Link>
                     <Link href={`/admin/articles/${a.id}/edit`} className="btn-ghost h-7 px-2"><Edit size={13} /></Link>
-                    <ArticleRowActions id={a.id} status={a.status} />
+                    <ArticleRowActions
+                      id={a.id}
+                      status={a.status}
+                      canPublish={allowPublish}
+                      canDelete={allowDelete}
+                      showReviewLink={showReviewLink}
+                    />
                   </div>
                 </td>
               </tr>

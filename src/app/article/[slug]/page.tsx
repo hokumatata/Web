@@ -2,10 +2,11 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { markdownToHtml } from "@/lib/markdown";
+import { AI_HUMAN_DISCLOSURE, stripCreditFooters } from "@/lib/article-body";
 import { formatDate, readTime, timeAgo } from "@/lib/utils";
 import { CommentBlock } from "@/components/site/CommentBlock";
 import { ArticleCard, type ArticleCardData } from "@/components/news/ArticleCard";
-import { Clock, User, Tag, ArrowLeft } from "lucide-react";
+import { Clock, Tag, ArrowLeft } from "lucide-react";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { newsArticleSchema, breadcrumbSchema, absUrl } from "@/lib/seo";
 
@@ -75,7 +76,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     },
   })) as ArticleCardData[];
 
-  const bodyHtml = markdownToHtml(article.body);
+  const cleanedBody = stripCreditFooters(article.body);
+  const bodyHtml = markdownToHtml(cleanedBody);
 
   await prisma.article.update({
     where: { id: article.id },
@@ -155,7 +157,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               <Clock size={12} />
               <span>{formatDate(article.publishedAt)} &middot; {timeAgo(article.publishedAt)}</span>
             </div>
-            <span className="text-2xs text-ink-400">{readTime(article.body)} min read</span>
+            <span className="text-2xs text-ink-400">{readTime(cleanedBody)} min read</span>
             <span className="text-2xs text-ink-500 font-mono">{article.views.toLocaleString()} views</span>
           </div>
 
@@ -186,6 +188,10 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           className="prose-mp max-w-none"
           dangerouslySetInnerHTML={{ __html: bodyHtml }}
         />
+
+        <p className="mt-8 text-xs text-ink-500 leading-relaxed border-t border-ink-800 pt-4">
+          {AI_HUMAN_DISCLOSURE}
+        </p>
 
         {/* Comments */}
         <CommentBlock

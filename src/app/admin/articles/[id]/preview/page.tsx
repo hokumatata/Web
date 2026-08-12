@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Edit, Tag } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { markdownToHtml } from "@/lib/markdown";
+import { AI_HUMAN_DISCLOSURE, stripCreditFooters } from "@/lib/article-body";
 import { formatDate, readTime } from "@/lib/utils";
 
 export const metadata = { title: "Preview Article", robots: { index: false, follow: false } };
@@ -31,7 +32,8 @@ export default async function PreviewArticlePage({ params }: { params: { id: str
 
   if (!article) notFound();
 
-  const bodyHtml = markdownToHtml(article.body);
+  const cleanedBody = stripCreditFooters(article.body);
+  const bodyHtml = markdownToHtml(cleanedBody);
   const isLive = article.status === "PUBLISHED";
 
   return (
@@ -70,7 +72,7 @@ export default async function PreviewArticlePage({ params }: { params: { id: str
           <div className="mt-4 flex flex-wrap items-center gap-4 text-2xs text-ink-400 border-t border-b border-ink-800 py-3">
             <span className="text-ink-100 font-medium">{article.author.name}</span>
             <span>{formatDate(article.publishedAt ?? article.createdAt)}</span>
-            <span>{readTime(article.body)} min read</span>
+            <span>{readTime(cleanedBody)} min read</span>
           </div>
           {article.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
@@ -97,6 +99,10 @@ export default async function PreviewArticlePage({ params }: { params: { id: str
         )}
 
         <div className="prose-mp max-w-none" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+
+        <p className="mt-8 text-xs text-ink-500 leading-relaxed border-t border-ink-800 pt-4">
+          {AI_HUMAN_DISCLOSURE}
+        </p>
       </div>
     </div>
   );

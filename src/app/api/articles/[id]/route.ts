@@ -3,7 +3,7 @@ import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { json, error, unauthorized, forbidden, notFound } from "@/lib/api";
 import { requireRole, getSession } from "@/lib/auth";
-import { roleAtLeast } from "@/lib/types";
+import { canPublish, isEditor, roleAtLeast } from "@/lib/types";
 
 function toPublicArticle<T extends Record<string, unknown>>(article: T) {
   const { dueDiligence: _dd, ...rest } = article;
@@ -26,19 +26,20 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   if (!article) return notFound("Article");
 
   const session = await getSession();
-  const isEditor = session ? roleAtLeast(session.role, "EDITOR") : false;
+  // Rank-based read access: ADMIN may still inspect unpublished rows for ops.
+  const staffReader = session ? roleAtLeast(session.role, "EDITOR") : false;
   const isOwnAuthor =
     !!session && roleAtLeast(session.role, "AUTHOR") && article.authorId === session.uid;
 
   if (article.status === "PUBLISHED") {
     // CMS staff get internals; public readers get a scrubbed payload.
-    if (isEditor || isOwnAuthor) return json(article);
+    if (staffReader || isOwnAuthor) return json(article);
     return json(toPublicArticle(article as unknown as Record<string, unknown>));
   }
 
   // Unpublished: AUTHOR (own) or EDITOR+ (all)
   if (!session) return unauthorized();
-  if (!isEditor && !isOwnAuthor) return forbidden();
+  if (!staffReader && !isOwnAuthor) return forbidden();
 
   return json(article);
 }
@@ -62,11 +63,12 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
   let nextStatus: string | undefined;
   if (status !== undefined) {
-    // Publishing is EDITOR+ via POST /api/articles/[id]/publish only.
+    // Publishing is via POST /api/articles/[id]/publish only (EDITOR/AUTHOR, not ADMIN).
     if (status === "PUBLISHED") {
       return error("Use the publish endpoint to publish articles", 403);
     }
-    if (!roleAtLeast(auth.session.role, "EDITOR")) {
+    // Exact EDITOR — ADMIN is ops-only and must not drive editorial status.
+    if (!isEditor(auth.session.role)) {
       return error("Only editors can change article status", 403);
     }
     if (status !== "DRAFT" && status !== "REVIEW") {
@@ -102,8 +104,17 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  const auth = await requireRole("EDITOR");
-  if (!auth.ok) return unauthorized();
+  const session = await getSession();
+  if (!session) return unauthorized();
+  // Reject / delete is an editorial action — ADMIN must not use it.
+  if (!canPublish(session.role)) return forbidden();
+
+  const article = await prisma.article.findUnique({ where: { id: params.id } });
+  if (!article) return notFound("Article");
+
+  if (!isEditor(session.role) && article.authorId !== session.uid) {
+    return forbidden();
+  }
 
   await prisma.article.delete({ where: { id: params.id } }).catch(() => {});
   revalidateTag("articles");
