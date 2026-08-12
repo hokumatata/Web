@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { json, error, unauthorized, forbidden } from "@/lib/api";
-import { requireRole } from "@/lib/auth";
+import { requireExactRoles } from "@/lib/auth";
 import { generateArticleDraft, type ArticleSources } from "@/lib/ai";
 
 export const runtime = "nodejs";
@@ -8,8 +8,8 @@ export const runtime = "nodejs";
 /**
  * POST /api/ai/generate
  *
- * Admin/editor endpoint that turns raw sources into a structured article
- * draft. Protected with the same role gate as the article endpoints (AUTHOR+).
+ * Editorial endpoint that turns raw sources into a structured article
+ * draft. Exact AUTHOR or EDITOR only (not READER, not required for ADMIN).
  *
  * Body (JSON, all fields optional strings):
  *   { tweets, releases, chartNotes, referenceText, referenceUrls, keyIdeas, categoryHint }
@@ -17,7 +17,7 @@ export const runtime = "nodejs";
  * Returns: { title, excerpt, body, categorySlug, tags[] }
  */
 export async function POST(req: NextRequest) {
-  const auth = await requireRole("AUTHOR");
+  const auth = await requireExactRoles(["AUTHOR", "EDITOR"]);
   if (!auth.ok) {
     return auth.reason === "forbidden" ? forbidden() : unauthorized();
   }

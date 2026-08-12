@@ -25,7 +25,7 @@ export function ArticleForm({
   article,
   categories,
   tags,
-  redirectTo = "/admin/articles",
+  redirectTo = "/dashboard/articles",
 }: {
   article?: ArticleData;
   categories: Category[];

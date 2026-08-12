@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { put } from "@vercel/blob";
-import { json, error, unauthorized } from "@/lib/api";
-import { requireRole } from "@/lib/auth";
+import { json, error, unauthorized, forbidden } from "@/lib/api";
+import { requireExactRoles } from "@/lib/auth";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
@@ -16,8 +16,10 @@ const EXT_BY_TYPE: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
-  const auth = await requireRole("AUTHOR");
-  if (!auth.ok) return unauthorized();
+  const auth = await requireExactRoles(["AUTHOR", "EDITOR"]);
+  if (!auth.ok) {
+    return auth.reason === "forbidden" ? forbidden() : unauthorized();
+  }
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;

@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Edit, Tag } from "lucide-react";
 import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
+import { isAuthor, isEditor } from "@/lib/types";
 import { markdownToHtml } from "@/lib/markdown";
 import { AI_HUMAN_DISCLOSURE, stripCreditFooters } from "@/lib/article-body";
 import { formatDate, readTime } from "@/lib/utils";
@@ -9,18 +11,15 @@ import { formatDate, readTime } from "@/lib/utils";
 export const metadata = { title: "Preview Article", robots: { index: false, follow: false } };
 
 /**
- * Editor preview of an article at any status.
- *
- * The public article route serves only PUBLISHED rows, so previewing from the
- * review queue by slug 404s on exactly the drafts a reviewer needs to read.
- * This renders the same markdown through the same prose styles, reading by id
- * and ignoring status.
- *
- * Deliberately not a copy of the public page: no view counter (previewing must
- * not inflate an unpublished article's stats), no comments, no related-articles
- * queries, and noindex so a shared link can never be crawled.
+ * Staff preview of an article at any status.
+ * Public /article/[slug] serves PUBLISHED only — drafts must preview by id here.
  */
 export default async function PreviewArticlePage({ params }: { params: { id: string } }) {
+  const session = await getSession();
+  if (!session || (!isAuthor(session.role) && !isEditor(session.role))) {
+    redirect("/dashboard");
+  }
+
   const article = await prisma.article.findUnique({
     where: { id: params.id },
     include: {
@@ -32,18 +31,24 @@ export default async function PreviewArticlePage({ params }: { params: { id: str
 
   if (!article) notFound();
 
+  if (isAuthor(session.role) && !isEditor(session.role) && article.authorId !== session.uid) {
+    redirect("/dashboard/articles");
+  }
+
   const cleanedBody = stripCreditFooters(article.body);
   const bodyHtml = markdownToHtml(cleanedBody);
   const isLive = article.status === "PUBLISHED";
+  const backHref = isEditor(session.role) ? "/dashboard/review" : "/dashboard/articles";
+  const backLabel = isEditor(session.role) ? "Review queue" : "My articles";
 
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
         <div className="flex items-center gap-2">
-          <Link href="/admin/articles/review" className="btn-ghost h-8 px-2 text-xs">
-            <ArrowLeft size={13} /> Review queue
+          <Link href={backHref} className="btn-ghost h-8 px-2 text-xs">
+            <ArrowLeft size={13} /> {backLabel}
           </Link>
-          <Link href={`/admin/articles/${article.id}/edit`} className="btn-ghost h-8 px-2 text-xs">
+          <Link href={`/dashboard/articles/${article.id}/edit`} className="btn-ghost h-8 px-2 text-xs">
             <Edit size={13} /> Edit
           </Link>
         </div>

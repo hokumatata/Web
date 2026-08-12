@@ -1,28 +1,24 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { isAdmin, isEditor, roleAtLeast } from "@/lib/types";
+import { isAdmin } from "@/lib/types";
 import { LogoutButton } from "@/components/auth/LogoutButton";
-import { LayoutDashboard, FileText, Tags, MessageSquare, Users, Mail, Activity, Settings, UserPlus, ClipboardCheck } from "lucide-react";
+import {
+  LayoutDashboard,
+  Tags,
+  MessageSquare,
+  Mail,
+  Activity,
+  Settings,
+  UserPlus,
+} from "lucide-react";
 
-type NavItem = {
-  href: string;
-  label: string;
-  icon: typeof LayoutDashboard;
-  /** When set, only these exact roles see the item (ADMIN must not see editorial publish surfaces). */
-  roles?: Array<"ADMIN" | "EDITOR">;
-};
-
-const NAV: NavItem[] = [
+const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/articles", label: "Articles", icon: FileText, roles: ["EDITOR"] },
-  { href: "/admin/articles/review", label: "Review Queue", icon: ClipboardCheck, roles: ["EDITOR"] },
   { href: "/admin/authors", label: "Authors", icon: UserPlus },
   { href: "/admin/categories", label: "Categories", icon: Tags },
   { href: "/admin/tags", label: "Tags", icon: Tags },
   { href: "/admin/comments", label: "Comments", icon: MessageSquare },
-  { href: "/admin/users", label: "Readers", icon: Users },
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin/tickers", label: "Tickers", icon: Activity },
   { href: "/admin/audit-log", label: "Audit Log", icon: Settings },
@@ -30,26 +26,15 @@ const NAV: NavItem[] = [
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
-  if (!session || !roleAtLeast(session.role, "EDITOR")) redirect("/login");
-
-  const showReviewCount = isEditor(session.role);
-  const reviewCount = showReviewCount
-    ? await prisma.article.count({ where: { status: "REVIEW" } })
-    : 0;
-
-  const nav = NAV.filter((n) => {
-    if (!n.roles) return true;
-    return n.roles.includes(session.role as "ADMIN" | "EDITOR");
-  });
+  if (!session) redirect("/login");
+  if (!isAdmin(session.role)) redirect("/dashboard");
 
   return (
     <div className="container-tw py-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <LayoutDashboard size={20} className="text-accent" />
-          <h1 className="text-xl font-bold text-ink-50">
-            {isAdmin(session.role) ? "Site ops" : "Admin"}
-          </h1>
+          <h1 className="text-xl font-bold text-ink-50">Site ops</h1>
           <span className="badge">{session.role}</span>
         </div>
         <LogoutButton />
@@ -57,7 +42,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <div className="flex flex-col lg:flex-row gap-6">
         <nav className="lg:w-52 flex-shrink-0">
           <ul className="flex lg:flex-col gap-0.5 overflow-x-auto lg:overflow-visible">
-            {nav.map((n) => (
+            {NAV.map((n) => (
               <li key={n.href}>
                 <Link
                   href={n.href}
@@ -65,9 +50,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 >
                   <n.icon size={14} className="text-ink-400" />
                   {n.label}
-                  {n.href === "/admin/articles/review" && reviewCount > 0 && (
-                    <span className="ml-auto badge-down text-2xs px-1.5 py-0.5">{reviewCount}</span>
-                  )}
                 </Link>
               </li>
             ))}

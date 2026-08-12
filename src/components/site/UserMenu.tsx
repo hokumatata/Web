@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, LayoutDashboard, Bookmark, Eye, Settings, LogOut, ChevronDown, FileText } from "lucide-react";
+import { User, LayoutDashboard, Bookmark, Eye, Settings, LogOut, ChevronDown, FileText, ClipboardCheck } from "lucide-react";
 
 interface UserMenuProps {
   name: string;
@@ -30,8 +30,9 @@ export function UserMenu({ name, role }: UserMenuProps) {
     router.refresh();
   }
 
-  const isAdmin = role === "ADMIN" || role === "EDITOR";
-  const isAuthor = role === "ADMIN" || role === "EDITOR" || role === "AUTHOR";
+  const showSiteOps = role === "ADMIN";
+  const showWriting = role === "AUTHOR" || role === "EDITOR";
+  const showReview = role === "EDITOR";
 
   return (
     <div ref={ref} className="relative">
@@ -56,7 +57,8 @@ export function UserMenu({ name, role }: UserMenuProps) {
           <div className="py-1">
             {[
               { href: "/dashboard", icon: User, label: "Dashboard", show: true },
-              { href: "/dashboard/articles", icon: FileText, label: "My Articles", show: isAuthor },
+              { href: "/dashboard/articles", icon: FileText, label: "My Articles", show: showWriting },
+              { href: "/dashboard/review", icon: ClipboardCheck, label: "Review Queue", show: showReview },
               { href: "/dashboard/saved", icon: Bookmark, label: "Saved", show: true },
               { href: "/dashboard/watchlist", icon: Eye, label: "Watchlist", show: true },
               { href: "/dashboard/preferences", icon: Settings, label: "Settings", show: true },
@@ -75,7 +77,7 @@ export function UserMenu({ name, role }: UserMenuProps) {
               ))}
           </div>
 
-          {isAdmin && (
+          {showSiteOps && (
             <div className="border-t border-ink-700 py-1">
               <Link
                 href="/admin"
@@ -83,7 +85,7 @@ export function UserMenu({ name, role }: UserMenuProps) {
                 className="flex items-center gap-3 px-4 py-2 text-sm text-accent font-medium hover:bg-ink-850 transition-colors"
               >
                 <LayoutDashboard size={14} />
-                Admin Panel
+                Site ops
               </Link>
             </div>
           )}

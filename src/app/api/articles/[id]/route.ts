@@ -2,8 +2,8 @@ import { NextRequest } from "next/server";
 import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { json, error, unauthorized, forbidden, notFound } from "@/lib/api";
-import { requireRole, getSession } from "@/lib/auth";
-import { canPublish, isEditor, roleAtLeast } from "@/lib/types";
+import { requireExactRoles, getSession } from "@/lib/auth";
+import { canPublish, isAdmin, isAuthor, isEditor } from "@/lib/types";
 
 function toPublicArticle<T extends Record<string, unknown>>(article: T) {
   const { dueDiligence: _dd, ...rest } = article;
@@ -26,18 +26,18 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   if (!article) return notFound("Article");
 
   const session = await getSession();
-  // Rank-based read access: ADMIN may still inspect unpublished rows for ops.
-  const staffReader = session ? roleAtLeast(session.role, "EDITOR") : false;
+  // Editorial desk (EDITOR) or Site ops (ADMIN) may inspect internals; authors only own.
+  const staffReader = !!session && (isEditor(session.role) || isAdmin(session.role));
   const isOwnAuthor =
-    !!session && roleAtLeast(session.role, "AUTHOR") && article.authorId === session.uid;
+    !!session && isAuthor(session.role) && article.authorId === session.uid;
 
   if (article.status === "PUBLISHED") {
-    // CMS staff get internals; public readers get a scrubbed payload.
+    // CMS staff / own author get internals; everyone else gets a scrubbed payload.
     if (staffReader || isOwnAuthor) return json(article);
     return json(toPublicArticle(article as unknown as Record<string, unknown>));
   }
 
-  // Unpublished: AUTHOR (own) or EDITOR+ (all)
+  // Unpublished: AUTHOR (own) or EDITOR / ADMIN (staff)
   if (!session) return unauthorized();
   if (!staffReader && !isOwnAuthor) return forbidden();
 
@@ -45,7 +45,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 }
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const auth = await requireRole("AUTHOR");
+  const auth = await requireExactRoles(["AUTHOR", "EDITOR"]);
   if (!auth.ok) {
     return auth.reason === "forbidden" ? forbidden() : unauthorized();
   }
@@ -53,8 +53,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   const article = await prisma.article.findUnique({ where: { id: params.id } });
   if (!article) return notFound("Article");
 
-  // Authors can only edit their own articles; editors+ can edit any
-  if (!roleAtLeast(auth.session.role, "EDITOR") && article.authorId !== auth.session.uid) {
+  // Authors can only edit their own articles; editors can edit any
+  if (!isEditor(auth.session.role) && article.authorId !== auth.session.uid) {
     return error("You can only edit your own articles", 403);
   }
 

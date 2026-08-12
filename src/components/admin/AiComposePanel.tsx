@@ -57,9 +57,11 @@ const EMPTY: Sources = {
 export function AiComposePanel({
   categories,
   tags,
+  redirectTo = "/dashboard/articles",
 }: {
   categories: Category[];
   tags: Tag[];
+  redirectTo?: string;
 }) {
   const [sources, setSources] = useState<Sources>(EMPTY);
   const [loading, setLoading] = useState(false);
@@ -150,6 +152,7 @@ export function AiComposePanel({
           article={prefilled}
           categories={categories.map((c) => ({ id: c.id, name: c.name, slug: c.slug }))}
           tags={tags.map((t) => ({ id: t.id, name: t.name }))}
+          redirectTo={redirectTo}
         />
       </div>
     );

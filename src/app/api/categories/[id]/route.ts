@@ -1,10 +1,10 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { json, error, unauthorized, notFound } from "@/lib/api";
-import { requireRole } from "@/lib/auth";
+import { requireExactRole } from "@/lib/auth";
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const auth = await requireRole("ADMIN");
+  const auth = await requireExactRole("ADMIN");
   if (!auth.ok) return unauthorized();
 
   const cat = await prisma.category.findUnique({ where: { id: params.id } });
@@ -24,7 +24,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  const auth = await requireRole("ADMIN");
+  const auth = await requireExactRole("ADMIN");
   if (!auth.ok) return unauthorized();
 
   const articleCount = await prisma.article.count({ where: { categoryId: params.id } });

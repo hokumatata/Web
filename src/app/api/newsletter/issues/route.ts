@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { json, unauthorized } from "@/lib/api";
-import { requireRole } from "@/lib/auth";
+import { requireExactRole } from "@/lib/auth";
 import { buildDailyBriefHtml, sendIssue, isDeliveryConfigured } from "@/lib/newsletter";
 
 export const dynamic = "force-dynamic";
@@ -17,14 +17,14 @@ export async function GET() {
 }
 
 /** Generate today's Daily Macro Brief and (optionally) send it.
- *  Authorized via an admin EDITOR session OR a Bearer CRON_SECRET (for scheduled delivery). */
+ *  Authorized via an ADMIN session OR a Bearer CRON_SECRET (for scheduled delivery). */
 export async function POST(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
   const authHeader = req.headers.get("authorization");
   const cronAuthorized = Boolean(cronSecret) && authHeader === `Bearer ${cronSecret}`;
 
   if (!cronAuthorized) {
-    const auth = await requireRole("EDITOR");
+    const auth = await requireExactRole("ADMIN");
     if (!auth.ok) return unauthorized();
   }
 

@@ -45,7 +45,7 @@ export default async function AuthorEditArticlePage({ params }: { params: { id: 
           }}
           categories={categories.map((c) => ({ id: c.id, name: c.name, slug: c.slug }))}
           tags={tags.map((t) => ({ id: t.id, name: t.name }))}
-          redirectTo="/dashboard/articles"
+          redirectTo={isEditor(session.role) ? "/dashboard/desk" : "/dashboard/articles"}
         />
       </div>
     </div>
