@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Trash2, UserPlus, X } from "lucide-react";
 import { formatDate } from "@/lib/utils";
@@ -12,22 +13,12 @@ export function UsersManager({ users }: { users: UserData[] }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("READER");
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const router = useRouter();
 
-  async function changeRole(id: string, newRole: string) {
-    await fetch(`/api/admin/users/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role: newRole }),
-    });
-    router.refresh();
-  }
-
   async function remove(id: string) {
-    if (!confirm("Delete this user?")) return;
+    if (!confirm("Delete this reader?")) return;
     await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
     router.refresh();
   }
@@ -40,17 +31,16 @@ export function UsersManager({ users }: { users: UserData[] }) {
       const res = await fetch("/api/admin/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({ name, email, password }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setFormError(data.error || "Failed to create user");
+        setFormError(data.error || "Failed to create reader");
         return;
       }
       setName("");
       setEmail("");
       setPassword("");
-      setRole("READER");
       setShowForm(false);
       router.refresh();
     } catch {
@@ -62,18 +52,23 @@ export function UsersManager({ users }: { users: UserData[] }) {
 
   return (
     <div>
+      <p className="text-sm text-ink-400 mb-6">
+        Readers sign up / are managed here. Create editors and authors under{" "}
+        <Link href="/admin/authors" className="text-accent hover:underline">Authors</Link>.
+      </p>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <p className="text-sm text-ink-400">{users.length} user{users.length !== 1 ? "s" : ""} registered</p>
+        <p className="text-sm text-ink-400">{users.length} reader{users.length !== 1 ? "s" : ""}</p>
         <button onClick={() => setShowForm(!showForm)} className={showForm ? "btn-ghost" : "btn-primary"}>
-          {showForm ? <><X size={14} /> Cancel</> : <><UserPlus size={14} /> Add User</>}
+          {showForm ? <><X size={14} /> Cancel</> : <><UserPlus size={14} /> Add Reader</>}
         </button>
       </div>
 
-      {/* Create User Form */}
+      {/* Create Reader Form */}
       {showForm && (
         <div className="card p-6 mb-8 animate-fade-in">
-          <h3 className="text-sm font-bold text-ink-50 mb-4">New User</h3>
+          <h3 className="text-sm font-bold text-ink-50 mb-4">New Reader</h3>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -88,28 +83,19 @@ export function UsersManager({ users }: { users: UserData[] }) {
                 <label className="label">Password *</label>
                 <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="input" placeholder="Min 6 characters" />
               </div>
-              <div>
-                <label className="label">Role</label>
-                <select value={role} onChange={(e) => setRole(e.target.value)} className="input">
-                  <option value="READER">Reader</option>
-                  <option value="AUTHOR">Author</option>
-                  <option value="EDITOR">Editor</option>
-                  <option value="ADMIN">Admin</option>
-                </select>
-              </div>
             </div>
             {formError && <p className="text-sm text-down font-medium">{formError}</p>}
             <div className="flex justify-end gap-3">
               <button type="button" onClick={() => setShowForm(false)} className="btn-ghost">Cancel</button>
               <button type="submit" disabled={saving} className="btn-primary">
-                {saving ? "Creating..." : "Create User"}
+                {saving ? "Creating..." : "Create Reader"}
               </button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Users Table */}
+      {/* Readers Table */}
       <div className="card overflow-hidden">
         <table className="w-full text-sm">
           <thead>
@@ -127,16 +113,7 @@ export function UsersManager({ users }: { users: UserData[] }) {
                 <td className="px-4 py-3 text-ink-100 font-medium">{u.name}</td>
                 <td className="px-4 py-3 text-ink-300">{u.email}</td>
                 <td className="px-4 py-3">
-                  <select
-                    value={u.role}
-                    onChange={(e) => changeRole(u.id, e.target.value)}
-                    className="input h-7 py-0 px-2 text-xs w-24"
-                  >
-                    <option value="READER">Reader</option>
-                    <option value="AUTHOR">Author</option>
-                    <option value="EDITOR">Editor</option>
-                    <option value="ADMIN">Admin</option>
-                  </select>
+                  <span className="badge">Reader</span>
                 </td>
                 <td className="px-4 py-3 text-ink-400 text-xs hidden md:table-cell">{formatDate(u.createdAt)}</td>
                 <td className="px-4 py-3 text-right">
@@ -144,6 +121,13 @@ export function UsersManager({ users }: { users: UserData[] }) {
                 </td>
               </tr>
             ))}
+            {users.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-8 text-center text-sm text-ink-400">
+                  No readers yet. Click &quot;Add Reader&quot; to create one.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

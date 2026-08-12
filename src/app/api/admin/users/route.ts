@@ -2,7 +2,6 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { json, error, unauthorized } from "@/lib/api";
 import { requireRole, hashPassword } from "@/lib/auth";
-import { isRole } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
   const auth = await requireRole("ADMIN");
@@ -14,8 +13,10 @@ export async function POST(req: NextRequest) {
   if (!name || !email || !password) return error("Name, email, and password are required");
   if (password.length < 6) return error("Password must be at least 6 characters");
 
-  const assignRole = role || "READER";
-  if (!isRole(assignRole)) return error("Invalid role");
+  // Readers panel only creates READER accounts. Editorial roles go through /api/admin/authors.
+  if (role !== undefined && role !== null && role !== "READER") {
+    return error("This endpoint only creates READER accounts. Use Authors to create editors or authors.", 400);
+  }
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) return error("Email already registered", 409);
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
   const passwordHash = await hashPassword(password);
 
   const user = await prisma.user.create({
-    data: { email, passwordHash, name, role: assignRole },
+    data: { email, passwordHash, name, role: "READER" },
     select: { id: true, name: true, email: true, role: true },
   });
 

@@ -2,7 +2,6 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { json, error, unauthorized, notFound } from "@/lib/api";
 import { requireRole } from "@/lib/auth";
-import { isRole } from "@/lib/types";
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const auth = await requireRole("ADMIN");
@@ -11,14 +10,24 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   const user = await prisma.user.findUnique({ where: { id: params.id } });
   if (!user) return notFound("User");
 
+  // Staff roles are managed outside this route; only READER accounts are editable here.
+  if (user.role !== "READER") {
+    return error("This endpoint only updates READER accounts. Editorial roles are managed under Authors.", 400);
+  }
+
   const body = await req.json();
 
-  if (body.role && !isRole(body.role)) return error("Invalid role");
+  // Role field is no longer accepted — readers stay READER; no promote/demote via Users API.
+  if (Object.prototype.hasOwnProperty.call(body, "role")) {
+    return error(
+      "Role changes are not allowed on this endpoint. Create editors and authors under Authors.",
+      400
+    );
+  }
 
   const updated = await prisma.user.update({
     where: { id: params.id },
     data: {
-      ...(body.role ? { role: body.role } : {}),
       ...(body.name ? { name: body.name } : {}),
     },
     select: { id: true, name: true, email: true, role: true },
@@ -32,6 +41,12 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   if (!auth.ok) return unauthorized();
 
   if (params.id === auth.session.uid) return error("Cannot delete yourself");
+
+  const user = await prisma.user.findUnique({ where: { id: params.id } });
+  if (!user) return notFound("User");
+  if (user.role !== "READER") {
+    return error("This endpoint only deletes READER accounts.", 400);
+  }
 
   await prisma.user.delete({ where: { id: params.id } }).catch(() => {});
   return json({ ok: true });

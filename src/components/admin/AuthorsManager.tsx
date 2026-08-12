@@ -69,7 +69,7 @@ export function AuthorsManager({ authors }: { authors: AuthorData[] }) {
           <p className="text-sm text-ink-400 mt-1">{authors.length} author{authors.length !== 1 ? "s" : ""} registered</p>
         </div>
         <button onClick={() => setShowForm(!showForm)} className={showForm ? "btn-ghost" : "btn-primary"}>
-          {showForm ? <><X size={14} /> Cancel</> : <><UserPlus size={14} /> Add Author</>}
+          {showForm ? <><X size={14} /> Cancel</> : <><UserPlus size={14} /> Add author or editor</>}
         </button>
       </div>
 
@@ -196,7 +196,7 @@ export function AuthorsManager({ authors }: { authors: AuthorData[] }) {
             {authors.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-sm text-ink-400">
-                  No authors yet. Click &quot;Add Author&quot; to create one.
+                  No authors yet. Click &quot;Add author or editor&quot; to create one.
                 </td>
               </tr>
             )}
