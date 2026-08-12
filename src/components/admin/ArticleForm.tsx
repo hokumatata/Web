@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Save } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
 import { RichEditor } from "./RichEditor";
-import { AiImageButton } from "./AiImageButton";
 
 interface Category { id: string; name: string; slug?: string }
 interface Tag { id: string; name: string }
@@ -45,8 +44,6 @@ export function ArticleForm({
   const [selectedTags, setSelectedTags] = useState<string[]>(article?.tags ?? []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const selectedCategorySlug = categories.find((c) => c.id === categoryId)?.slug;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -102,13 +99,11 @@ export function ArticleForm({
 
       <div>
         <ImageUpload value={coverImageUrl} onChange={setCoverImageUrl} label="Cover Image (article hero)" />
-        <AiImageButton kind="cover" title={title} excerpt={excerpt} categorySlug={selectedCategorySlug} onGenerated={setCoverImageUrl} />
       </div>
 
       <div>
         <ImageUpload value={thumbnailUrl} onChange={setThumbnailUrl} label="Thumbnail (card image)" />
         <p className="text-2xs text-ink-500 mt-1">Shown on listing cards. Falls back to the cover image if left empty.</p>
-        <AiImageButton kind="thumbnail" title={title} excerpt={excerpt} categorySlug={selectedCategorySlug} onGenerated={setThumbnailUrl} />
       </div>
 
       <div>

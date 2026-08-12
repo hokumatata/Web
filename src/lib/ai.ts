@@ -112,10 +112,10 @@ function buildUserPrompt(sources: ArticleSources): string {
 
     const synthesis =
       sources.reports.length > 1
-        ? `These ${sources.reports.length} reports from ${new Set(sources.reports.map((r) => r.outlet)).size} outlets cover the SAME story. Write ONE original article that synthesises them: establish what they agree on, note where they differ or add detail the others lack, and build a fuller picture than any single report gives. Do not follow the structure or phrasing of any one report, and do not write a summary of "what outlets are saying" — write the story itself.`
-        : `Write an original article on this story. Do not mirror the source's structure or phrasing.`;
+        ? `These ${sources.reports.length} reports from ${new Set(sources.reports.map((r) => r.outlet)).size} outlets cover the SAME story. Write ONE original article that synthesises them into the story itself: establish what happened, note where reports differ or add detail the others lack, and build a fuller picture than any single report gives. Do not follow the structure or phrasing of any one report. Do NOT write a roundup of "what outlets are saying", do NOT list outlets one-by-one, and do NOT append a Sources / Source reports / References section.`
+        : `Write an original article on this story. Do not mirror the source's structure or phrasing. Do NOT paste the report text, URLs, or a Sources appendix into the article.`;
 
-    parts.push(`### Source reports\n${synthesis}\n\n${reports}`);
+    parts.push(`### Source reports (INPUT ONLY — do not reproduce in the article)\n${synthesis}\n\n${reports}`);
   }
 
   add("Editor's key ideas / angle", sources.keyIdeas);
@@ -134,9 +134,16 @@ function buildUserPrompt(sources: ArticleSources): string {
     parts.push("(No sources were provided. Ask for sources — but still return valid JSON with a placeholder draft explaining that sources are required.)");
   }
 
-  return `Write a "The Forex Republic" article from the following material.\n\n${parts.join(
-    "\n\n"
-  )}\n\nReturn only the JSON object described in the system instructions.`;
+  return `Write a "The Forex Republic" article from the following material.
+
+CRITICAL — SOURCE MATERIAL IS INPUT ONLY:
+- The blocks below are research inputs for drafting. They must NOT appear in title, excerpt, or body as pasted blobs, outlet catalogues, tweet dumps, URL lists, or a Sources / Source reports / References appendix.
+- Write the story as original desk prose. Attribute briefly inline only where a fact needs it (e.g. "Barclaycard reported…"), never as a wire-summary structure.
+- JSON fields must contain only the finished article fields — never echo the raw source text back.
+
+${parts.join("\n\n")}
+
+Return only the JSON object described in the system instructions.`;
 }
 
 let client: OpenAI | null = null;
@@ -194,7 +201,8 @@ export async function generateArticleDraft(
     throw new Error("OpenAI response did not match the expected draft shape");
   }
 
-  return expandIfThin(result.data, sources, model);
+  const cleaned = sanitizeDraftFields(result.data, sources);
+  return expandIfThin(cleaned, sources, model);
 }
 
 /**
@@ -243,11 +251,91 @@ Do not add a single figure, price, date, quote or named institution that is not 
     if (!expanded.success) return draft;
 
     // Only accept the rewrite if it is actually more developed.
-    return expanded.data.body.length > draft.body.length ? expanded.data : draft;
+    const next = sanitizeDraftFields(expanded.data, sources);
+    return next.body.length > draft.body.length ? next : draft;
   } catch {
     // The first draft is still usable; a human reviews it either way.
     return draft;
   }
+}
+
+/**
+ * Strip trailing source-dump sections the model sometimes appends despite the
+ * prompt ban, and clear any field that is basically a paste of the raw inputs.
+ */
+function sanitizeDraftFields(draft: ArticleDraft, sources: ArticleSources): ArticleDraft {
+  return {
+    ...draft,
+    title: scrubEchoedSourceField(draft.title, sources),
+    excerpt: scrubEchoedSourceField(draft.excerpt, sources),
+    body: stripSourceAppendices(draft.body),
+  };
+}
+
+/** Drop common trailing Sources / Source reports / References appendices. */
+export function stripSourceAppendices(body: string): string {
+  let cleaned = body;
+
+  // Cut from the first trailing source-section heading to end-of-document.
+  const headingCut =
+    /\n#{1,3}\s*(sources?|source reports?|references?|further reading|attribution|credits?)\b[^\n]*\n[\s\S]*$/i;
+  cleaned = cleaned.replace(headingCut, "");
+
+  // Cut a horizontal-rule footer that is clearly a sources / reporting credit dump.
+  const footerCut =
+    /\n---+\s*\n+(?:\*?\s*)?(?:sources?|source reports?|references?|reporting informed by|based on reports from)\b[\s\S]*$/i;
+  cleaned = cleaned.replace(footerCut, "");
+
+  // Cut a bare "Source reports" prose block that starts late in the piece.
+  const proseCut = /\n(?:\*\*)?source reports?(?:\*\*)?\s*:?\s*\n[\s\S]*$/i;
+  cleaned = cleaned.replace(proseCut, "");
+
+  return cleaned.trimEnd();
+}
+
+/**
+ * If the model copies a large raw source blob into title/excerpt, drop that
+ * paste so the editor is not prefilled with input material. Short headlines that
+ * merely overlap a source headline are left alone (due diligence already flags
+ * near-copies).
+ */
+function scrubEchoedSourceField(value: string, sources: ArticleSources): string {
+  const trimmed = value.trim();
+  if (!trimmed) return trimmed;
+
+  // Only treat long / multi-line values as possible dumps — never blank a normal headline.
+  const looksLikeDump = trimmed.length >= 160 || trimmed.includes("\n") || /^https?:\/\//i.test(trimmed);
+  if (!looksLikeDump) return trimmed;
+
+  const blobs = collectRawSourceBlobs(sources);
+  for (const blob of blobs) {
+    if (blob.length < 40) continue;
+    if (trimmed === blob) return "";
+    const sample = blob.slice(0, Math.min(160, blob.length));
+    if (sample.length >= 40 && trimmed.includes(sample)) return "";
+  }
+  return trimmed;
+}
+
+function collectRawSourceBlobs(sources: ArticleSources): string[] {
+  const blobs: string[] = [];
+  for (const v of [
+    sources.tweets,
+    sources.releases,
+    sources.chartNotes,
+    sources.referenceText,
+    sources.referenceUrls,
+    sources.keyIdeas,
+  ]) {
+    const t = v?.trim();
+    if (t) blobs.push(t);
+  }
+  for (const r of sources.reports ?? []) {
+    if (r.summary?.trim()) blobs.push(r.summary.trim());
+    if (r.headline?.trim()) blobs.push(r.headline.trim());
+    if (r.url?.trim()) blobs.push(r.url.trim());
+  }
+  return blobs;
 }
 
 /**
@@ -406,7 +494,7 @@ export async function generateBreakingBrief(
   if (!result.success) {
     throw new Error("OpenAI response did not match the expected draft shape");
   }
-  return result.data;
+  return sanitizeDraftFields(result.data, sources);
 }
 
 /**
@@ -436,69 +524,3 @@ export function findUnsourcedFigures(body: string, sourceText: string): string[]
   return Array.from(unsourced).map((t) => `Figure "${t}" does not appear in the source material`);
 }
 
-export interface GeneratedImage {
-  /** Raw image bytes to persist (e.g. to Vercel Blob). */
-  buffer: Buffer;
-  contentType: string;
-}
-
-/**
- * Generate a single editorial image (cover or card thumbnail) from a short
- * prompt. Uses the cheapest configured image model at low quality to keep spend
- * minimal — image generation is opt-in per article, never automatic.
- *
- * Defaults: model `gpt-image-1` at `quality: "low"`, 1024x1024. Override with
- * OPENAI_IMAGE_MODEL / OPENAI_IMAGE_QUALITY / OPENAI_IMAGE_SIZE.
- */
-export async function generateArticleImage(prompt: string): Promise<GeneratedImage> {
-  const trimmed = prompt.trim();
-  if (!trimmed) throw new Error("An image prompt is required");
-
-  const openai = getClient();
-  const model = process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1";
-  const size = (process.env.OPENAI_IMAGE_SIZE ?? "1024x1024") as
-    | "1024x1024"
-    | "1024x1536"
-    | "1536x1024";
-  const quality = (process.env.OPENAI_IMAGE_QUALITY ?? "low") as
-    | "low"
-    | "medium"
-    | "high";
-
-  const response = await openai.images.generate({
-    model,
-    prompt: trimmed,
-    n: 1,
-    size,
-    // `quality` is only honored by gpt-image-* models; harmless otherwise.
-    ...(model.startsWith("gpt-image") ? { quality } : {}),
-  });
-
-  const b64 = response.data?.[0]?.b64_json;
-  if (!b64) {
-    throw new Error("OpenAI returned no image data");
-  }
-
-  return { buffer: Buffer.from(b64, "base64"), contentType: "image/png" };
-}
-
-/**
- * Build a concise, house-style image prompt from an article's core fields.
- * Kept short on purpose — image cost is per-image, not per-token.
- */
-export function buildImagePrompt(input: {
-  title: string;
-  excerpt?: string;
-  categorySlug?: string;
-  kind?: "cover" | "thumbnail";
-}): string {
-  const { title, excerpt, categorySlug, kind = "cover" } = input;
-  const topic = [title, excerpt].filter(Boolean).join(". ");
-  const subject = categorySlug ? `${categorySlug} financial markets` : "financial markets";
-  return [
-    `Professional editorial ${kind} image for a financial news article about ${subject}.`,
-    `Topic: ${topic}.`,
-    "Clean, modern, Bloomberg/CoinDesk-style photojournalistic or abstract data-driven visual.",
-    "No text, no words, no logos, no watermarks. Muted professional color palette.",
-  ].join(" ");
-}
