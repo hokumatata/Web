@@ -66,14 +66,10 @@ Open [http://localhost:3000](http://localhost:3000).
 | `NEXT_PUBLIC_SITE_NAME` | Site name displayed in UI | Yes |
 | `OPENAI_API_KEY` | OpenAI API key for AI article drafting ([create one](https://platform.openai.com/api-keys)) | For AI drafting |
 | `OPENAI_MODEL` | Override the OpenAI model used for drafting (default `gpt-4o-mini`) | No |
-| `OPENAI_IMAGE_MODEL` | Override the OpenAI image model for cover/thumbnail generation (default `gpt-image-1`) | No |
-| `OPENAI_IMAGE_QUALITY` | Image quality: `low` (default), `medium`, `high` — kept low to minimize cost | No |
-| `OPENAI_IMAGE_SIZE` | Generated image size (default `1024x1024`) | No |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob token for image uploads | Production |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob token for manual image uploads | Production |
 | `PUBLISH_API_KEY` | Shared secret for the `/api/publish` and `/api/publish/generate` automation endpoints | For automation |
 | `CRON_SECRET` | Secret Vercel Cron sends as `Authorization: Bearer …` to the scheduled feed-drafting job | For scheduled drafting |
 | `SOURCE_DRAFTS_PER_RUN` | Max drafts created per scheduled run (default `3`, capped at `10`) | No |
-| `SOURCE_GENERATE_IMAGES` | Set to `false` to disable AI cover images on scheduled drafts (default on) | No |
 | `SOURCE_AUTHOR_EMAIL` | Author the scheduled drafts are attributed to (default `masteruser@theforexrepublic.com`) | No |
 | `SOURCE_RSS_FEEDS` | Override source feeds, comma-separated `Name\|url` or `Name\|url\|beat` (default: see `src/lib/sources.ts`) | No |
 | `BREAKING_AUTOPUBLISH` | Allow the breaking wire to publish confirmed briefs live (opt-in; default off / review-only unless set to `true`) | No |
@@ -90,7 +86,7 @@ Editors can generate a full article draft from raw source material instead of wr
 1. Set `OPENAI_API_KEY` in your environment.
 2. In the admin dashboard, go to **Articles → AI Compose** (`/admin/articles/ai`).
 3. Paste any combination of sources: key ideas/angle, tweet text, official releases, chart notes, reference article text, and reference URLs.
-4. Click **Generate draft**. The model returns a title, excerpt, markdown body (in the house structure: Key Pointers, Introduction, Market Context, Analysis, Technical Analysis, Market Takeaway), a suggested category, and suggested tags.
+4. Click **Generate draft**. The model returns a title, excerpt, markdown body, a suggested category, and suggested tags. Pasted sources stay as **inputs only** — they are not copied into the saved article body.
 5. The draft is loaded into the standard article editor for review and is saved as **DRAFT** — a human always reviews before publishing.
 
 > **Note on charts:** Live TradingView (or other) chart URLs cannot be fetched or read by the model. Describe the chart in words in the *Chart notes* field, and/or upload a chart image via the cover/media upload (Vercel Blob) and reference it in the body.
@@ -102,9 +98,7 @@ Articles have two separate images:
 - **Cover image** — the large hero shown at the top of the article page.
 - **Thumbnail** — the smaller image shown on listing/section cards. If left empty, cards fall back to the cover image.
 
-Both can be uploaded (drag-and-drop or URL, stored in Vercel Blob) or **generated with AI**. In the article editor, click **Generate cover with AI** / **Generate thumbnail with AI** to create an image from the article's title/excerpt/category via `POST /api/ai/image`. Image generation is **opt-in per article** and uses the cheapest configured OpenAI image model (`gpt-image-1` at `low` quality by default) to avoid overspending.
-
-> **Required env vars:** AI image generation needs `OPENAI_API_KEY` (optionally overridden by `OPENAI_IMAGE_MODEL`, `OPENAI_IMAGE_QUALITY`, and `OPENAI_IMAGE_SIZE`), and storing the resulting image in production needs `BLOB_READ_WRITE_TOKEN` (Vercel Blob). If either is missing, the "Generate … with AI" action fails — set both in your Vercel project's environment. See the [environment variables](#environment-variables) table for details.
+Upload covers and thumbnails manually (drag-and-drop or URL) via the article editor; files are stored in Vercel Blob (`BLOB_READ_WRITE_TOKEN` in production). **AI image generation has been removed** — there is no Generate-with-AI button and `/api/ai/image` is gone.
 
 ### Automation endpoint
 
@@ -112,7 +106,7 @@ Both can be uploaded (drag-and-drop or URL, stored in Vercel Blob) or **generate
 
 ### Scheduled drafting from news feeds
 
-`GET /api/cron/draft-from-feeds` runs on a schedule (Vercel Cron, see `vercel.json` — daily) and drafts original, in-depth, house-style articles from public news feeds. It reads only the **public RSS/Atom headlines and short summaries** of the configured publications — never their full article text — and uses them as *signals* to write original pieces. Each draft also gets an **AI-generated cover image** (uploaded to Vercel Blob); set `SOURCE_GENERATE_IMAGES=false` to disable.
+`GET /api/cron/draft-from-feeds` runs on a schedule (Vercel Cron, see `vercel.json` — daily) and drafts original, in-depth, house-style articles from public news feeds. It reads only the **public RSS/Atom headlines and short summaries** of the configured publications — never their full article text — and uses them as *signals* to write original pieces. Covers are left empty for editors to upload manually; scheduled AI cover generation has been removed.
 
 **The pipeline, per run:**
 
@@ -127,7 +121,7 @@ Both can be uploaded (drag-and-drop or URL, stored in Vercel Blob) or **generate
 
 **Due diligence + approval workflow:** every generated article is saved with status **`REVIEW`** (not `DRAFT`/`PUBLISHED`) and runs through an automated due-diligence pass that compares the draft against its source material — checking for fabricated figures/quotes, unhedged claims, and missing attribution — and stores a score (0–100), a verdict (`pass`/`review`/`flag`), and specific flags. These land in **Admin → Review Queue**, where a human sees the due-diligence assessment alongside the draft and clicks **Approve & publish**, **Keep as draft** (to edit first), or **Reject**. Nothing is ever auto-published. Set an optional `SLACK_WEBHOOK_URL` to get pinged when new drafts await review.
 
-**Attribution.** Published articles credit outlets **by name in the prose and in a footer credit line**, with no outbound link to the source article. Source URLs are kept for the editor: the Review Queue lists every item that fed each story, linked, and they stay in the `SourceItem` table as an audit trail.
+**Attribution.** Published articles credit outlets **inline in the prose** where a fact needs it, with no Sources appendix and no outbound link to the source article. Source URLs are kept for the editor: the Review Queue lists every item that fed each story, linked, and they stay in the `SourceItem` table as an audit trail.
 
 **Source availability:** all ten default feeds were verified server-fetchable. **FXStreet** sits behind a Cloudflare bot challenge (returns 403 to servers) and **Bloomberg** has no free feed and is paywalled, so neither can be fetched automatically. For those, paste the occasional headline/blurb via **AI Compose** or `/api/publish/generate`.
 
@@ -163,11 +157,10 @@ Check the gates with `npx tsx scripts/breaking-dry-run.ts`: a fixture suite of p
 **Dry runs.** `npx tsx scripts/newsroom-dry-run.ts` fetches the live feeds and prints per-feed counts, cluster counts, the scored queue with story types and the rejected tail — no model calls, no writes. `npx tsx scripts/newsroom-sample.ts [n]` goes further and actually writes sample articles across story types (needs `OPENAI_API_KEY`), reporting word count, headings, style violations, unverified price levels and the due-diligence verdict for each. Use both after changing prompts or scoring.
 
 - Every result is saved as **`REVIEW`** and awaits explicit human approval in the Review Queue — nothing is ever auto-published.
-- Cost is bounded: clustering, scoring and routing are local and free; at most `SOURCE_DRAFTS_PER_RUN` articles per run (a cheap `gpt-4o-mini` draft call, a due-diligence call, and one low-quality cover image each), and N outlets on one event cost one article rather than N. Items rejected by the newsworthiness gate are recorded as seen so they aren't reconsidered; items that cleared the gate but didn't fit the run budget stay eligible for the next run.
-- Cover images need `OPENAI_API_KEY` and `BLOB_READ_WRITE_TOKEN` set. Image generation is best-effort — if it fails, the article is still saved for review with an empty cover. Set `SOURCE_GENERATE_IMAGES=false` to turn it off.
+- Cost is bounded: clustering, scoring and routing are local and free; at most `SOURCE_DRAFTS_PER_RUN` articles per run (a cheap `gpt-4o-mini` draft call plus a due-diligence call), and N outlets on one event cost one article rather than N. Items rejected by the newsworthiness gate are recorded as seen so they aren't reconsidered; items that cleared the gate but didn't fit the run budget stay eligible for the next run.
 - Dedup is tracked in the `SourceItem` table (keyed by source link).
 - Set `CRON_SECRET` in the environment; Vercel Cron sends it as `Authorization: Bearer <CRON_SECRET>`. You can trigger a run manually with the `x-api-key: <PUBLISH_API_KEY>` header. Adjust the Vercel cadence by editing the `schedule` in `vercel.json`. Note: Vercel **Hobby** only allows one cron run per day.
-- **Running more often than daily (free):** Vercel Hobby caps cron at daily, so `.github/workflows/journalist-cron.yml` runs a GitHub Actions schedule every 3 hours that calls the endpoint with the `x-api-key` header. Add repo secrets `SITE_URL` (your deployed base URL) and `PUBLISH_API_KEY` (matching the Vercel env var). If **Vercel Deployment Protection** is enabled, the endpoint redirects server-to-server calls to a login page (HTTP 302) — enable Vercel → Settings → Deployment Protection → **Protection Bypass for Automation** and add its secret as the repo secret `VERCEL_AUTOMATION_BYPASS_SECRET` (the workflow forwards it as `x-vercel-protection-bypass`), or turn protection off for Production. Scheduled workflows run only from the default branch and can be delayed a few minutes; you can also trigger it manually from the Actions tab. On Hobby the serverless function is capped at ~60s, so with image generation you may want `SOURCE_DRAFTS_PER_RUN=1` or `2` to ensure each run finishes.
+- **Running more often than daily (free):** Vercel Hobby caps cron at daily, so `.github/workflows/journalist-cron.yml` runs a GitHub Actions schedule every 3 hours that calls the endpoint with the `x-api-key` header. Add repo secrets `SITE_URL` (your deployed base URL) and `PUBLISH_API_KEY` (matching the Vercel env var). If **Vercel Deployment Protection** is enabled, the endpoint redirects server-to-server calls to a login page (HTTP 302) — enable Vercel → Settings → Deployment Protection → **Protection Bypass for Automation** and add its secret as the repo secret `VERCEL_AUTOMATION_BYPASS_SECRET` (the workflow forwards it as `x-vercel-protection-bypass`), or turn protection off for Production. Scheduled workflows run only from the default branch and can be delayed a few minutes; you can also trigger it manually from the Actions tab. On Hobby the serverless function is capped at ~60s, so keep `SOURCE_DRAFTS_PER_RUN` modest (`1` or `2`) if runs time out.
 
 ## Seeded Accounts
 

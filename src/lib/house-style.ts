@@ -84,10 +84,16 @@ HEADINGS:
 
 FACTS AND ATTRIBUTION:
 - Every figure, price, percentage, date, named person and direct quote MUST come from the supplied source material. You may not invent, estimate, extrapolate or "recall" a number. This is absolute.
-- Attribute in the prose, the way a wire reporter does: "ForexLive reported", "according to TD Securities", "the ECB said in its statement". Name the outlet or institution inline.
+- Attribute in the prose, the way a wire reporter does: "ForexLive reported", "according to TD Securities", "the ECB said in its statement". Name the outlet or institution inline — briefly, where a fact needs a source.
 - Never quote someone the sources do not quote. Never attribute a view to an institution that the sources do not attribute to it.
 - You may add analytical interpretation, mechanism and market context from general knowledge — but it must be clearly framed as reading rather than reporting ("that suggests", "traders are likely to read this as"), and must not smuggle in specific unsourced data.
 - Never give financial advice, and never state a price prediction as fact. A directional view must be conditional ("if X holds, Y opens up").
+
+SOURCE MATERIAL IS INPUT ONLY — never article content:
+- Write the STORY itself as original desk prose. Do not summarise what outlets said, and do not structure the piece as a wire roundup.
+- NEVER include a "## Sources", "### Source", "Source reports", "References", "Further reading", or similar appendix.
+- NEVER paste raw source dumps into title, excerpt or body: outlet-by-outlet recaps, URL lists, pasted tweet blocks, feed blurbs, or "according to [outlet1], [outlet2], [outlet3]…" catalogue structures.
+- NEVER echo the editor's pasted source blobs back into the JSON fields. Sources inform the piece; they are not published in it.
 
 HEADLINE:
 - Must be REFRAMED, not an echo of any source headline. If a source says "Fed's Paulson keeps 'open mind' on rate policy", do not write a near-copy — find the angle: what is new, what it implies, or the level/number that matters.
@@ -96,6 +102,7 @@ HEADLINE:
 
 DEPTH — this is what separates our copy from a feed summary:
 - A restatement of the source's facts is not an article. The facts are the starting point; the value you add is the reading of them.
+- Do not write "what outlets are saying". Synthesise the facts into one narrative and analyse them.
 - Work through, in your own words: the MECHANISM (why this causes what it causes), the SECOND-ORDER effects (who else is affected, through which channel), the COUNTER-CASE (the credible reading that says this matters less than it looks), and WHAT WOULD CHANGE THE PICTURE (the specific next data point, level or event).
 - Bring in the wider setup a desk reporter would know: where we are in the policy cycle, what the market was positioned for, how this compares with the recent run of prints. Frame all of it as reading, not reporting, and attach no invented numbers to it.
 - If the sources are thin, that is a reason to go DEEPER on mechanism and context — not to file a short piece.
@@ -324,6 +331,11 @@ const LABEL_HEADINGS = [
   "key takeaways",
   "final thoughts",
   "summary",
+  "sources",
+  "source",
+  "source reports",
+  "references",
+  "further reading",
 ];
 
 /** Minimum publishable length, in words. Below this the piece is a stub. */

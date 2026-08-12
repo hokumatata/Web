@@ -20,7 +20,6 @@ import {
 } from "@/lib/breaking";
 import { getConfiguredFeeds, fetchFeedItems } from "@/lib/sources";
 import { loadCalendarTimeline } from "@/lib/econ-calendar-store";
-import { generateCoverBestEffort } from "@/lib/cover-image";
 import { revalidateTag } from "next/cache";
 
 export const runtime = "nodejs";
@@ -155,19 +154,13 @@ async function fileBrief(
 
   const publish = autopublish && holdReasons.length === 0;
 
-  // A cover is worth a couple of seconds on a piece that stays on the front
-  // page; it is never worth delaying one that is already late.
-  const coverImageUrl = publish
-    ? ""
-    : await generateCoverBestEffort(draft.title, draft.excerpt, slug, "breaking");
-
   const article = await prisma.article.create({
     data: {
       slug: slugify(draft.title) + "-" + Date.now().toString(36),
       title: draft.title,
       excerpt: draft.excerpt,
       body: draft.body + (publish ? DEVELOPING_NOTE : ""),
-      coverImageUrl,
+      coverImageUrl: "",
       thumbnailUrl: null,
       categoryId: cat.id,
       authorId,

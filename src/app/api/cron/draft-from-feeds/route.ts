@@ -20,13 +20,12 @@ import {
 import { notifyReviewQueue } from "@/lib/notify";
 import { getConfiguredFeeds, fetchFeedItems, type Beat } from "@/lib/sources";
 import { syncEconCalendar } from "@/lib/econ-calendar-store";
-import { generateCoverBestEffort } from "@/lib/cover-image";
 import { revalidateTag } from "next/cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-// Image generation adds time per draft; allow the longer window (Vercel caps
-// this to the project's plan limit — up to 300s on Pro).
+// Drafting + due diligence can exceed the default; allow the longer window
+// (Vercel caps this to the project's plan limit — up to 300s on Pro).
 export const maxDuration = 300;
 
 /**
@@ -176,23 +175,17 @@ async function draftFromCluster(
     }
   }
 
-  const attribution = buildAttribution(cluster);
   const articleSlug = slugify(draft.title) + "-" + Date.now().toString(36);
-
-  const coverImageUrl = await generateCoverBestEffort(
-    draft.title,
-    draft.excerpt,
-    slug,
-    "draft-from-feeds"
-  );
 
   const article = await prisma.article.create({
     data: {
       slug: articleSlug,
       title: draft.title,
       excerpt: draft.excerpt,
-      body: draft.body + attribution,
-      coverImageUrl,
+      // Body is desk prose only — outlet credits stay in SourceItem / Review Queue,
+      // not appended into the article body as a sources dump.
+      body: draft.body,
+      coverImageUrl: "",
       thumbnailUrl: null,
       categoryId: cat.id,
       authorId,
@@ -213,16 +206,6 @@ async function draftFromCluster(
   }
 
   return { id: article.id, title: draft.title, dueDiligence };
-}
-
-/**
- * Credit the outlets whose reporting informed the piece, by name and without
- * linking away to them. Facts are already attributed inline in the prose; this
- * footer is the standing credit line.
- */
-function buildAttribution(cluster: StoryCluster): string {
-  const outlets = cluster.sources.join(", ");
-  return `\n\n---\n*Reporting informed by ${outlets}. Written and fact-checked with AI assistance, reviewed by a human editor before publication.*`;
 }
 
 async function run(req: NextRequest) {

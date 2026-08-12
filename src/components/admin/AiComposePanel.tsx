@@ -125,7 +125,7 @@ export function AiComposePanel({
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-sm text-ink-200">
               <Sparkles size={15} className="text-accent" />
-              AI draft generated — review and edit before saving. It will be saved as a <strong>DRAFT</strong>.
+              AI draft generated — review and edit before saving. Source paste stays out of the body; it will be saved as a <strong>DRAFT</strong>.
             </div>
             <button type="button" onClick={() => setDraft(null)} className="btn-ghost h-8 px-3 text-xs">
               <ArrowLeft size={13} /> Back to sources
@@ -158,7 +158,7 @@ export function AiComposePanel({
   return (
     <form onSubmit={onGenerate} className="space-y-5">
       <p className="text-sm text-ink-300">
-        Paste your raw sources below. The model drafts a structured article in The Forex Republic&apos;s house style, then drops you into the editor to review before saving.
+        Paste raw sources below as <strong className="font-medium text-ink-200">generation inputs only</strong> — they are not copied into the article. The model drafts original desk prose in house style, then opens the editor so you can review before saving. Attach covers with the manual image upload after the draft is generated.
       </p>
       {SOURCE_FIELDS.map((f) => (
         <div key={f.key}>
