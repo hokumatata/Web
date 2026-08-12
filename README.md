@@ -76,7 +76,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `SOURCE_GENERATE_IMAGES` | Set to `false` to disable AI cover images on scheduled drafts (default on) | No |
 | `SOURCE_AUTHOR_EMAIL` | Author the scheduled drafts are attributed to (default `masteruser@theforexrepublic.com`) | No |
 | `SOURCE_RSS_FEEDS` | Override source feeds, comma-separated `Name\|url` or `Name\|url\|beat` (default: see `src/lib/sources.ts`) | No |
-| `BREAKING_AUTOPUBLISH` | Allow the breaking wire to publish confirmed briefs live (default `true`; `false` files them to review) | No |
+| `BREAKING_AUTOPUBLISH` | Allow the breaking wire to publish confirmed briefs live (opt-in; default off / review-only unless set to `true`) | No |
 | `BREAKING_PER_RUN` | Max briefs per breaking run (default `2`, capped at `5`) | No |
 | `BREAKING_MAX_AGE_MINUTES` | How recent an item must be to count as breaking (default `90`) | No |
 | `BREAKING_MIN_SCORE` | Newsworthiness needed to publish unreviewed (default `70`) | No |

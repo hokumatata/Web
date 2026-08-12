@@ -1,8 +1,22 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { json, error, unauthorized } from "@/lib/api";
+import { json, error, unauthorized, forbidden } from "@/lib/api";
 import { requireRole } from "@/lib/auth";
+import { roleAtLeast } from "@/lib/types";
 import { slugify } from "@/lib/utils";
+
+const PUBLIC_STATUSES = new Set(["PUBLISHED"]);
+const STAFF_STATUSES = new Set(["PUBLISHED", "DRAFT", "REVIEW"]);
+
+/** Drop staff-only fields from payloads returned to anonymous/public readers. */
+function toPublicArticle<T extends Record<string, unknown>>(article: T) {
+  const { dueDiligence: _dd, ...rest } = article;
+  if (rest.author && typeof rest.author === "object" && rest.author !== null) {
+    const { email: _email, ...authorRest } = rest.author as Record<string, unknown>;
+    return { ...rest, author: authorRest };
+  }
+  return rest;
+}
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -11,8 +25,27 @@ export async function GET(req: NextRequest) {
   const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10));
   const perPage = Math.min(50, parseInt(url.searchParams.get("perPage") ?? "20", 10));
 
+  if (!STAFF_STATUSES.has(status)) {
+    return error("Invalid status", 400);
+  }
+
+  const isPublic = PUBLIC_STATUSES.has(status);
+  let authorIdFilter: string | undefined;
+
+  if (!isPublic) {
+    const auth = await requireRole("AUTHOR");
+    if (!auth.ok) {
+      return auth.reason === "forbidden" ? forbidden() : unauthorized();
+    }
+    // Authors only see their own unpublished work; editors+ see all.
+    if (!roleAtLeast(auth.session.role, "EDITOR")) {
+      authorIdFilter = auth.session.uid;
+    }
+  }
+
   const where = {
     status,
+    ...(authorIdFilter ? { authorId: authorIdFilter } : {}),
     ...(category ? { category: { slug: category } } : {}),
   };
 
@@ -24,11 +57,20 @@ export async function GET(req: NextRequest) {
       take: perPage,
       include: {
         category: { select: { slug: true, name: true } },
-        author: { select: { name: true } },
+        author: { select: isPublic ? { name: true } : { name: true, email: true } },
       },
     }),
     prisma.article.count({ where }),
   ]);
+
+  if (isPublic) {
+    return json({
+      articles: articles.map((a) => toPublicArticle(a as unknown as Record<string, unknown>)),
+      total,
+      page,
+      perPage,
+    });
+  }
 
   return json({ articles, total, page, perPage });
 }

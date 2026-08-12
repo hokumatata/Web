@@ -7,7 +7,7 @@ name: Journalist agent (breaking wire)
 # The endpoint itself decides what may go live. It publishes only when every
 # gate passes (settled language, a concrete figure, first-party or two-outlet
 # confirmation, due diligence) and otherwise files the piece to the review
-# queue. Set BREAKING_AUTOPUBLISH=false in Vercel to force review-only.
+# queue. Autopublish is off unless BREAKING_AUTOPUBLISH=true in Vercel.
 #
 # Required repository secrets (shared with journalist-cron.yml):
 #   SITE_URL        e.g. https://your-app.vercel.app  (no trailing slash)
