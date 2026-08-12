@@ -18,6 +18,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/macro",
     "/about",
     "/contact",
+    "/privacy",
+    "/terms",
+    "/cookies",
+    "/disclaimer",
   ].map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified: new Date(),
@@ -34,7 +38,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         take: 5000,
       })
       .catch(() => []),
-    prisma.category.findMany({ select: { slug: true } }).catch(() => []),
+    // Exclude empty hubs until they have published articles.
+    prisma.category
+      .findMany({
+        where: { articles: { some: { status: "PUBLISHED" } } },
+        select: { slug: true },
+      })
+      .catch(() => []),
   ]);
 
   const articleRoutes = articles.map((a) => ({

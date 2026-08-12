@@ -14,11 +14,12 @@ function escapeXml(s: string): string {
 }
 
 export async function GET() {
-  // Google News sitemap: only articles published in the last 48 hours.
-  const since = new Date(Date.now() - 48 * 60 * 60 * 1000);
+  // Early-stage full coverage for discovery: include all PUBLISHED articles with
+  // a non-null publishedAt (newest first, up to 1000). Can tighten to a 48h
+  // window later when volume grows.
   const articles = await prisma.article
     .findMany({
-      where: { status: "PUBLISHED", publishedAt: { gte: since } },
+      where: { status: "PUBLISHED", publishedAt: { not: null } },
       select: { slug: true, title: true, publishedAt: true, category: { select: { name: true } } },
       orderBy: { publishedAt: "desc" },
       take: 1000,

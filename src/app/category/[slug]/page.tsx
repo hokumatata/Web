@@ -1,12 +1,24 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { ArticleCard, type ArticleCardData } from "@/components/news/ArticleCard";
+import { absUrl } from "@/lib/seo";
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const cat = await prisma.category.findUnique({ where: { slug: params.slug } });
   if (!cat) return { title: "Not found" };
-  return { title: cat.name, description: cat.description };
+
+  const publishedCount = await prisma.article.count({
+    where: { status: "PUBLISHED", categoryId: cat.id },
+  });
+
+  return {
+    title: cat.name,
+    description: cat.description ?? `${cat.name} coverage on The Forex Republic.`,
+    alternates: { canonical: absUrl(`/category/${cat.slug}`) },
+    robots: publishedCount === 0 ? { index: false, follow: true } : { index: true, follow: true },
+  };
 }
 
 const INCLUDE = {

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
@@ -6,8 +7,22 @@ import { NewsletterInline } from "@/components/site/NewsletterInline";
 import { NewsWire } from "@/components/site/NewsWire";
 import type { HeadlineItem } from "@/app/api/headlines/route";
 import { ArrowRight } from "lucide-react";
+import { absUrl, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: `${SITE_NAME} — Markets news and analysis`,
+  description:
+    "Live markets news and analysis across forex, crypto, equities, and macro. Professional coverage for traders and operators.",
+  alternates: { canonical: absUrl("/") },
+  openGraph: {
+    title: `${SITE_NAME} — Markets news and analysis`,
+    description:
+      "Live markets news and analysis across forex, crypto, equities, and macro.",
+    url: SITE_URL,
+  },
+};
 
 const INCLUDE = {
   category: { select: { slug: true, name: true } },
@@ -86,6 +101,12 @@ export default async function HomePage() {
     <div className="animate-fade-in">
       {/* Hero + Latest News Sidebar */}
       <div className="container-tw py-8">
+        <header className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-ink-50 tracking-tight">
+            {SITE_NAME}
+          </h1>
+          <p className="mt-1 text-sm text-ink-300">Markets news and analysis</p>
+        </header>
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Lead Story + Sub-leads */}
           <div className="lg:col-span-8">

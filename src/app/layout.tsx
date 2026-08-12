@@ -7,13 +7,11 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { ThemeProvider } from "@/components/site/ThemeProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { organizationSchema, websiteSchema } from "@/lib/seo";
+import { organizationSchema, websiteSchema, SITE_NAME, SITE_URL } from "@/lib/seo";
 import { getSession } from "@/lib/auth";
 
-const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "The Forex Republic";
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://theforexrepublic.com";
-
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "The Forex Republic — Live Crypto, Forex & Macro Newsroom",
   description:
     "Professional-grade market intelligence. Live data, expert analysis, and breaking news across crypto, forex, equities, and macro.",
