@@ -2,14 +2,22 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { roleAtLeast } from "@/lib/types";
+import { isAdmin, isEditor, roleAtLeast } from "@/lib/types";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { LayoutDashboard, FileText, Tags, MessageSquare, Users, Mail, Activity, Settings, UserPlus, ClipboardCheck } from "lucide-react";
 
-const NAV = [
+type NavItem = {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  /** When set, only these exact roles see the item (ADMIN must not see editorial publish surfaces). */
+  roles?: Array<"ADMIN" | "EDITOR">;
+};
+
+const NAV: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/articles", label: "Articles", icon: FileText },
-  { href: "/admin/articles/review", label: "Review Queue", icon: ClipboardCheck },
+  { href: "/admin/articles", label: "Articles", icon: FileText, roles: ["EDITOR"] },
+  { href: "/admin/articles/review", label: "Review Queue", icon: ClipboardCheck, roles: ["EDITOR"] },
   { href: "/admin/authors", label: "Authors", icon: UserPlus },
   { href: "/admin/categories", label: "Categories", icon: Tags },
   { href: "/admin/tags", label: "Tags", icon: Tags },
@@ -24,14 +32,24 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const session = await getSession();
   if (!session || !roleAtLeast(session.role, "EDITOR")) redirect("/login");
 
-  const reviewCount = await prisma.article.count({ where: { status: "REVIEW" } });
+  const showReviewCount = isEditor(session.role);
+  const reviewCount = showReviewCount
+    ? await prisma.article.count({ where: { status: "REVIEW" } })
+    : 0;
+
+  const nav = NAV.filter((n) => {
+    if (!n.roles) return true;
+    return n.roles.includes(session.role as "ADMIN" | "EDITOR");
+  });
 
   return (
     <div className="container-tw py-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <LayoutDashboard size={20} className="text-accent" />
-          <h1 className="text-xl font-bold text-ink-50">Admin</h1>
+          <h1 className="text-xl font-bold text-ink-50">
+            {isAdmin(session.role) ? "Site ops" : "Admin"}
+          </h1>
           <span className="badge">{session.role}</span>
         </div>
         <LogoutButton />
@@ -39,7 +57,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <div className="flex flex-col lg:flex-row gap-6">
         <nav className="lg:w-52 flex-shrink-0">
           <ul className="flex lg:flex-col gap-0.5 overflow-x-auto lg:overflow-visible">
-            {NAV.map((n) => (
+            {nav.map((n) => (
               <li key={n.href}>
                 <Link
                   href={n.href}

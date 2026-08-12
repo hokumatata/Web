@@ -1,8 +1,8 @@
 import { getSession } from "@/lib/auth";
-import { roleAtLeast } from "@/lib/types";
+import { canPublish, isAuthor, isEditor } from "@/lib/types";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
-import { Bookmark, Eye, Settings, FileText, Plus, TrendingUp } from "lucide-react";
+import { Bookmark, Eye, Settings, FileText, Plus, TrendingUp, ClipboardCheck } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
 
 export const metadata = { title: "Dashboard" };
@@ -11,7 +11,7 @@ export default async function DashboardPage() {
   const session = await getSession();
   if (!session) return null;
 
-  const isAuthor = roleAtLeast(session.role, "AUTHOR");
+  const showWriting = isAuthor(session.role) || isEditor(session.role);
 
   const [savedCount, watchlistCount] = await Promise.all([
     prisma.savedArticle.count({ where: { userId: session.uid } }),
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   let draftCount = 0;
   let totalViews = 0;
 
-  if (isAuthor) {
+  if (showWriting) {
     authorArticles = await prisma.article.findMany({
       where: { authorId: session.uid },
       orderBy: { updatedAt: "desc" },
@@ -51,6 +51,22 @@ export default async function DashboardPage() {
     <div className="animate-fade-in">
       <h2 className="text-xl font-bold text-ink-50 mb-6">Your Dashboard</h2>
 
+      {(canPublish(session.role) || isEditor(session.role)) && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          <Link href="/dashboard/articles/new" className="btn-primary text-xs h-8">
+            <Plus size={14} /> Write Article
+          </Link>
+          <Link href="/dashboard/articles" className="btn-ghost text-xs h-8">
+            <FileText size={14} /> My Articles
+          </Link>
+          {isEditor(session.role) && (
+            <Link href="/admin/articles/review" className="btn-ghost text-xs h-8">
+              <ClipboardCheck size={14} /> Review Queue
+            </Link>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {cards.map((c) => (
           <Link key={c.href} href={c.href} className="card-hover p-5 group">
@@ -61,7 +77,7 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {isAuthor && (
+      {showWriting && (
         <div className="mt-8">
           <div className="section-title">
             <h2 className="flex items-center gap-2">

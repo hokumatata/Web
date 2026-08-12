@@ -93,6 +93,7 @@ SOURCE MATERIAL IS INPUT ONLY — never article content:
 - Write the STORY itself as original desk prose. Do not summarise what outlets said, and do not structure the piece as a wire roundup.
 - NEVER include a "## Sources", "### Source", "Source reports", "References", "Further reading", or similar appendix.
 - NEVER paste raw source dumps into title, excerpt or body: outlet-by-outlet recaps, URL lists, pasted tweet blocks, feed blurbs, or "according to [outlet1], [outlet2], [outlet3]…" catalogue structures.
+- NEVER end with "reporting informed by…", "based on reports from…", or any multi-outlet credit footer.
 - NEVER echo the editor's pasted source blobs back into the JSON fields. Sources inform the piece; they are not published in it.
 
 HEADLINE:
@@ -108,11 +109,19 @@ DEPTH — this is what separates our copy from a feed summary:
 - If the sources are thin, that is a reason to go DEEPER on mechanism and context — not to file a short piece.
 
 LENGTH AND STRUCTURE — these are hard requirements, count them before you finish:
-- An opening section before the first heading: 2 to 3 paragraphs.
-- Then THREE to FOUR "## " sections.
+- Desk shape: sharp lede → two to four claim-headed sections → short close. Not a wire-roundup skeleton.
+- An opening section before the first heading: 2 to 3 paragraphs (the lede).
+- Then TWO to FOUR "## " sections headed as specific claims about THIS story.
 - Every section: at least 3 paragraphs. Every paragraph: at least 3 sentences, except where you use a deliberate one-sentence paragraph for emphasis (at most two of those in the whole piece).
+- Close briefly in the final section or a short unheaded close — do not end with takeaways lists, outlet catalogues, or credit dumps.
 - That lands at roughly 700 to 1,000 words. A piece under 550 words has not met the requirements above and is not publishable.
-- Reach the length through the analytical layers above, never by repeating a fact you have already stated, restating the headline, or padding with generalities. If you find yourself saying the same thing twice, replace the second instance with the counter-case or the mechanism.`;
+- Reach the length through the analytical layers above, never by repeating a fact you have already stated, restating the headline, or padding with generalities. If you find yourself saying the same thing twice, replace the second instance with the counter-case or the mechanism.
+
+END MATTER — banned from the body entirely:
+- Do NOT append Sources, Source reports, References, Further reading, Attribution, or Credits sections.
+- Do NOT write "reporting informed by…", "based on reports from…", "coverage informed by…", or any multi-outlet list as a footer.
+- Inline attribution stays sparingly where a fact needs it ("according to the ECB"). Never as a closing catalogue.
+- Do NOT invent an AI-assistance or human-review disclosure in the JSON body — the site renders that after the article.`;
 
 interface StoryTypeSpec {
   /** Human label used in the prompt and the review queue. */
@@ -336,6 +345,8 @@ const LABEL_HEADINGS = [
   "source reports",
   "references",
   "further reading",
+  "attribution",
+  "credits",
 ];
 
 /** Minimum publishable length, in words. Below this the piece is a stub. */
@@ -352,6 +363,14 @@ export function findStyleViolations(body: string): string[] {
 
   for (const phrase of BANNED_PHRASES) {
     if (lower.includes(phrase)) violations.push(`Banned phrase: "${phrase}"`);
+  }
+
+  if (
+    /\breporting informed by\b/i.test(body) ||
+    /\bbased on reports from\b/i.test(body) ||
+    /\bcoverage informed by\b/i.test(body)
+  ) {
+    violations.push("Outlet credit footer / catalogue in body");
   }
 
   const headings: string[] = [];

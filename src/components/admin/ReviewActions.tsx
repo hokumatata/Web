@@ -4,9 +4,24 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Trash2, FileText } from "lucide-react";
 
-export function ReviewActions({ id }: { id: string }) {
+export function ReviewActions({
+  id,
+  canPublish = true,
+}: {
+  id: string;
+  /** When false (e.g. ADMIN), hide publish/reject controls. */
+  canPublish?: boolean;
+}) {
   const router = useRouter();
   const [busy, setBusy] = useState<null | "approve" | "draft" | "reject">(null);
+
+  if (!canPublish) {
+    return (
+      <p className="text-2xs text-ink-500">
+        Publishing is for editors and authors — ops admins cannot approve.
+      </p>
+    );
+  }
 
   async function approve() {
     if (!confirm("Approve and publish this article now?")) return;

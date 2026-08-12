@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
-import { roleAtLeast } from "@/lib/types";
+import { canPublish, isAuthor, isEditor } from "@/lib/types";
 import { prisma } from "@/lib/db";
 import { timeAgo } from "@/lib/utils";
 import { Plus, Edit, Eye, FileText } from "lucide-react";
@@ -11,7 +11,10 @@ export const metadata = { title: "My Articles" };
 
 export default async function AuthorArticlesPage() {
   const session = await getSession();
-  if (!session || !roleAtLeast(session.role, "AUTHOR")) redirect("/login");
+  if (!session || (!isAuthor(session.role) && !isEditor(session.role))) redirect("/login");
+
+  const allowPublish = canPublish(session.role);
+  const showReviewLink = isEditor(session.role);
 
   const articles = await prisma.article.findMany({
     where: { authorId: session.uid },
@@ -90,7 +93,13 @@ export default async function AuthorArticlesPage() {
                         <Link href={`/article/${a.slug}`} className="btn-ghost h-7 px-2"><Eye size={13} /></Link>
                       )}
                       <Link href={`/dashboard/articles/${a.id}/edit`} className="btn-ghost h-7 px-2"><Edit size={13} /></Link>
-                      <ArticleRowActions id={a.id} status={a.status} />
+                      <ArticleRowActions
+                        id={a.id}
+                        status={a.status}
+                        canPublish={allowPublish}
+                        canDelete={allowPublish}
+                        showReviewLink={showReviewLink}
+                      />
                     </div>
                   </td>
                 </tr>

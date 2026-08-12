@@ -6,6 +6,7 @@ import {
   findStyleViolations,
   type StoryType,
 } from "@/lib/house-style";
+import { stripCreditFooters } from "@/lib/article-body";
 
 /**
  * OpenAI-backed article drafting for The Forex Republic.
@@ -112,8 +113,8 @@ function buildUserPrompt(sources: ArticleSources): string {
 
     const synthesis =
       sources.reports.length > 1
-        ? `These ${sources.reports.length} reports from ${new Set(sources.reports.map((r) => r.outlet)).size} outlets cover the SAME story. Write ONE original article that synthesises them into the story itself: establish what happened, note where reports differ or add detail the others lack, and build a fuller picture than any single report gives. Do not follow the structure or phrasing of any one report. Do NOT write a roundup of "what outlets are saying", do NOT list outlets one-by-one, and do NOT append a Sources / Source reports / References section.`
-        : `Write an original article on this story. Do not mirror the source's structure or phrasing. Do NOT paste the report text, URLs, or a Sources appendix into the article.`;
+        ? `These ${sources.reports.length} reports from ${new Set(sources.reports.map((r) => r.outlet)).size} outlets cover the SAME story. Write ONE original article that synthesises them into the story itself: establish what happened, note where reports differ or add detail the others lack, and build a fuller picture than any single report gives. Do not follow the structure or phrasing of any one report. Do NOT write a roundup of "what outlets are saying", do NOT list outlets one-by-one, do NOT end with "reporting informed by…" / "based on reports from…", and do NOT append a Sources / Source reports / References / Further reading section. The page adds its own AI+human disclosure — do not invent one.`
+        : `Write an original article on this story. Do not mirror the source's structure or phrasing. Do NOT paste the report text, URLs, a Sources appendix, or a "reporting informed by…" credit line into the article. The page adds its own AI+human disclosure — do not invent one.`;
 
     parts.push(`### Source reports (INPUT ONLY — do not reproduce in the article)\n${synthesis}\n\n${reports}`);
   }
@@ -138,7 +139,9 @@ function buildUserPrompt(sources: ArticleSources): string {
 
 CRITICAL — SOURCE MATERIAL IS INPUT ONLY:
 - The blocks below are research inputs for drafting. They must NOT appear in title, excerpt, or body as pasted blobs, outlet catalogues, tweet dumps, URL lists, or a Sources / Source reports / References appendix.
-- Write the story as original desk prose. Attribute briefly inline only where a fact needs it (e.g. "Barclaycard reported…"), never as a wire-summary structure.
+- Write the story as original desk prose: sharp lede → 2–4 claim-headed sections → short close. Not a wire roundup.
+- Attribute briefly inline only where a fact needs it (e.g. "according to the ECB"), never as a closing catalogue of outlets.
+- Never write "reporting informed by…", "based on reports from…", or any multi-outlet credit footer. Do not invent an AI-disclosure line — the site renders that separately.
 - JSON fields must contain only the finished article fields — never echo the raw source text back.
 
 ${parts.join("\n\n")}
@@ -236,11 +239,11 @@ async function expandIfThin(
         { role: "assistant", content: JSON.stringify(draft) },
         {
           role: "user",
-          content: `This draft is too short and under-developed: it does not meet the structural requirements (opening of 2-3 paragraphs, then 3-4 "## " sections, each of at least 3 paragraphs of at least 3 sentences).
+          content: `This draft is too short and under-developed: it does not meet the structural requirements (sharp lede of 2-3 paragraphs, then 2-4 claim-headed "## " sections, each of at least 3 paragraphs of at least 3 sentences, then a short close).
 
 Rewrite it in full, keeping the reporting and every existing fact exactly as it is, and develop the analysis to meet those requirements. Add depth ONLY through: the mechanism behind the move, second-order effects and the channels they travel through, the counter-case, how this compares with the recent run of prints and where we are in the policy cycle, and what specifically would change the picture.
 
-Do not add a single figure, price, date, quote or named institution that is not already in the source material. Do not repeat points you have already made. Return the same JSON shape.`,
+Do not add a single figure, price, date, quote or named institution that is not already in the source material. Do not repeat points you have already made. Do not append Sources, "reporting informed by…", or any outlet catalogue. Return the same JSON shape.`,
         },
       ],
     });
@@ -272,25 +275,9 @@ function sanitizeDraftFields(draft: ArticleDraft, sources: ArticleSources): Arti
   };
 }
 
-/** Drop common trailing Sources / Source reports / References appendices. */
+/** Drop common trailing Sources / credit footers (shared with render-time cleanup). */
 export function stripSourceAppendices(body: string): string {
-  let cleaned = body;
-
-  // Cut from the first trailing source-section heading to end-of-document.
-  const headingCut =
-    /\n#{1,3}\s*(sources?|source reports?|references?|further reading|attribution|credits?)\b[^\n]*\n[\s\S]*$/i;
-  cleaned = cleaned.replace(headingCut, "");
-
-  // Cut a horizontal-rule footer that is clearly a sources / reporting credit dump.
-  const footerCut =
-    /\n---+\s*\n+(?:\*?\s*)?(?:sources?|source reports?|references?|reporting informed by|based on reports from)\b[\s\S]*$/i;
-  cleaned = cleaned.replace(footerCut, "");
-
-  // Cut a bare "Source reports" prose block that starts late in the piece.
-  const proseCut = /\n(?:\*\*)?source reports?(?:\*\*)?\s*:?\s*\n[\s\S]*$/i;
-  cleaned = cleaned.replace(proseCut, "");
-
-  return cleaned.trimEnd();
+  return stripCreditFooters(body);
 }
 
 /**

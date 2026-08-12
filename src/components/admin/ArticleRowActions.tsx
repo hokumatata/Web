@@ -4,7 +4,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Trash2, Send, ClipboardCheck } from "lucide-react";
 
-export function ArticleRowActions({ id, status }: { id: string; status: string }) {
+export function ArticleRowActions({
+  id,
+  status,
+  canPublish = false,
+  canDelete = false,
+  showReviewLink = false,
+}: {
+  id: string;
+  status: string;
+  canPublish?: boolean;
+  canDelete?: boolean;
+  showReviewLink?: boolean;
+}) {
   const router = useRouter();
 
   async function publish() {
@@ -20,19 +32,21 @@ export function ArticleRowActions({ id, status }: { id: string; status: string }
 
   return (
     <>
-      {status === "REVIEW" && (
+      {status === "REVIEW" && showReviewLink && (
         <Link href="/admin/articles/review" className="btn-ghost h-7 px-2 text-accent" title="Review & approve">
           <ClipboardCheck size={13} />
         </Link>
       )}
-      {status === "DRAFT" && (
+      {status === "DRAFT" && canPublish && (
         <button onClick={publish} className="btn-ghost h-7 px-2 text-up" title="Publish">
           <Send size={13} />
         </button>
       )}
-      <button onClick={remove} className="btn-ghost h-7 px-2 text-down" title="Delete">
-        <Trash2 size={13} />
-      </button>
+      {canDelete && (
+        <button onClick={remove} className="btn-ghost h-7 px-2 text-down" title="Delete">
+          <Trash2 size={13} />
+        </button>
+      )}
     </>
   );
 }

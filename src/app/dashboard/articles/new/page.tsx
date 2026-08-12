@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
-import { roleAtLeast } from "@/lib/types";
+import { isAuthor, isEditor } from "@/lib/types";
 import { prisma } from "@/lib/db";
 import { ArticleForm } from "@/components/admin/ArticleForm";
 
@@ -8,7 +8,7 @@ export const metadata = { title: "Write Article" };
 
 export default async function AuthorNewArticlePage() {
   const session = await getSession();
-  if (!session || !roleAtLeast(session.role, "AUTHOR")) redirect("/login");
+  if (!session || (!isAuthor(session.role) && !isEditor(session.role))) redirect("/dashboard");
 
   const [categories, tags] = await Promise.all([
     prisma.category.findMany({ orderBy: { order: "asc" } }),
