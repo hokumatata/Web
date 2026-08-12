@@ -22,7 +22,7 @@ const NAV: NavItem[] = [
   { href: "/admin/categories", label: "Categories", icon: Tags },
   { href: "/admin/tags", label: "Tags", icon: Tags },
   { href: "/admin/comments", label: "Comments", icon: MessageSquare },
-  { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/users", label: "Readers", icon: Users },
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin/tickers", label: "Tickers", icon: Activity },
   { href: "/admin/audit-log", label: "Audit Log", icon: Settings },
