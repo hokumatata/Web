@@ -1,11 +1,11 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { json, error, unauthorized } from "@/lib/api";
-import { requireRole, hashPassword } from "@/lib/auth";
+import { requireExactRole, hashPassword } from "@/lib/auth";
 import { isRole } from "@/lib/types";
 
 export async function GET() {
-  const auth = await requireRole("ADMIN");
+  const auth = await requireExactRole("ADMIN");
   if (!auth.ok) return unauthorized();
 
   const authors = await prisma.user.findMany({
@@ -28,7 +28,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const auth = await requireRole("ADMIN");
+  const auth = await requireExactRole("ADMIN");
   if (!auth.ok) return unauthorized();
 
   const body = await req.json();

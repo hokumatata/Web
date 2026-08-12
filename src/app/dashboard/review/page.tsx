@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
+import { isEditor } from "@/lib/types";
 import { timeAgo } from "@/lib/utils";
 import { Eye, Edit, ShieldCheck, AlertTriangle, Search, Link as LinkIcon } from "lucide-react";
 import { ReviewActions } from "@/components/admin/ReviewActions";
@@ -39,6 +42,9 @@ export default async function ReviewQueuePage({
 }: {
   searchParams?: { category?: string };
 }) {
+  const session = await getSession();
+  if (!session || !isEditor(session.role)) redirect("/dashboard");
+
   const categoryFilter = searchParams?.category?.trim() || null;
 
   const articles = await prisma.article.findMany({
@@ -111,7 +117,7 @@ export default async function ReviewQueuePage({
       {categories.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-6">
           <Link
-            href="/admin/articles/review"
+            href="/dashboard/review"
             className={!categoryFilter ? "badge-accent" : "badge hover:bg-ink-800"}
           >
             All ({allReview.length})
@@ -119,7 +125,7 @@ export default async function ReviewQueuePage({
           {categories.map((c) => (
             <Link
               key={c.slug}
-              href={`/admin/articles/review?category=${encodeURIComponent(c.slug)}`}
+              href={`/dashboard/review?category=${encodeURIComponent(c.slug)}`}
               className={categoryFilter === c.slug ? "badge-accent" : "badge hover:bg-ink-800"}
             >
               {c.name} ({c.count})
@@ -223,14 +229,14 @@ export default async function ReviewQueuePage({
                           {/* Not /article/[slug]: that route serves PUBLISHED rows
                               only, so previewing a draft there 404s. */}
                           <Link
-                            href={`/admin/articles/${a.id}/preview`}
+                            href={`/dashboard/articles/${a.id}/preview`}
                             className="btn-ghost h-8 px-2 text-xs"
                             title="Preview"
                           >
                             <Eye size={13} /> Preview
                           </Link>
                           <Link
-                            href={`/admin/articles/${a.id}/edit`}
+                            href={`/dashboard/articles/${a.id}/edit`}
                             className="btn-ghost h-8 px-2 text-xs"
                             title="Edit"
                           >

@@ -89,3 +89,19 @@ export async function requireRole(required: Role) {
   if (!roleAtLeast(s.role, required)) return { ok: false as const, reason: "forbidden" as const };
   return { ok: true as const, session: s };
 }
+
+/** Exact role match — does not elevate ADMIN via rank. Prefer for Site ops / editorial mutations. */
+export async function requireExactRole(required: Role) {
+  const s = await getSession();
+  if (!s) return { ok: false as const, reason: "unauthenticated" as const };
+  if (s.role !== required) return { ok: false as const, reason: "forbidden" as const };
+  return { ok: true as const, session: s };
+}
+
+/** Exact match against any of the listed roles — no rank elevation. */
+export async function requireExactRoles(allowed: Role[]) {
+  const s = await getSession();
+  if (!s) return { ok: false as const, reason: "unauthenticated" as const };
+  if (!allowed.includes(s.role)) return { ok: false as const, reason: "forbidden" as const };
+  return { ok: true as const, session: s };
+}

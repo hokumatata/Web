@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { json, error, unauthorized, forbidden } from "@/lib/api";
-import { requireRole } from "@/lib/auth";
-import { roleAtLeast } from "@/lib/types";
+import { requireExactRoles } from "@/lib/auth";
+import { isEditor } from "@/lib/types";
 import { slugify } from "@/lib/utils";
 
 const PUBLIC_STATUSES = new Set(["PUBLISHED"]);
@@ -33,12 +33,12 @@ export async function GET(req: NextRequest) {
   let authorIdFilter: string | undefined;
 
   if (!isPublic) {
-    const auth = await requireRole("AUTHOR");
+    const auth = await requireExactRoles(["AUTHOR", "EDITOR"]);
     if (!auth.ok) {
       return auth.reason === "forbidden" ? forbidden() : unauthorized();
     }
-    // Authors only see their own unpublished work; editors+ see all.
-    if (!roleAtLeast(auth.session.role, "EDITOR")) {
+    // Authors only see their own unpublished work; editors see all.
+    if (!isEditor(auth.session.role)) {
       authorIdFilter = auth.session.uid;
     }
   }
@@ -76,8 +76,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const auth = await requireRole("AUTHOR");
-  if (!auth.ok) return unauthorized();
+  const auth = await requireExactRoles(["AUTHOR", "EDITOR"]);
+  if (!auth.ok) {
+    return auth.reason === "forbidden" ? forbidden() : unauthorized();
+  }
 
   const body = await req.json();
   const { title, excerpt, bodyText, categoryId, coverImageUrl, thumbnailUrl, isFeatured, isBreaking, tags } = body;

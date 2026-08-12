@@ -60,9 +60,14 @@ export default async function DashboardPage() {
             <FileText size={14} /> My Articles
           </Link>
           {isEditor(session.role) && (
-            <Link href="/admin/articles/review" className="btn-ghost text-xs h-8">
-              <ClipboardCheck size={14} /> Review Queue
-            </Link>
+            <>
+              <Link href="/dashboard/review" className="btn-ghost text-xs h-8">
+                <ClipboardCheck size={14} /> Review Queue
+              </Link>
+              <Link href="/dashboard/desk" className="btn-ghost text-xs h-8">
+                <FileText size={14} /> Desk
+              </Link>
+            </>
           )}
         </div>
       )}

@@ -8,6 +8,26 @@ const nextConfig = {
       { protocol: "https", hostname: "coin-images.coingecko.com" },
     ],
   },
+  async redirects() {
+    return [
+      { source: "/admin/articles", destination: "/dashboard/desk", permanent: true },
+      { source: "/admin/articles/review", destination: "/dashboard/review", permanent: true },
+      { source: "/admin/articles/ai", destination: "/dashboard/compose", permanent: true },
+      { source: "/admin/articles/new", destination: "/dashboard/articles/new", permanent: true },
+      {
+        source: "/admin/articles/:id/edit",
+        destination: "/dashboard/articles/:id/edit",
+        permanent: true,
+      },
+      {
+        source: "/admin/articles/:id/preview",
+        destination: "/dashboard/articles/:id/preview",
+        permanent: true,
+      },
+      // Readers admin surface removed — organic signups only
+      { source: "/admin/users", destination: "/admin", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

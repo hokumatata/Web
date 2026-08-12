@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
@@ -6,13 +7,15 @@ import { timeAgo } from "@/lib/utils";
 import { Plus, Edit, Eye, Sparkles } from "lucide-react";
 import { ArticleRowActions } from "@/components/admin/ArticleRowActions";
 
-export const metadata = { title: "Manage Articles" };
+export const metadata = { title: "Editorial Desk" };
 
-export default async function AdminArticlesPage() {
+/** Editor desk: all articles across the newsroom (not just own). */
+export default async function DeskArticlesPage() {
   const session = await getSession();
-  const allowPublish = !!session && canPublish(session.role);
+  if (!session || !isEditor(session.role)) redirect("/dashboard");
+
+  const allowPublish = canPublish(session.role);
   const allowDelete = allowPublish;
-  const showReviewLink = !!session && isEditor(session.role);
 
   const articles = await prisma.article.findMany({
     orderBy: { updatedAt: "desc" },
@@ -25,12 +28,12 @@ export default async function AdminArticlesPage() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-ink-50">Articles</h2>
+        <h2 className="text-xl font-bold text-ink-50">Desk</h2>
         <div className="flex items-center gap-2">
-          <Link href="/admin/articles/ai" className="btn-ghost text-xs h-8">
+          <Link href="/dashboard/compose" className="btn-ghost text-xs h-8">
             <Sparkles size={14} /> AI Compose
           </Link>
-          <Link href="/admin/articles/new" className="btn-primary text-xs h-8">
+          <Link href="/dashboard/articles/new" className="btn-primary text-xs h-8">
             <Plus size={14} /> New Article
           </Link>
         </div>
@@ -65,14 +68,14 @@ export default async function AdminArticlesPage() {
                 <td className="px-4 py-3 text-right font-mono text-ink-300 tabular">{a.views}</td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
-                    <Link href={`/article/${a.slug}`} className="btn-ghost h-7 px-2"><Eye size={13} /></Link>
-                    <Link href={`/admin/articles/${a.id}/edit`} className="btn-ghost h-7 px-2"><Edit size={13} /></Link>
+                    <Link href={`/dashboard/articles/${a.id}/preview`} className="btn-ghost h-7 px-2"><Eye size={13} /></Link>
+                    <Link href={`/dashboard/articles/${a.id}/edit`} className="btn-ghost h-7 px-2"><Edit size={13} /></Link>
                     <ArticleRowActions
                       id={a.id}
                       status={a.status}
                       canPublish={allowPublish}
                       canDelete={allowDelete}
-                      showReviewLink={showReviewLink}
+                      showReviewLink
                     />
                   </div>
                 </td>

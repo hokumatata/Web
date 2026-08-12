@@ -1,12 +1,12 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { json, error, tooManyRequests, unauthorized, forbidden } from "@/lib/api";
-import { requireRole } from "@/lib/auth";
+import { requireExactRole } from "@/lib/auth";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 /** Subscriber list — staff only. Public subscribe remains on POST. */
 export async function GET() {
-  const auth = await requireRole("EDITOR");
+  const auth = await requireExactRole("ADMIN");
   if (!auth.ok) {
     return auth.reason === "forbidden" ? forbidden() : unauthorized();
   }

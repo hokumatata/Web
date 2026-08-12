@@ -15,7 +15,7 @@ export interface ReviewQueueItem {
 
 function reviewQueueUrl(): string | null {
   const base = process.env.SITE_URL?.replace(/\/$/, "");
-  return base ? `${base}/admin/articles/review` : null;
+  return base ? `${base}/dashboard/review` : null;
 }
 
 /**

@@ -1,10 +1,10 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { json, error, unauthorized } from "@/lib/api";
-import { requireRole } from "@/lib/auth";
+import { requireExactRole } from "@/lib/auth";
 
 export async function GET() {
-  const auth = await requireRole("EDITOR");
+  const auth = await requireExactRole("ADMIN");
   if (!auth.ok) return unauthorized();
 
   const tickers = await prisma.tickerConfig.findMany({ orderBy: { order: "asc" } });
@@ -12,7 +12,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const auth = await requireRole("ADMIN");
+  const auth = await requireExactRole("ADMIN");
   if (!auth.ok) return unauthorized();
 
   const { symbol, label, type } = await req.json();

@@ -33,7 +33,7 @@ export function ArticleRowActions({
   return (
     <>
       {status === "REVIEW" && showReviewLink && (
-        <Link href="/admin/articles/review" className="btn-ghost h-7 px-2 text-accent" title="Review & approve">
+        <Link href="/dashboard/review" className="btn-ghost h-7 px-2 text-accent" title="Review & approve">
           <ClipboardCheck size={13} />
         </Link>
       )}
