@@ -48,7 +48,8 @@ export const maxDuration = 300;
  * Published briefs are marked isBreaking and carry a standing "developing" note,
  * because an editor is expected to expand them into a full piece afterwards.
  *
- * Set BREAKING_AUTOPUBLISH=false to keep the lane running as a fast REVIEW
+ * Autopublish is opt-in: set BREAKING_AUTOPUBLISH=true to allow confirmed
+ * briefs to go live. Unset or any other value keeps the lane as a fast REVIEW
  * feeder with the front page untouched.
  *
  * Auth: same as the drafting cron — `Authorization: Bearer <CRON_SECRET>` or
@@ -218,7 +219,7 @@ async function run(req: NextRequest) {
     0,
     Math.min(100, Number(process.env.BREAKING_DD_MIN_SCORE ?? 80))
   );
-  const autopublish = process.env.BREAKING_AUTOPUBLISH !== "false";
+  const autopublish = process.env.BREAKING_AUTOPUBLISH === "true";
   const authorEmail = process.env.SOURCE_AUTHOR_EMAIL ?? "masteruser@theforexrepublic.com";
 
   const author = await prisma.user.findUnique({ where: { email: authorEmail } });
