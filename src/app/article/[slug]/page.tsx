@@ -2,13 +2,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { markdownToHtml } from "@/lib/markdown";
-import { AI_HUMAN_DISCLOSURE, stripCreditFooters } from "@/lib/article-body";
+import { AI_HUMAN_DISCLOSURE, stripCreditFooters, stripDuplicateTitleHeading } from "@/lib/article-body";
 import { formatDate, readTime, timeAgo } from "@/lib/utils";
 import { CommentBlock } from "@/components/site/CommentBlock";
 import { ArticleCard, type ArticleCardData } from "@/components/news/ArticleCard";
 import { Clock, Tag, ArrowLeft } from "lucide-react";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { newsArticleSchema, breadcrumbSchema, absUrl } from "@/lib/seo";
+import { newsArticleSchema, breadcrumbSchema, absUrl, absImageUrl } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const article = await prisma.article.findUnique({
@@ -16,7 +16,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     include: { category: { select: { name: true } } },
   });
   if (!article) return { title: "Not found" };
-  const canonical = `/article/${article.slug}`;
+  const canonical = absUrl(`/article/${article.slug}`);
+  const cover = absImageUrl(article.coverImageUrl);
   return {
     title: article.title,
     description: article.excerpt,
@@ -25,15 +26,15 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       type: "article",
       title: article.title,
       description: article.excerpt,
-      url: absUrl(canonical),
-      images: article.coverImageUrl ? [article.coverImageUrl] : undefined,
+      url: canonical,
+      images: cover ? [cover] : undefined,
       publishedTime: article.publishedAt?.toISOString(),
     },
     twitter: {
       card: "summary_large_image",
       title: article.title,
       description: article.excerpt,
-      images: article.coverImageUrl ? [article.coverImageUrl] : undefined,
+      images: cover ? [cover] : undefined,
     },
   };
 }
@@ -76,7 +77,10 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     },
   })) as ArticleCardData[];
 
-  const cleanedBody = stripCreditFooters(article.body);
+  const authorName = article.author?.name ?? null;
+  const authorSlug = article.author?.authorProfile?.slug ?? null;
+
+  const cleanedBody = stripDuplicateTitleHeading(stripCreditFooters(article.body), article.title);
   const bodyHtml = markdownToHtml(cleanedBody);
 
   await prisma.article.update({
@@ -88,11 +92,12 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     slug: article.slug,
     title: article.title,
     excerpt: article.excerpt,
-    coverImageUrl: article.coverImageUrl,
+    coverImageUrl: absImageUrl(article.coverImageUrl) ?? null,
     publishedAt: article.publishedAt,
     updatedAt: article.updatedAt,
-    authorName: article.author?.name,
-    authorSlug: article.author?.authorProfile?.slug,
+    authorName,
+    // Only set author.url when a real profile slug exists (never phantom).
+    authorSlug: authorSlug || null,
     categoryName: article.category.name,
   });
   const crumbs = breadcrumbSchema([
@@ -140,14 +145,23 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           <p className="mt-4 text-lg text-ink-200 text-pretty leading-relaxed">{article.excerpt}</p>
 
           <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-ink-300 border-t border-b border-ink-800 py-4">
-            {article.author && (
+            {authorName && (
               <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-full bg-ink-700 flex items-center justify-center text-xs font-bold text-ink-200">
-                  {article.author.name[0]}
+                  {authorName[0]}
                 </div>
                 <div>
-                  <span className="text-ink-100 font-medium">{article.author.name}</span>
-                  {article.author.authorProfile?.bio && (
+                  {authorSlug ? (
+                    <Link
+                      href={`/author/${authorSlug}`}
+                      className="text-ink-100 font-medium hover:text-accent transition-colors"
+                    >
+                      {authorName}
+                    </Link>
+                  ) : (
+                    <span className="text-ink-100 font-medium">{authorName}</span>
+                  )}
+                  {article.author?.authorProfile?.bio && (
                     <p className="text-2xs text-ink-400 max-w-xs truncate">{article.author.authorProfile.bio}</p>
                   )}
                 </div>

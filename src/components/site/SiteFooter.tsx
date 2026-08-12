@@ -1,5 +1,13 @@
 import Link from "next/link";
 
+const FOOTER_LEGAL = [
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
+  { href: "/cookies", label: "Cookies" },
+  { href: "/disclaimer", label: "Disclaimer" },
+  { href: "/contact", label: "Contact" },
+] as const;
+
 export function SiteFooter({ siteName }: { siteName: string }) {
   const year = new Date().getFullYear();
   return (
@@ -40,8 +48,8 @@ export function SiteFooter({ siteName }: { siteName: string }) {
           <h4 className="text-xs font-bold uppercase tracking-wider text-ink-300 mb-4">Company</h4>
           <ul className="space-y-2.5">
             {[
+              ...FOOTER_LEGAL,
               { href: "/about", label: "About" },
-              { href: "/contact", label: "Contact" },
               { href: "/newsletter", label: "Newsletter" },
               { href: "/login", label: "Sign In" },
               { href: "/register", label: "Register" },
@@ -58,7 +66,16 @@ export function SiteFooter({ siteName }: { siteName: string }) {
       <div className="border-t border-ink-700">
         <div className="container-tw flex flex-col gap-2 py-5 text-xs text-ink-500 md:flex-row md:items-center md:justify-between">
           <span>&copy; {year} {siteName}. All rights reserved. Not financial advice.</span>
-          <span>Built for traders &amp; analysts</span>
+          <nav className="flex flex-wrap items-center gap-x-2 gap-y-1" aria-label="Legal">
+            {FOOTER_LEGAL.map((l, i) => (
+              <span key={l.href} className="inline-flex items-center gap-2">
+                {i > 0 && <span aria-hidden="true">·</span>}
+                <Link href={l.href} className="hover:text-accent transition-colors">
+                  {l.label}
+                </Link>
+              </span>
+            ))}
+          </nav>
         </div>
       </div>
     </footer>

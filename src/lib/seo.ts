@@ -1,9 +1,21 @@
 export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "The Forex Republic";
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://theforexrepublic.com";
+/**
+ * Canonical production origin. Prefer the www host.
+ * Set NEXT_PUBLIC_SITE_URL=https://www.theforexrepublic.com in Vercel (Production).
+ */
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.theforexrepublic.com";
 
 export function absUrl(path: string): string {
   return `${SITE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 }
+
+/** Absolute URL for Open Graph / schema images (pass-through if already absolute). */
+export function absImageUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  if (/^https?:\/\//i.test(url)) return url;
+  return absUrl(url);
+}
+
 
 interface ArticleSchemaInput {
   slug: string;
@@ -24,7 +36,10 @@ export function newsArticleSchema(a: ArticleSchemaInput): Record<string, unknown
     "@type": "NewsArticle",
     headline: a.title,
     description: a.excerpt,
-    image: a.coverImageUrl ? [a.coverImageUrl] : undefined,
+    image: (() => {
+      const img = absImageUrl(a.coverImageUrl);
+      return img ? [img] : undefined;
+    })(),
     datePublished: a.publishedAt?.toISOString(),
     dateModified: (a.updatedAt ?? a.publishedAt)?.toISOString(),
     articleSection: a.section ?? a.categoryName,
