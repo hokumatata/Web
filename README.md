@@ -190,8 +190,15 @@ without valid password values.
 2. Add a PostgreSQL database (Vercel Postgres or Neon) from the Storage tab
 3. Add a Blob store from the Storage tab (for image uploads)
 4. Set `JWT_SECRET` and `NEXT_PUBLIC_SITE_NAME` in Environment Variables
-5. Deploy — migrations run automatically during build
-6. Run `npm run db:seed` against production DB to populate sample data
+5. Apply schema migrations as a **separate controlled step** (not during the Vercel build):
+
+   ```bash
+   DATABASE_URL="<production-connection-string>" npx prisma migrate deploy
+   ```
+
+   Do this before or after deploy when the schema changes. The production `build` script only runs `prisma generate` and `next build` so a failed row in `_prisma_migrations` cannot block deploys.
+6. Deploy the app on Vercel
+7. Run `npm run db:seed` against production DB to populate sample data
 
 ## Project Structure
 
@@ -230,7 +237,8 @@ prisma/
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start development server |
-| `npm run build` | Production build (generates client, runs migrations, builds Next.js) |
+| `npm run build` | Production build (`prisma generate` + `next build`; does **not** run migrations) |
+| `npx prisma migrate deploy` | Apply pending migrations with `DATABASE_URL` (run separately from Vercel build) |
 | `npm run lint` | ESLint check |
 | `npm run typecheck` | TypeScript type check |
 | `npm run db:migrate` | Create new migration |
