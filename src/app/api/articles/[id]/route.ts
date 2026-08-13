@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { json, error, unauthorized, forbidden, notFound } from "@/lib/api";
 import { requireExactRoles, getSession } from "@/lib/auth";
 import { canPublish, isAdmin, isAuthor, isEditor } from "@/lib/types";
+import { slugify } from "@/lib/utils";
 
 function toPublicArticle<T extends Record<string, unknown>>(article: T) {
   const { dueDiligence: _dd, ...rest } = article;
@@ -59,7 +60,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 
   const body = await req.json();
-  const { title, excerpt, bodyText, categoryId, coverImageUrl, thumbnailUrl, isFeatured, isBreaking, status, tags } = body;
+  const { title, excerpt, bodyText, categoryId, coverImageUrl, thumbnailUrl, isFeatured, isBreaking, status, tags, slug: requestedSlug } = body;
 
   let nextStatus: string | undefined;
   if (status !== undefined) {
@@ -77,6 +78,20 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     nextStatus = status;
   }
 
+  let nextSlug: string | undefined;
+  if (requestedSlug !== undefined) {
+    if (typeof requestedSlug !== "string" || !requestedSlug.trim()) {
+      return error("Slug cannot be empty");
+    }
+    nextSlug = slugify(requestedSlug);
+    if (!nextSlug) return error("Slug cannot be empty");
+    const clash = await prisma.article.findFirst({
+      where: { slug: nextSlug, NOT: { id: params.id } },
+      select: { id: true },
+    });
+    if (clash) return error("Slug already in use", 409);
+  }
+
   const updated = await prisma.article.update({
     where: { id: params.id },
     data: {
@@ -89,6 +104,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       ...(isFeatured !== undefined ? { isFeatured } : {}),
       ...(isBreaking !== undefined ? { isBreaking } : {}),
       ...(nextStatus !== undefined ? { status: nextStatus } : {}),
+      ...(nextSlug !== undefined ? { slug: nextSlug } : {}),
     },
   });
 
