@@ -1,36 +1,11 @@
 import type { MetadataRoute } from "next";
-import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { SITE_URL } from "@/lib/seo";
 
-export const revalidate = 60;
-
-const getSitemapArticles = unstable_cache(
-  () =>
-    prisma.article
-      .findMany({
-        where: { status: "PUBLISHED" },
-        select: { slug: true, updatedAt: true, publishedAt: true },
-        orderBy: { publishedAt: "desc" },
-        take: 5000,
-      })
-      .catch(() => []),
-  ["sitemap-articles"],
-  { revalidate: 60, tags: ["articles"] }
-);
-
-// Exclude empty hubs until they have published articles.
-const getSitemapCategories = unstable_cache(
-  () =>
-    prisma.category
-      .findMany({
-        where: { articles: { some: { status: "PUBLISHED" } } },
-        select: { slug: true },
-      })
-      .catch(() => []),
-  ["sitemap-categories"],
-  { revalidate: 60, tags: ["articles"] }
-);
+// Match news-sitemap: Prisma needs Node, and build-time prerender is how
+// an empty/failed query became the production static-only sitemap.xml.
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
@@ -57,9 +32,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: path === "/" ? 1 : 0.7,
   }));
 
+  // Do not .catch(() => []) or wrap in unstable_cache: a thrown query (or a
+  // cached empty failure) must not be served as a hubs-only sitemap.
   const [articles, categories] = await Promise.all([
-    getSitemapArticles(),
-    getSitemapCategories(),
+    prisma.article.findMany({
+      where: { status: "PUBLISHED" },
+      select: { slug: true, updatedAt: true, publishedAt: true },
+      orderBy: { publishedAt: "desc" },
+      take: 5000,
+    }),
+    prisma.category.findMany({
+      where: { articles: { some: { status: "PUBLISHED" } } },
+      select: { slug: true },
+    }),
   ]);
 
   const articleRoutes = articles.map((a) => ({
