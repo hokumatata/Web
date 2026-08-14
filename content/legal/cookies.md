@@ -32,7 +32,7 @@ We use cookies to:
 - Understand how readers use the Site  
 - Deliver and measure advertising, including Google AdSense where enabled  
 
-Where relevant, our AdSense publisher identifier is **ADSENSE_PUBLISHER_ID**.
+Where relevant, our AdSense publisher identifier is **pub-6405807258726781**.
 
 ---
 

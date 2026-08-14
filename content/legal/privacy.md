@@ -54,7 +54,7 @@ We and our partners may use cookies and similar technologies. These can include:
 
 See our [Cookie Policy](/cookies) for details and controls.
 
-Google may process data for AdSense and related services under Google’s policies. Where relevant, our AdSense publisher identifier is **ADSENSE_PUBLISHER_ID**.
+Google may process data for AdSense and related services under Google’s policies. Where relevant, our AdSense publisher identifier is **pub-6405807258726781**.
 
 ---
 
