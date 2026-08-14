@@ -1,2 +1,1 @@
-# Google AdSense — replace PUBLISHER_ID after approval
-google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+google.com, pub-6405807258726781, DIRECT, f08c47fec0942fa0
