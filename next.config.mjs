@@ -18,13 +18,10 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      // Production apex → www (host match; does not affect preview deployments).
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "theforexrepublic.com" }],
-        destination: "https://www.theforexrepublic.com/:path*",
-        permanent: true,
-      },
+      // Apex → www lives in src/middleware.ts. Next.js redirects run before
+      // public/, so a `/:path*` host redirect would 308 /ads.txt. AdSense’s
+      // crawler often requires HTTP 200 on the exact apex host and does not
+      // reliably follow 308s.
       // Policy alias paths → canonical routes
       { source: "/privacy-policy", destination: "/privacy", permanent: true },
       { source: "/terms-of-use", destination: "/terms", permanent: true },
