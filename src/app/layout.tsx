@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   title: "The Forex Republic — Live Crypto, Forex & Macro Newsroom",
   description:
     "Professional-grade market intelligence. Live data, expert analysis, and breaking news across crypto, forex, equities, and macro.",
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png", sizes: "512x512" }],
+    apple: [{ url: "/apple-icon", type: "image/png", sizes: "180x180" }],
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

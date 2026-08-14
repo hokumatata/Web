@@ -49,6 +49,12 @@ const nextConfig = {
       { source: "/admin/users", destination: "/admin", permanent: true },
     ];
   },
+  async rewrites() {
+    return [
+      { source: "/favicon.ico", destination: "/icon.png" },
+      { source: "/apple-touch-icon.png", destination: "/apple-icon" },
+    ];
+  },
   async headers() {
     return [
       {

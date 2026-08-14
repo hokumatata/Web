@@ -1,8 +1,36 @@
 import type { MetadataRoute } from "next";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { SITE_URL } from "@/lib/seo";
 
-export const revalidate = 3600;
+export const revalidate = 60;
+
+const getSitemapArticles = unstable_cache(
+  () =>
+    prisma.article
+      .findMany({
+        where: { status: "PUBLISHED" },
+        select: { slug: true, updatedAt: true, publishedAt: true },
+        orderBy: { publishedAt: "desc" },
+        take: 5000,
+      })
+      .catch(() => []),
+  ["sitemap-articles"],
+  { revalidate: 60, tags: ["articles"] }
+);
+
+// Exclude empty hubs until they have published articles.
+const getSitemapCategories = unstable_cache(
+  () =>
+    prisma.category
+      .findMany({
+        where: { articles: { some: { status: "PUBLISHED" } } },
+        select: { slug: true },
+      })
+      .catch(() => []),
+  ["sitemap-categories"],
+  { revalidate: 60, tags: ["articles"] }
+);
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
@@ -30,21 +58,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const [articles, categories] = await Promise.all([
-    prisma.article
-      .findMany({
-        where: { status: "PUBLISHED" },
-        select: { slug: true, updatedAt: true, publishedAt: true },
-        orderBy: { publishedAt: "desc" },
-        take: 5000,
-      })
-      .catch(() => []),
-    // Exclude empty hubs until they have published articles.
-    prisma.category
-      .findMany({
-        where: { articles: { some: { status: "PUBLISHED" } } },
-        select: { slug: true },
-      })
-      .catch(() => []),
+    getSitemapArticles(),
+    getSitemapCategories(),
   ]);
 
   const articleRoutes = articles.map((a) => ({
