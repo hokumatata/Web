@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { json, unauthorized, forbidden, notFound } from "@/lib/api";
 import { getSession } from "@/lib/auth";
@@ -25,5 +25,6 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
   });
 
   revalidateTag("articles");
+  revalidatePath("/sitemap.xml");
   return json(updated);
 }
