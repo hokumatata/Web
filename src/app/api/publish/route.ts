@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { json, error } from "@/lib/api";
 import { slugify } from "@/lib/utils";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 /**
  * Simple article publishing endpoint.
@@ -101,6 +101,7 @@ export async function POST(req: NextRequest) {
   }
 
   revalidateTag("articles");
+  revalidatePath("/sitemap.xml");
 
   return json({
     success: true,

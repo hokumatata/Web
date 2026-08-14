@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { json, error, unauthorized, forbidden, notFound } from "@/lib/api";
 import { requireExactRoles, getSession } from "@/lib/auth";
@@ -100,6 +100,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 
   revalidateTag("articles");
+  revalidatePath("/sitemap.xml");
   return json(updated);
 }
 
@@ -118,5 +119,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
 
   await prisma.article.delete({ where: { id: params.id } }).catch(() => {});
   revalidateTag("articles");
+  revalidatePath("/sitemap.xml");
   return json({ ok: true });
 }

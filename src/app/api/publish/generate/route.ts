@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { json, error } from "@/lib/api";
 import { slugify } from "@/lib/utils";
 import { generateArticleDraft, type ArticleSources } from "@/lib/ai";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export const runtime = "nodejs";
 
@@ -111,6 +111,7 @@ export async function POST(req: NextRequest) {
   }
 
   revalidateTag("articles");
+  revalidatePath("/sitemap.xml");
 
   return json({
     success: true,
