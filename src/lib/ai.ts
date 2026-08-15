@@ -139,8 +139,9 @@ function buildUserPrompt(sources: ArticleSources): string {
 
 CRITICAL — SOURCE MATERIAL IS INPUT ONLY:
 - The blocks below are research inputs for drafting. They must NOT appear in title, excerpt, or body as pasted blobs, outlet catalogues, tweet dumps, URL lists, or a Sources / Source reports / References appendix.
-- Write a real desk note, not a 400-word blurb: sharp lede that is NOT a restatement of the title → mechanism (why the print/tape moves the dollar or the pair) → actual vs consensus vs prior using ONLY figures supplied below (if a leg is missing, say so — never invent) → the falsifier that would kill the read → a pair-level or instrument-level implication (DXY / a major / gold), not "USD may react" → short close.
-- Target 800–1,200 words unless the editor's key ideas explicitly ask for a brief.
+- Write a real desk note, not a 400-word blurb. Lede: price or the concrete fact first, then the weekly/session move, then two named pressures, then the tension — never a title rewrite, never "traders will watch". Then 3–5 claim-headed findings. Mechanism is a chain (A → B → this asset). Actual vs consensus vs prior, flows, odds, levels — ONLY figures supplied below (if a leg is missing, say so). Named people and short quotes when the sources have them; do not invent interviews. Path + condition + kill in the close, not "USD may react".
+- Desk note: 800–1,200 words. A feature can run longer if the sources support named casualties and a thesis. Only write a brief if the editor's key ideas explicitly ask for one.
+- TA only on price-forecast / market-move, and only AFTER the fundamental case. No TA on a data-release or feature unless asked.
 - Do NOT write a Watchlist / Next steps / What to watch section that is only CTAs to /economic-calendar and /price. Those two links may appear once, together, in the close — never as the body.
 - Attribute briefly inline only where a fact needs it (e.g. "according to the ECB"), never as a closing catalogue of outlets.
 - Never write "reporting informed by…", "based on reports from…", or any multi-outlet credit footer. Do not invent an AI-disclosure line — the site renders that separately.
@@ -250,15 +251,16 @@ async function expandIfThin(
         { role: "assistant", content: JSON.stringify(draft) },
         {
           role: "user",
-          content: `This draft fails the house-style quality floor and is not a finished piece. Typical failures: a lede that restates the headline; a 400-word blurb; a Watchlist / Next steps section that is only CTAs to /economic-calendar and /price; missing mechanism; generic "USD may react"; invented or omitted actual/consensus/prior.
+          content: `This draft fails the house-style quality floor and is not a finished piece. Typical failures: a lede that restates the headline; a 400-word blurb; a Watchlist / Next steps section that is only CTAs to /economic-calendar and /price; missing mechanism chain; generic "USD may react"; invented or omitted actual/consensus/prior.
 
-Rewrite it in full as a real desk note (roughly 800–1,200 words). Keep every existing sourced fact exactly as it is. The rewrite MUST contain:
-- a sharp lede that is not a restatement of the title
-- the MECHANISM (the channel by which the print/tape moves the dollar or the pair — not "see the calendar")
-- actual vs consensus vs prior using only figures already in the source material; if a leg is missing, say so
-- a FALSIFIER (the specific print, level or event that would kill this read)
-- a pair-level or instrument-level implication (DXY, a major, or gold)
-- two to four claim-headed "## " sections and a short close
+Rewrite it in full as a real desk note (roughly 800–1,200 words). Keep every existing sourced fact exactly as it is. Match the VOICE_SAMPLES register. The rewrite MUST contain:
+- a lede that is price or the concrete fact, then the move, then two named pressures, then the tension — not a title rewrite
+- 3–5 claim-headed findings
+- the MECHANISM as a chain (A → B → this asset)
+- actual vs consensus vs prior, flows, odds, levels using only figures already in the source material; if a leg is missing, say so
+- named people and short quotes only if they are already in the sources; do not invent interviews
+- a path + condition + kill (falsifier) in the path section
+- TA only if this is a price-forecast or market-move story, and only after the fundamental case
 - no Watchlist/Next-steps CTA body; /economic-calendar and /price may appear once in the close only
 - no Sources appendix, no "reporting informed by…", no invented AI disclosure
 
@@ -375,7 +377,7 @@ Check specifically for:
 - Fabrication: any specific figure, price, percentage, date, statistic, or direct quote in the draft that is NOT present in or directly supported by the source material. Invented actual/consensus/prior figures are an automatic flag.
 - Overreach: claims stated as fact that should be hedged, price predictions stated as certainty, or financial advice.
 - Attribution: whether claims that need a source are attributed.
-- Quality floor: a lede that only restates the headline; a Watchlist/Next-steps section that is only CTAs to /economic-calendar and /price; missing mechanism (why the print/tape moves the dollar or the pair); generic "USD may react" with no named instrument; a 400-word blurb instead of an 800–1,200 word desk note; outlet catalogues or "reporting informed by…" footers.
+- Quality floor: a lede that only restates the headline; a Watchlist/Next-steps section that is only CTAs to /economic-calendar and /price; missing mechanism chain (A → B → this asset); generic "USD may react"; invented or omitted actual/consensus/prior; a 400-word blurb instead of an 800–1,200 word desk note; outlet catalogues or "reporting informed by…" footers.
 
 Return ONLY a single JSON object (no markdown fences, no commentary) with exactly these keys:
 - "score": number 0-100. How well-supported and publication-ready the draft is. 85+ = clean, 60-84 = minor issues, below 60 = significant issues.
