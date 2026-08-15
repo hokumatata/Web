@@ -8,7 +8,7 @@
  *   npx tsx scripts/house-style-dry-run.ts
  */
 
-import { buildSystemPrompt, findStyleViolations } from "../src/lib/house-style";
+import { buildSystemPrompt, findStyleViolations, QUALITY_FLOOR, VOICE_SAMPLES } from "../src/lib/house-style";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -127,6 +127,12 @@ function main() {
   check(
     "expand-if-thin rewrite names the quality floor",
     userPromptFile.includes("fails the house-style quality floor")
+  );
+  check("QUALITY_FLOOR is a standalone, editable block", QUALITY_FLOOR.includes("QUALITY FLOOR"));
+  check("VOICE_SAMPLES is empty until Vishal's samples land", VOICE_SAMPLES.trim() === "");
+  check(
+    "system prompt does not name Bloomberg/FXStreet as the voice to copy",
+    !prompt.includes("who read Bloomberg, Reuters and FXStreet")
   );
 
   console.log(failures === 0 ? "\nall checks passed" : `\n${failures} check(s) failed`);
