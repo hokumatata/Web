@@ -113,8 +113,8 @@ function buildUserPrompt(sources: ArticleSources): string {
 
     const synthesis =
       sources.reports.length > 1
-        ? `These ${sources.reports.length} reports from ${new Set(sources.reports.map((r) => r.outlet)).size} outlets cover the SAME story. Write ONE original article that synthesises them into the story itself: establish what happened, note where reports differ or add detail the others lack, and build a fuller picture than any single report gives. Do not follow the structure or phrasing of any one report. Do NOT write a roundup of "what outlets are saying", do NOT list outlets one-by-one, do NOT end with "reporting informed by…" / "based on reports from…", and do NOT append a Sources / Source reports / References / Further reading section. The page adds its own AI+human disclosure — do not invent one.`
-        : `Write an original article on this story. Do not mirror the source's structure or phrasing. Do NOT paste the report text, URLs, a Sources appendix, or a "reporting informed by…" credit line into the article. The page adds its own AI+human disclosure — do not invent one.`;
+        ? `These ${sources.reports.length} reports from ${new Set(sources.reports.map((r) => r.outlet)).size} outlets cover the SAME story. Write ONE original desk note that synthesises them into the story itself: establish what happened, note where reports differ or add detail the others lack, and build a fuller picture than any single report gives. Do not follow the structure or phrasing of any one report. Do NOT write a roundup of "what outlets are saying", do NOT list outlets one-by-one, do NOT end with "reporting informed by…" / "based on reports from…", and do NOT append a Sources / Source reports / References / Further reading section. Do NOT file a lede-plus-watchlist stub. The page adds its own AI+human disclosure — do not invent one.`
+        : `Write an original desk note on this story. Do not mirror the source's structure or phrasing. Do NOT paste the report text, URLs, a Sources appendix, or a "reporting informed by…" credit line into the article. Do NOT file a lede-plus-watchlist stub. The page adds its own AI+human disclosure — do not invent one.`;
 
     parts.push(`### Source reports (INPUT ONLY — do not reproduce in the article)\n${synthesis}\n\n${reports}`);
   }
@@ -139,7 +139,9 @@ function buildUserPrompt(sources: ArticleSources): string {
 
 CRITICAL — SOURCE MATERIAL IS INPUT ONLY:
 - The blocks below are research inputs for drafting. They must NOT appear in title, excerpt, or body as pasted blobs, outlet catalogues, tweet dumps, URL lists, or a Sources / Source reports / References appendix.
-- Write the story as original desk prose: sharp lede → 2–4 claim-headed sections → short close. Not a wire roundup.
+- Write a real desk note, not a 400-word blurb: sharp lede that is NOT a restatement of the title → mechanism (why the print/tape moves the dollar or the pair) → actual vs consensus vs prior using ONLY figures supplied below (if a leg is missing, say so — never invent) → the falsifier that would kill the read → a pair-level or instrument-level implication (DXY / a major / gold), not "USD may react" → short close.
+- Target 800–1,200 words unless the editor's key ideas explicitly ask for a brief.
+- Do NOT write a Watchlist / Next steps / What to watch section that is only CTAs to /economic-calendar and /price. Those two links may appear once, together, in the close — never as the body.
 - Attribute briefly inline only where a fact needs it (e.g. "according to the ECB"), never as a closing catalogue of outlets.
 - Never write "reporting informed by…", "based on reports from…", or any multi-outlet credit footer. Do not invent an AI-disclosure line — the site renders that separately.
 - JSON fields must contain only the finished article fields — never echo the raw source text back.
@@ -209,21 +211,30 @@ export async function generateArticleDraft(
 }
 
 /**
- * If the first pass came back as a stub, ask once for a deeper version.
+ * If the first pass came back as a stub — too short, a headline restatement,
+ * or a watchlist of site CTAs — ask once for a real desk note.
  *
  * Smaller models reliably under-write when the source material is a one-line
  * feed blurb, and no amount of prompt emphasis fixes it in a single pass. One
- * conditional follow-up call is cheap (it only fires on short drafts) and is
- * framed as "develop the analysis", not "make it longer", so the model adds
- * reasoning rather than padding.
+ * conditional follow-up call is cheap (it only fires on quality-floor failures)
+ * and is framed as "develop the analysis", not "make it longer", so the model
+ * adds reasoning rather than padding.
  */
 async function expandIfThin(
   draft: ArticleDraft,
   sources: ArticleSources,
   model: string
 ): Promise<ArticleDraft> {
-  const tooShort = findStyleViolations(draft.body).some((v) => v.startsWith("Too short"));
-  if (!tooShort) return draft;
+  const violations = findStyleViolations(draft.body);
+  const needsRewrite = violations.some(
+    (v) =>
+      v.startsWith("Too short") ||
+      v.includes("lede restates") ||
+      v.includes("Watchlist") ||
+      v.includes("site CTA") ||
+      v.includes("unstructured")
+  );
+  if (!needsRewrite) return draft;
 
   const openai = getClient();
   try {
@@ -239,11 +250,19 @@ async function expandIfThin(
         { role: "assistant", content: JSON.stringify(draft) },
         {
           role: "user",
-          content: `This draft is too short and under-developed: it does not meet the structural requirements (sharp lede of 2-3 paragraphs, then 2-4 claim-headed "## " sections, each of at least 3 paragraphs of at least 3 sentences, then a short close).
+          content: `This draft fails the house-style quality floor and is not a finished piece. Typical failures: a lede that restates the headline; a 400-word blurb; a Watchlist / Next steps section that is only CTAs to /economic-calendar and /price; missing mechanism; generic "USD may react"; invented or omitted actual/consensus/prior.
 
-Rewrite it in full, keeping the reporting and every existing fact exactly as it is, and develop the analysis to meet those requirements. Add depth ONLY through: the mechanism behind the move, second-order effects and the channels they travel through, the counter-case, how this compares with the recent run of prints and where we are in the policy cycle, and what specifically would change the picture.
+Rewrite it in full as a real desk note (roughly 800–1,200 words). Keep every existing sourced fact exactly as it is. The rewrite MUST contain:
+- a sharp lede that is not a restatement of the title
+- the MECHANISM (the channel by which the print/tape moves the dollar or the pair — not "see the calendar")
+- actual vs consensus vs prior using only figures already in the source material; if a leg is missing, say so
+- a FALSIFIER (the specific print, level or event that would kill this read)
+- a pair-level or instrument-level implication (DXY, a major, or gold)
+- two to four claim-headed "## " sections and a short close
+- no Watchlist/Next-steps CTA body; /economic-calendar and /price may appear once in the close only
+- no Sources appendix, no "reporting informed by…", no invented AI disclosure
 
-Do not add a single figure, price, date, quote or named institution that is not already in the source material. Do not repeat points you have already made. Do not append Sources, "reporting informed by…", or any outlet catalogue. Return the same JSON shape.`,
+Do not add a single figure, price, date, quote or named institution that is not already in the source material. Do not repeat points you have already made. Return the same JSON shape.`,
         },
       ],
     });
@@ -353,10 +372,10 @@ const dueDiligenceSchema = z.object({
 const DUE_DILIGENCE_SYSTEM_PROMPT = `You are a rigorous editorial fact-checker and standards editor for "The Forex Republic", a financial news publication. You are given (a) the original SOURCE material an article was drafted from and (b) the DRAFT article. Your job is to assess whether the draft is well-supported by the source, free of fabricated specifics, appropriately hedged, and ready for a human editor's final approval.
 
 Check specifically for:
-- Fabrication: any specific figure, price, percentage, date, statistic, or direct quote in the draft that is NOT present in or directly supported by the source material.
+- Fabrication: any specific figure, price, percentage, date, statistic, or direct quote in the draft that is NOT present in or directly supported by the source material. Invented actual/consensus/prior figures are an automatic flag.
 - Overreach: claims stated as fact that should be hedged, price predictions stated as certainty, or financial advice.
 - Attribution: whether claims that need a source are attributed.
-- Tone/quality: hype, filler, or missing sections of the required house structure.
+- Quality floor: a lede that only restates the headline; a Watchlist/Next-steps section that is only CTAs to /economic-calendar and /price; missing mechanism (why the print/tape moves the dollar or the pair); generic "USD may react" with no named instrument; a 400-word blurb instead of an 800–1,200 word desk note; outlet catalogues or "reporting informed by…" footers.
 
 Return ONLY a single JSON object (no markdown fences, no commentary) with exactly these keys:
 - "score": number 0-100. How well-supported and publication-ready the draft is. 85+ = clean, 60-84 = minor issues, below 60 = significant issues.

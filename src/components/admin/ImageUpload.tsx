@@ -7,9 +7,11 @@ interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
   label?: string;
+  /** Optional house-style hint under the control (covers stay manual). */
+  hint?: string;
 }
 
-export function ImageUpload({ value, onChange, label = "Cover Image" }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, label = "Cover Image", hint }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [dragOver, setDragOver] = useState(false);
@@ -110,6 +112,7 @@ export function ImageUpload({ value, onChange, label = "Cover Image" }: ImageUpl
         />
       </div>
 
+      {hint && <p className="text-2xs text-ink-500 mt-1">{hint}</p>}
       {error && <p className="text-xs text-down mt-1">{error}</p>}
       <input
         ref={inputRef}

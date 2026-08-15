@@ -161,7 +161,10 @@ export function AiComposePanel({
   return (
     <form onSubmit={onGenerate} className="space-y-5">
       <p className="text-sm text-ink-300">
-        Paste raw sources below as <strong className="font-medium text-ink-200">generation inputs only</strong> — they are not copied into the article. The model drafts original desk prose in house style, then opens the editor so you can review before saving. Attach covers with the manual image upload after the draft is generated.
+        Paste raw sources below as <strong className="font-medium text-ink-200">generation inputs only</strong> — they are not copied into the article. First-pass floor: a desk note with a sharp lede, mechanism, actual/consensus/prior, falsifier, and a named instrument — not a headline restatement plus watchlist. Voice is still open; do not treat the draft as a finished house style.
+      </p>
+      <p className="text-2xs text-ink-400">
+        Covers stay a <strong className="font-medium text-ink-300">manual upload</strong> after the draft. Match the designed theme: navy/teal, gold, charts, bold type. Do not use photoreal cash-stack stock. There is no image generator.
       </p>
       {SOURCE_FIELDS.map((f) => (
         <div key={f.key}>
