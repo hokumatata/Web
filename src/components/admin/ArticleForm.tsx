@@ -98,7 +98,12 @@ export function ArticleForm({
       <RichEditor value={body} onChange={setBody} />
 
       <div>
-        <ImageUpload value={coverImageUrl} onChange={setCoverImageUrl} label="Cover Image (article hero)" />
+        <ImageUpload
+          value={coverImageUrl}
+          onChange={setCoverImageUrl}
+          label="Cover Image (article hero)"
+          hint="House covers: navy/teal, gold accents, charts, bold type. Not photoreal cash-stack stock. Manual upload only — no generator."
+        />
       </div>
 
       <div>
