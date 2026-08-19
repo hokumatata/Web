@@ -101,6 +101,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
   revalidateTag("articles");
   revalidatePath("/sitemap.xml");
+  revalidatePath("/news-sitemap.xml");
   return json(updated);
 }
 
@@ -120,5 +121,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   await prisma.article.delete({ where: { id: params.id } }).catch(() => {});
   revalidateTag("articles");
   revalidatePath("/sitemap.xml");
+  revalidatePath("/news-sitemap.xml");
   return json({ ok: true });
 }
