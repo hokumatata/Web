@@ -5,6 +5,7 @@ import { TickerTape } from "@/components/site/TickerTape";
 import { BreakingTicker } from "@/components/site/BreakingTicker";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ThemeProvider } from "@/components/site/ThemeProvider";
+import { GoogleAnalytics } from "@/components/site/GoogleAnalytics";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationSchema, websiteSchema, SITE_NAME, SITE_URL } from "@/lib/seo";
@@ -36,6 +37,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body>
+        <GoogleAnalytics />
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <QueryProvider>
           <ThemeProvider>
