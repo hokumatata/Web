@@ -112,6 +112,7 @@ export async function POST(req: NextRequest) {
 
   revalidateTag("articles");
   revalidatePath("/sitemap.xml");
+  revalidatePath("/news-sitemap.xml");
 
   return json({
     success: true,

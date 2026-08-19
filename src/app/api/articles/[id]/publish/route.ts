@@ -26,5 +26,6 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
 
   revalidateTag("articles");
   revalidatePath("/sitemap.xml");
+  revalidatePath("/news-sitemap.xml");
   return json(updated);
 }

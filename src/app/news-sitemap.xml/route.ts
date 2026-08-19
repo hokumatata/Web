@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { SITE_NAME, SITE_URL } from "@/lib/seo";
 
-export const revalidate = 600;
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function escapeXml(s: string): string {
@@ -17,14 +17,12 @@ export async function GET() {
   // Early-stage full coverage for discovery: include all PUBLISHED articles with
   // a non-null publishedAt (newest first, up to 1000). Can tighten to a 48h
   // window later when volume grows.
-  const articles = await prisma.article
-    .findMany({
-      where: { status: "PUBLISHED", publishedAt: { not: null } },
-      select: { slug: true, title: true, publishedAt: true, category: { select: { name: true } } },
-      orderBy: { publishedAt: "desc" },
-      take: 1000,
-    })
-    .catch(() => []);
+  const articles = await prisma.article.findMany({
+    where: { status: "PUBLISHED", publishedAt: { not: null } },
+    select: { slug: true, title: true, publishedAt: true, category: { select: { name: true } } },
+    orderBy: { publishedAt: "desc" },
+    take: 1000,
+  });
 
   const entries = articles
     .map(
@@ -51,7 +49,7 @@ ${entries}
   return new Response(xml, {
     headers: {
       "Content-Type": "application/xml",
-      "Cache-Control": "public, s-maxage=600, stale-while-revalidate=1200",
+      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
     },
   });
 }
