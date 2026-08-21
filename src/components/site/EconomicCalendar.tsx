@@ -271,7 +271,7 @@ export function EconomicCalendar({ calendar }: { calendar: EconCalendar }) {
     <div className="animate-fade-in">
       <div className="flex items-center gap-3 mb-1">
         <Calendar size={20} className="text-accent" />
-        <h1 className="text-2xl font-bold text-ink-50 tracking-tight">Economic Calendar</h1>
+        <h1 className="text-2xl font-bold text-ink-50 tracking-tight">Forex Economic Calendar Today</h1>
       </div>
       <p className="text-sm text-ink-400 mb-6">
         Macro releases and central bank decisions on one continuous timeline — recent

@@ -22,6 +22,11 @@ const nextConfig = {
       // public/, so a `/:path*` host redirect would 308 /ads.txt. AdSense’s
       // crawler often requires HTTP 200 on the exact apex host and does not
       // reliably follow 308s.
+      // Public aliases → canonical routes (Growth). statusCode 301 rather than
+      // permanent: true (308) so crawlers get the classic permanent redirect.
+      { source: "/calendar", destination: "/economic-calendar", statusCode: 301 },
+      { source: "/forex-economic-calendar", destination: "/economic-calendar", statusCode: 301 },
+      { source: "/prices", destination: "/price", statusCode: 301 },
       // Policy alias paths → canonical routes
       { source: "/privacy-policy", destination: "/privacy", permanent: true },
       { source: "/terms-of-use", destination: "/terms", permanent: true },

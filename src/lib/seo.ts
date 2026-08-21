@@ -1,12 +1,31 @@
 export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "The Forex Republic";
+
+const FALLBACK_SITE_URL = "https://www.theforexrepublic.com";
+
 /**
- * Canonical production origin. Prefer the www host.
+ * Canonical production origin: absolute www, no trailing slash.
  * Set NEXT_PUBLIC_SITE_URL=https://www.theforexrepublic.com in Vercel (Production).
+ * Apex hosts are rewritten to www so canonicals match the live URL.
  */
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.theforexrepublic.com";
+export const SITE_URL = resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL);
+
+function resolveSiteUrl(raw: string | undefined): string {
+  const trimmed = (raw ?? FALLBACK_SITE_URL).trim().replace(/\/+$/, "");
+  try {
+    const url = new URL(trimmed);
+    if (url.hostname === "theforexrepublic.com") {
+      url.hostname = "www.theforexrepublic.com";
+    }
+    return url.origin;
+  } catch {
+    return FALLBACK_SITE_URL;
+  }
+}
 
 export function absUrl(path: string): string {
-  return `${SITE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+  if (!path || path === "/") return `${SITE_URL}/`;
+  const suffix = (path.startsWith("/") ? path : `/${path}`).replace(/\/+$/, "");
+  return `${SITE_URL}${suffix}`;
 }
 
 /** Absolute URL for Open Graph / schema images (pass-through if already absolute). */
