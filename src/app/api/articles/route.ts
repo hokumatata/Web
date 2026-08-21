@@ -82,10 +82,18 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { title, excerpt, bodyText, categoryId, coverImageUrl, thumbnailUrl, isFeatured, isBreaking, tags } = body;
+  const { title, excerpt, bodyText, categoryId, coverImageUrl, thumbnailUrl, isFeatured, isBreaking, tags, slug: requestedSlug } = body;
   if (!title || !excerpt || !bodyText || !categoryId) return error("Missing required fields");
 
-  const slug = slugify(title) + "-" + Date.now().toString(36);
+  let slug: string;
+  if (typeof requestedSlug === "string" && requestedSlug.trim()) {
+    slug = slugify(requestedSlug);
+    if (!slug) return error("Slug cannot be empty");
+    const clash = await prisma.article.findUnique({ where: { slug }, select: { id: true } });
+    if (clash) return error("Slug already in use", 409);
+  } else {
+    slug = slugify(title) + "-" + Date.now().toString(36);
+  }
 
   const article = await prisma.article.create({
     data: {
