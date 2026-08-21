@@ -6,15 +6,17 @@ import { absUrl, SITE_NAME } from "@/lib/seo";
 const TITLE = "Forex Economic Calendar Today";
 const DESCRIPTION =
   "Forex economic calendar today with upcoming high-impact prints, times, and consensus for FX and macro.";
+/** Live URL is www, no trailing slash (a slash 308s to this path). */
+const CANONICAL = absUrl("/economic-calendar");
 
 export const metadata: Metadata = {
   title: `${TITLE} | ${SITE_NAME}`,
   description: DESCRIPTION,
-  alternates: { canonical: absUrl("/economic-calendar") },
+  alternates: { canonical: CANONICAL },
   openGraph: {
     title: `${TITLE} | ${SITE_NAME}`,
     description: DESCRIPTION,
-    url: absUrl("/economic-calendar"),
+    url: CANONICAL,
   },
 };
 // Must be a literal for Next's static analysis; keep in sync with REVALIDATE_SECONDS.
