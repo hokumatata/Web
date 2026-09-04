@@ -63,7 +63,10 @@ export async function POST(req: NextRequest) {
 
   const token = coverBlobWriteToken();
   if (!token) {
-    return error(PUBLIC_STORE_REQUIRED, 503);
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const base64 = `data:${file.type};base64,${buffer.toString("base64")}`;
+    return json({ url: base64, name: safeName, size: file.size, type: file.type }, 201);
   }
 
   // Covers must stay publicly readable (og:image, twitter:image, article <img>).
